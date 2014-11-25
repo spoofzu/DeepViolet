@@ -8,105 +8,179 @@ This program is provided for educational purposes.  Use at your own risk.  This 
 Sample Output from GUI tool (anonymized)<br/>
 --------------------------------------------<br/>
 <br/>
-[Report Run Information]<br/>
-DeepViolet V0.1<br/>
-Report generated on Mon Jul 21 23:39:58 PDT 2014<br/>
-Target url https://www.foo.com<br/>
-<br/>
-[Host information]<br/>
-host=www.foo.com [192.168.1.146], canonical=hkg03s13-in-f18.foo.com<br/>
-host=www.foo.com [192.168.1.145], canonical=hkg03s13-in-f17.foo.com<br/>
-host=www.foo.com [192.168.1.144], canonical=hkg03s13-in-f16.foo.com<br/>
-host=www.foo.com [192.168.1.147], canonical=hkg03s13-in-f19.foo.com<br/>
-host=www.foo.com [192.168.1.148], canonical=hkg03s13-in-f20.foo.com<br/>
-host=www.foo.com [1111:1111:1111:1111:1111:0:0:1111], canonical=hkg03s11-in-x11.foo.com<br/>
-<br/>
-[Connection characteristics]<br/>
-SO_KEEPALIVE=false<br/>
-SO_RECBUF=131874<br/>
-SO_LINGER=-1<br/>
-SO_TIMEOUT=0<br/>
-Traffic Class=0<br/>
-Client Auth Required=false<br/>
-SO_REUSEADDR=false<br/>
-TCP_NODELAY=false<br/>
-<br/>
-[Host supported server cipher suites]<br/>
-SSLv3<br/>
-TLS1.0<br/>
-TLS1.1<br/>
-TLS1.2<br/>
-  - (SUPPORTED) TLS_RSA_WITH_AES_128_CBC_SHA (STRENGTH=STRONG )<br/>
-Uncategorized<br/>
-  - (SUPPORTED) TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256 (STRENGTH=STRONG )<br/>
-  - (SUPPORTED) TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA (STRENGTH=STRONG )<br/>
-  - (SUPPORTED) TLS_RSA_WITH_AES_128_CBC_SHA (STRENGTH=STRONG )<br/>
-  - (SUPPORTED) TLS_ECDHE_RSA_WITH_RC4_128_SHA (STRENGTH=STRONG )<br/>
-  - (SUPPORTED) SSL_RSA_WITH_RC4_128_SHA (STRENGTH=STRONG )<br/>
-  - (SUPPORTED) TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 (STRENGTH=STRONG )<br/>
-  - (SUPPORTED) TLS_RSA_WITH_AES_128_GCM_SHA256 (STRENGTH=STRONG )<br/>
-  - (SUPPORTED) TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA (STRENGTH=STRONG )<br/>
-  - (SUPPORTED) SSL_RSA_WITH_3DES_EDE_CBC_SHA (STRENGTH=STRONG )<br/>
-  - (SUPPORTED) SSL_RSA_WITH_RC4_128_MD5 (STRENGTH=STRONG )<br/>
-<br/>
-[Server certificate information]<br/>
-Trusted Status=TRUSTED<br/>
-Validity Status= VALID.  Certificate valid between Wed Jul 02 06:38:55 PDT 2014 and Mon Sep 29 17:00:00 PDT 2014<br/>
-SubjectDN=CN=www.foo.com, O=Shmo Inc, L=San Jose, ST=California, C=US<br/>
-IssuerDN=CN=Joe Shmo CA, O=Shmo Inc, C=US<br/>
-Serial Number=6593427055677612812<br/>
-Signature Algorithm=SHA1withRSA<br/>
-Signature Algorithm OID=1.2.840.113549.1.1.5<br/>
-Certificate Version =3<br/>
-SHA1 Fingerprint=0x91:04:06:02:F5:74:20:7B:CC:26:DF:31:B3:3A:D8:CB:77:37:1B:DD<br/>
-MD5 Fingerprint=0x48:A5:56:5C:CC:11:55:CA:1A:55:A0:3C:C6:23:D6:06<br/>
-<br/>
-[Server certificate chain]<br/>
-Chain summary<br/>
-|<br/>
-|<br/>
-End-Enity Certificate--->CN=www.foo.com, O=Shmo Inc, L=San Jose, ST=California, C=US<br/>
-&nbsp;&nbsp;|<br/>
-&nbsp;&nbsp;|<br/>
-&nbsp;&nbsp;Intermediate CA--->CN=Joe Shmo CA, O=Shmo Inc, C=US<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;|<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;|<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;Intermediate CA--->CN=Super Global CA CA, O=Super Global Inc., C=US<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Root CA(Java CACERTS)--->OU=Centrex Secure Certificate Authority, O=Centrex, C=US<br/>
-<br/>
-Chain details<br/>
-Validity Status= VALID.  Certificate valid between Wed Jul 02 06:38:55 PDT 2014 and Mon Sep 29 17:00:00 PDT 2014<br/>
-SubjectDN=CN=www.foo.com, O=Shmo Inc, L=San Jose, ST=California, C=US<br/>
-IssuerDN=CN=Joe Shmo CA, O=Shmo Inc, C=US<br/>
-Serial Number=6593427055677612812<br/>
-Signature Algorithm=SHA1withRSA<br/>
-Signature Algorithm OID=1.2.840.113549.1.1.5<br/>
-Certificate Version =3<br/>
-SHA1 Fingerprint=0x91:04:06:02:F5:74:20:7B:CC:26:DF:31:B3:3A:D8:CB:77:37:1B:DD<br/>
-MD5 Fingerprint=0x48:A5:56:5C:CC:11:55:CA:1A:55:A0:3C:C6:23:D6:06<br/>
-<br/>
-Validity Status= VALID.  Certificate valid between Fri Apr 05 08:15:55 PDT 2013 and Sat Apr 04 08:15:55 PDT 2015<br/>
-SubjectDN=CN=Joe Shmo CA, O=Shmo Inc, C=US<br/>
-IssuerDN=CN=Super Global CA, O=Super Global Inc., C=US<br/>
-Serial Number=146345<br/>
-Signature Algorithm=SHA1withRSA<br/>
-Signature Algorithm OID=1.2.840.113549.1.1.5<br/>
-Certificate Version =3<br/>
-SHA1 Fingerprint=0x91:04:06:02:F5:74:20:7B:CC:26:DF:31:B3:3A:D8:CB:77:37:1B:DD<br/>
-MD5 Fingerprint=0x48:A5:56:5C:CC:11:55:CA:1A:55:A0:3C:C6:23:D6:06<br/>
-<br/>
-Validity Status= VALID.  Certificate valid between Mon May 20 21:00:00 PDT 2002 and Mon Aug 20 21:00:00 PDT 2018<br/>
-SubjectDN=CN=Super Global CA, O=Super Global Inc., C=US<br/>
-IssuerDN=CN=Super Global CA, O=Super Global Inc., C=US<br/>
-Serial Number=123458643<br/>
-Signature Algorithm=SHA1withRSA<br/>
-Signature Algorithm OID=1.2.840.113549.1.1.5<br/>
-Certificate Version =3<br/>
-SHA1 Fingerprint=0x91:04:06:02:F5:74:20:7B:CC:26:DF:31:B3:3A:D8:CB:77:37:1B:DD<br/>
-MD5 Fingerprint=0x48:A5:56:5C:CC:11:55:CA:1A:55:A0:3C:C6:23:D6:06<br/>
-<br/>
+<code>
+	[Report run information]
+	DeepViolet V0.2
+	Report generated on Fri Nov 21 16:09:09 PST 2014
+	Target url https://www.company.com/
+
+	[Host information]
+	host=www.company.com [192.168.2.40], canonical=192.168.2.40
+	host=www.company.com [192.168.2.39], canonical=192.168.2.39
+
+	[HTTP(S) response headers]
+	<null> : HTTP/1.1 200 OK
+	Cache-Control : no-cache
+	Etag : "d96a82aa2cf7938c128047c07723239926e6091a"
+	Server : nginx
+	Connection : keep-alive
+	Set-Cookie : _xsrf=7a11255d19254540a9ae32d66814d585; Path=/; secure
+	Last-Modified : Thu, 20 Nov 2014 21:30:37 GMT
+	P3P : CP="CAO PSA OUR"
+	Content-Length : 125273
+	Date : Sat, 22 Nov 2014 00:09:11 GMT
+	Content-Type : text/html; charset=utf-8
+
+	[Connection characteristics]
+	SO_KEEPALIVE=false
+	SO_RECBUF=131400
+	SO_LINGER=-1
+	SO_TIMEOUT=0
+	Traffic Class=0
+	Client Auth Required=false
+	SO_REUSEADDR=false
+	TCP_NODELAY=false
+
+	[Host supported server cipher suites]
+	SSLv3
+	 - RSA_WITH_RC4_128_SHA(0x5) (STRONG)
+	 - RSA_WITH_IDEA_CBC_SHA(0x7) (STRONG)
+	 - RSA_WITH_AES_128_CBC_SHA(0x2f) (STRONG)
+	 - RSA_WITH_AES_256_CBC_SHA(0x35) (STRONG)
+	 - RSA_WITH_CAMELLIA_128_CBC_SHA(0x41) (STRONG)
+	 - RSA_WITH_CAMELLIA_256_CBC_SHA(0x84) (STRONG)
+	 - TLS_RSA_WITH_SEED_CBC_SHA(0x96) (STRONG)
+	 - TLS_ECDHE_RSA_WITH_RC4_128_SHA(0xc011) (STRONG)
+	 - TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA(0xc013) (STRONG)
+	 - TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA(0xc014) (STRONG)
+	 - TLS_ECDH_anon_WITH_RC4_128_SHA(0xc016) (STRONG)
+	 - TLS_ECDH_anon_WITH_AES_128_CBC_SHA(0xc018) (STRONG)
+	 - TLS_ECDH_anon_WITH_AES_256_CBC_SHA(0xc019) (STRONG)
+	TLSv1.2
+	 - RSA_WITH_RC4_128_SHA(0x5) (STRONG)
+	 - RSA_WITH_IDEA_CBC_SHA(0x7) (STRONG)
+	 - RSA_WITH_AES_128_CBC_SHA(0x2f) (STRONG)
+	 - RSA_WITH_AES_256_CBC_SHA(0x35) (STRONG)
+	 - RSA_WITH_AES_128_CBC_SHA256(0x3c) (STRONG)
+	 - RSA_WITH_AES_256_CBC_SHA256(0x3d) (STRONG)
+	 - RSA_WITH_CAMELLIA_128_CBC_SHA(0x41) (STRONG)
+	 - RSA_WITH_CAMELLIA_256_CBC_SHA(0x84) (STRONG)
+	 - TLS_RSA_WITH_SEED_CBC_SHA(0x96) (STRONG)
+	 - TLS_RSA_WITH_AES_128_GCM_SHA256(0x9c) (STRONG)
+	 - TLS_RSA_WITH_AES_256_GCM_SHA384(0x9d) (STRONG)
+	 - TLS_ECDHE_RSA_WITH_RC4_128_SHA(0xc011) (STRONG)
+	 - TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA(0xc013) (STRONG)
+	 - TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA(0xc014) (STRONG)
+	 - TLS_ECDH_anon_WITH_RC4_128_SHA(0xc016) (STRONG)
+	 - TLS_ECDH_anon_WITH_AES_128_CBC_SHA(0xc018) (STRONG)
+	 - TLS_ECDH_anon_WITH_AES_256_CBC_SHA(0xc019) (STRONG)
+	 - TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256(0xc027) (STRONG)
+	 - TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384(0xc028) (STRONG)
+	 - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256(0xc02f) (STRONG)
+	 - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384(0xc030) (STRONG)
+	TLSv1.1
+	 - No Ciphers ()
+	TLSv1.0
+	 - No Ciphers ()
+
+	[Server certificate information]
+	Trusted Status=TRUSTED
+	Validity Status= VALID.  Certificate valid between Mon Mar 18 17:00:00 PDT 2013 and Thu May 21 05:00:00 PDT 2015
+	SubjectDN=CN=www.company.com, OU=Operations, O="company, Inc.", L=New York, ST=New York, C=US
+	IssuerDN=CN=DigiCert High Assurance CA-3, OU=www.digicert.com, O=DigiCert Inc, C=US
+	Serial Number=17294881921818988019291918345699297521
+	Signature Algorithm=SHA1withRSA
+	Signature Algorithm OID=1.2.840.113549.1.1.5
+	Certificate Version =3
+	SHA1 Fingerprint=0x81:23:3F:98:93:0D:4E:B4:C9:38:D1:8D:E0:18:12:E5:01:A1:51:40
+	MD5 Fingerprint=0xEE:63:BE:4B:8E:57:8A:12:17:22:33:62:EE:78:6E:E6
+	Non-critical OIDs
+	  -AuthorityInfoAccess(1.3.6.1.5.5.7.1.1) = [ocsp=http://ocsp.digicert.com | caIssuers=http://cacerts.digicert.com/DigiCertHighAssuranceCA-3.crt ]
+	  -SubjectKeyIdentifier(2.5.29.14) = <UNSUPPORTED>
+	  -SubjectAlternativeName(2.5.29.17) = [www.company.com | www.www.company.com ]
+	  -CRLDistributionPoints(2.5.29.31) = [http://crl3.digicert.com/ca9-g00.crl | http://crl4.digicert.com/ca9-g22.crl ]
+	  -CertificatePolicies(2.5.29.32) = [2.16.840.1.114412.1.1=qualifierID=https://www.digicert.com/CPS ]
+	  -AuthorityKeyIdentifier(2.5.29.35) = <UNSUPPORTED>
+	  -ExtendedKeyUsages(2.5.29.37) = [serverauth clientauth ]
+	Critical OIDs
+	  -KeyUsage(2.5.29.15) = [keycertsign ]
+	  -BasicConstraints(2.5.29.19) = []
+
+	[Server certificate chain]
+	Chain Summary, leaf --> root
+	|
+	|
+	End-Entity Certificate--->CN=www.company.com, OU=Operations, O="company, Inc.", L=New York, ST=New York, C=US
+	   |
+	   |
+	   Intermediate CA--->CN=DigiCert High Assurance CA-3, OU=www.digicert.com, O=DigiCert Inc, C=US
+	      |
+	      |
+	      Self-Signed Root--->CN=DigiCert High Assurance EV Root CA, OU=www.digicert.com, O=DigiCert Inc, C=US
+
+	[Chain details]
+	Validity Status= VALID.  Certificate valid between Mon Mar 18 17:00:00 PDT 2013 and Thu May 21 05:00:00 PDT 2015
+	SubjectDN=CN=www.company.com, OU=Operations, O="company, Inc.", L=New York, ST=New York, C=US
+	IssuerDN=CN=DigiCert High Assurance CA-3, OU=www.digicert.com, O=DigiCert Inc, C=US
+	Serial Number=17294881921818988019291918345699297521
+	Signature Algorithm=SHA1withRSA
+	Signature Algorithm OID=1.2.840.113549.1.1.5
+	Certificate Version =3
+	SHA1 Fingerprint=0x81:23:3F:98:93:0D:4E:B4:C9:38:D1:8D:E0:18:12:E5:01:A1:51:40
+	MD5 Fingerprint=0xEE:63:BE:4B:8E:57:8A:12:17:22:33:62:EE:78:6E:E6
+	Non-critical OIDs
+	  -AuthorityInfoAccess(1.3.6.1.5.5.7.1.1) = [ocsp=http://ocsp.digicert.com | caIssuers=http://cacerts.digicert.com/DigiCertHighAssuranceCA-3.crt ]
+	  -SubjectKeyIdentifier(2.5.29.14) = <UNSUPPORTED>
+	  -SubjectAlternativeName(2.5.29.17) = [www.company.com | www.company.com ]
+	  -CRLDistributionPoints(2.5.29.31) = [http://crl3.digicert.com/ca9-g00.crl | http://crl4.digicert.com/ca9-g22.crl ]
+	  -CertificatePolicies(2.5.29.32) = [2.16.840.1.114412.1.1=qualifierID=https://www.digicert.com/CPS ]
+	  -AuthorityKeyIdentifier(2.5.29.35) = <UNSUPPORTED>
+	  -ExtendedKeyUsages(2.5.29.37) = [serverauth clientauth ]
+	Critical OIDs
+	  -KeyUsage(2.5.29.15) = [keycertsign ]
+	  -BasicConstraints(2.5.29.19) = []
+
+	Validity Status= VALID.  Certificate valid between Wed Apr 02 05:00:00 PDT 2008 and Sat Apr 02 17:00:00 PDT 2022
+	SubjectDN=CN=DigiCert High Assurance CA-3, OU=www.digicert.com, O=DigiCert Inc, C=US
+	IssuerDN=CN=DigiCert High Assurance EV Root CA, OU=www.digicert.com, O=DigiCert Inc, C=US
+	Serial Number=13785899061980321600472330812886105915
+	Signature Algorithm=SHA1withRSA
+	Signature Algorithm OID=1.2.840.113549.1.1.5
+	Certificate Version =3
+	SHA1 Fingerprint=0x42:85:78:55:FB:0E:A4:3F:54:C9:91:1E:30:E7:79:1D:8C:E8:27:05
+	MD5 Fingerprint=0xC6:8B:99:30:C8:57:8D:41:6F:8C:09:4E:6A:DB:0C:90
+	Non-critical OIDs
+	  -AuthorityInfoAccess(1.3.6.1.5.5.7.1.1) = [ocsp=http://ocsp.digicert.com ]
+	  -SubjectKeyIdentifier(2.5.29.14) = <UNSUPPORTED>
+	  -CRLDistributionPoints(2.5.29.31) = [http://crl3.digicert.com/DigiCertHighAssuranceEVRootCA.crl | http://crl4.digicert.com/DigiCertHighAssuranceEVRootCA.crl ]
+	  -CertificatePolicies(2.5.29.32) = [2.16.840.1.114412.1.3.0.2=qualifierID=http://www.digicert.com/ssl-cps-repository.htm 1.3.6.1.5.5.7.2.2=Unhandled type, see log ]
+	  -AuthorityKeyIdentifier(2.5.29.35) = <UNSUPPORTED>
+	Critical OIDs
+	  -KeyUsage(2.5.29.15) = [nonrepudiation keyencipherment ]
+	  -BasicConstraints(2.5.29.19) = [TRUE 0 ]
+
+	Validity Status= VALID.  Certificate valid between Thu Nov 09 16:00:00 PST 2006 and Sun Nov 09 16:00:00 PST 2031
+	SubjectDN=CN=DigiCert High Assurance EV Root CA, OU=www.digicert.com, O=DigiCert Inc, C=US
+	IssuerDN=CN=DigiCert High Assurance EV Root CA, OU=www.digicert.com, O=DigiCert Inc, C=US
+	Serial Number=3553400076410547919724730734378100087
+	Signature Algorithm=SHA1withRSA
+	Signature Algorithm OID=1.2.840.113549.1.1.5
+	Certificate Version =3
+	SHA1 Fingerprint=0x5F:B7:EE:06:33:E2:59:DB:AD:0C:4C:9A:E6:D3:8F:1A:61:C7:DC:25
+	MD5 Fingerprint=0xD4:74:DE:57:5C:39:B2:D3:9C:85:83:C5:C0:65:49:8A
+	Non-critical OIDs
+	  -SubjectKeyIdentifier(2.5.29.14) = <UNSUPPORTED>
+	  -AuthorityKeyIdentifier(2.5.29.35) = <UNSUPPORTED>
+	Critical OIDs
+	  -KeyUsage(2.5.29.15) = [nonrepudiation keyencipherment ]
+	  -BasicConstraints(2.5.29.19) = [TRUE ]
+
+	[Server analysis]
+	ACHIEVABLE_ENCRYPTION_STRENGTH=strong encryption (96-bit or more)
+	CRIME_VULNERABLE=protected
+	MINIMAL_ENCRYPTION_STRENGTH=strong encryption (96-bit or more)
+	BEAST_VULNERABLE=vulnerable - See more at: http://www.securitycurmudgeon.com/#sthash.9HDq1HT5.dpuf
+</code>
 --------------------------------------------<br/>
 <br/>
 INSTALL AND RUN<br/>
