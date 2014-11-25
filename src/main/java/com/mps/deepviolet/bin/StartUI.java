@@ -1,7 +1,10 @@
 package com.mps.deepviolet.bin;
 
 
-
+/**
+ * Entry point to start DeepViolet as desktop application.
+ * @author Milton Smith
+ */
 import java.io.File;
 
 import javax.swing.SwingUtilities;
@@ -18,12 +21,19 @@ public class StartUI {
 
 	private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.bin.StartUI");
 	
+	/**
+	 * Main entry point
+	 * @param args Command line arguments (not used for now)
+	 */
 	public static void main(String[] args) {
 		
 		new StartUI().init(args);
 
 	}
-
+	
+	/**
+	 * Initialization
+	 */
 	private void init(String[] args) {
 		
 		// Create ~/DeepViolet/ working directory on OS
@@ -44,6 +54,10 @@ public class StartUI {
 		
 	}
 	
+	/**
+	 * Create a directory, depending upon the operating system, to store
+	 * the results for each scanning run.
+	 */
 	private void createWorkingDirectory() {
 		
 		String OS = System.getProperty("os.name");

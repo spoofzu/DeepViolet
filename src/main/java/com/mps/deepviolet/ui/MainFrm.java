@@ -48,6 +48,12 @@ import com.mps.deepviolet.job.DeepScanTask;
 import com.mps.deepviolet.job.UIBackgroundTask;
 import com.mps.deepviolet.suite.CipherSuiteUtil;
 
+/**
+ * Build main application UI used by StartUI.  Creates the JFrame and deploys user interface control
+ * elements.
+ * @author Milton Smith
+ *
+ */
 public class MainFrm extends JFrame {
 
 	private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.ui.MainFrm");
@@ -70,6 +76,9 @@ public class MainFrm extends JFrame {
 	
 	private static JFileChooser fc;
 	
+	/**
+	 * CTOR
+	 */
 	public MainFrm() {
 		
 		super();
@@ -78,6 +87,9 @@ public class MainFrm extends JFrame {
 		
 	}
 	
+	/**
+	 * Build the UI.
+	 */
 	public void initComponents() {
 		
 		GridBagLayout gbl1 = new GridBagLayout();
@@ -213,20 +225,21 @@ public class MainFrm extends JFrame {
 		centerOnScreen();
 		pack();
 		
+		// Listener for Window resize
 		this.addComponentListener( new ComponentAdapter() {
 		    public void componentResized(ComponentEvent e) {
 		    	refresh();
 		    }
 		});
 		
-
+		// Button listener to start the scan.
 		btnDeepScan.addActionListener(new ActionListener() { 
 			  public void actionPerformed(ActionEvent e) { 
 				  selectionBtnDeepScanPressed();
 			  } 
 		});
 		
-		
+		// Button listener to save the report results.
 		btnSave.addActionListener(new ActionListener() { 
 			  public void actionPerformed(ActionEvent e) { 
 				  selectionBtnSavePressed();
@@ -235,14 +248,17 @@ public class MainFrm extends JFrame {
 		
 	}
 	
+	/**
+	 * Action when scanned pressed.  Basically, setup the background tasks and execute.
+	 */
 	private void selectionBtnDeepScanPressed() {
 		
 		setEnableControls(false);
 		
 		
-		final Style regular = doc.getStyle("regular");
-		final Style sectionhead = doc.getStyle("sectionhead");
-		final Style error = doc.getStyle("error");
+//		final Style regular = doc.getStyle("regular");
+//		final Style sectionhead = doc.getStyle("sectionhead");
+//		final Style error = doc.getStyle("error");
 
 		// Basic URL sanitization.
 		String surl = txtServer.getText() !=null ?
@@ -273,6 +289,10 @@ public class MainFrm extends JFrame {
 
 	}
 	
+	/**
+	 * Update the status on long running tasks.
+	 * @param task Current task.
+	 */
 	private void updateLongRunningUIStatus( final UIBackgroundTask task ) {
 		
 		final Style regular = doc.getStyle("regular");
@@ -311,7 +331,9 @@ public class MainFrm extends JFrame {
 		
 	}
 	
-	
+	/**
+	 * Action when save button pressed.  Save the scan results.
+	 */
 	private void selectionBtnSavePressed() {
 		
 		setEnableControls(false);
@@ -381,6 +403,10 @@ public class MainFrm extends JFrame {
 		setEnableControls(true);
 	}
 	
+	/**
+	 * Update UI with a task related work status.
+	 * @param phase
+	 */
 	private void updateWorkStatus( String phase ) {
 		
 		StringBuffer buff = new StringBuffer();
@@ -390,28 +416,35 @@ public class MainFrm extends JFrame {
 		txtStatus.setText(buff.toString());
 	}
 	
+	/**
+	 * Center the UI on the screen.
+	 */
 	private void centerOnScreen() {
 		
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
 	}
 	
+	/**
+	 * Refresh or update the UI.
+	 */
 	public void refresh() {
 	
 			invalidate();
 			revalidate();
 			repaint();
-			
-		
+	
 	}
 	
+	/**
+	 * Enable or disable user interface controls.  We don't allow the user to have more than
+	 * a single scan job running at the moment.
+	 * @param state True, controls are enabled.  False, controls are disabled.  User cannot run new scans.
+	 */
 	private void setEnableControls( boolean state ) {
 		
 		btnSave.setEnabled(state);
 		btnDeepScan.setEnabled(state);
-		
-		
-		
 		
 	}
 	
