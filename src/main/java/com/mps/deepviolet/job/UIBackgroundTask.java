@@ -12,6 +12,7 @@ public class UIBackgroundTask extends Thread {
 	
 	private String largestatus = "";
 
+	
 	/**
 	 * Override with the code to executive in the background
 	 * @throws Exception Thrown on error.

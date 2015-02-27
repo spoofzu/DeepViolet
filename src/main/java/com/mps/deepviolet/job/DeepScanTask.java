@@ -32,6 +32,16 @@ public class DeepScanTask extends UIBackgroundTask {
 	}
 	
 	/**
+	 * Return the current URL
+	 * @return
+	 */
+	public URL getURL() {
+		
+		return url;
+		
+	}
+	
+	/**
 	 * Retrieve the status message for each task to communicate
 	 * on the UI to users
 	 * @return String Status message.
