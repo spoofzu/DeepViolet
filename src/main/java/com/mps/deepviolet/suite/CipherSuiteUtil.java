@@ -543,14 +543,15 @@ public class CipherSuiteUtil {
 		// return cached instance of server TLS data if available and not expired.
 		if ( hostcache.containsKey( url ) ) {
 			hostdata = hostcache.get(url);
-			if( !hostdata.isExpired() )
-				return hostdata;
-		}
-		
+//TODOMS: FOR NOW DON'T CACHE ANYTHING.  NOT SURE THIS MAKES SENSE.
+//			if( !hostdata.isExpired() )
+//				return hostdata;
 		// No cached instance of TLS data so create some
-		hostdata = new HostData(url);
-		hostcache.put(url, hostdata);	
-		
+		} else {
+			hostdata = new HostData(url);
+			hostcache.put(url, hostdata);	
+		}
+			
 		String name = url.getHost();
 		int port = ( url.getPort() > 0 ) ? url.getPort() : 443;
 		
@@ -587,7 +588,8 @@ public class CipherSuiteUtil {
 		Map<Integer, Set<Integer>> suppCS =
 			new TreeMap<Integer, Set<Integer>>();
 		Set<String> certID = new TreeSet<String>();
-
+		boolean vulnFREAK = false;
+		
 		if (sh2 != null) {
 
 			ArrayList<String> listv2 = new ArrayList<String>();
@@ -598,6 +600,7 @@ public class CipherSuiteUtil {
 				vc2.add(c);
 			}
 			for (int c : vc2) {
+				if( !vulnFREAK ) { vulnFREAK = cipherSuiteStringV2(c).indexOf("EXPORT") > -1; }
 				listv2.add( cipherSuiteStringV2(c)+"(0x"+Integer.toHexString(c)+")" );
 
 			}
@@ -622,6 +625,7 @@ public class CipherSuiteUtil {
 			if (lastSuppCS == null || !lastSuppCS.equals(vsc)) {
 				
 				for (int c : vsc) {
+					if( !vulnFREAK ) { vulnFREAK = cipherSuiteString(c).indexOf("EXPORT") > -1; }
 					listv.add( cipherSuiteString(c)+"(0x"+Integer.toHexString(c)+")" );
 				}				
 				lastSuppCS = vsc;
@@ -634,15 +638,16 @@ public class CipherSuiteUtil {
 			
 		}
 		
-		for (int v : sv) {
-			if (v == 0x0200) {
-				continue;
-			}
-			Set<Integer> vsc = supportedSuites(isa, v, certID);
-			suppCS.put(v, vsc);
-		}
+//		for (int v : sv) {
+//			if (v == 0x0200) {
+//				continue;
+//			}
+//			Set<Integer> vsc = supportedSuites(isa, v, certID);
+//			suppCS.put(v, vsc);
+//		}
 		
 		
+		// Iterate over supported ciphersuites.
 		int agMaxStrength = STRONG;
 		int agMinStrength = STRONG;
 		boolean vulnBEAST = false;
@@ -657,10 +662,12 @@ public class CipherSuiteUtil {
 			}
 		}
 		
+		
 		hostdata.setScalarValue("analysis","MINIMAL_ENCRYPTION_STRENGTH", strengthString(agMinStrength));
 		hostdata.setScalarValue("analysis","ACHIEVABLE_ENCRYPTION_STRENGTH", strengthString(agMinStrength));
 		hostdata.setScalarValue("analysis","BEAST_VULNERABLE", vulnBEAST ? "vulnerable" : "protected");
 		hostdata.setScalarValue("analysis","CRIME_VULNERABLE", compress ? "vulnerable" : "protected");
+		hostdata.setScalarValue("analysis","FREAK_VULNERABLE", vulnFREAK ? "vulnerable" : "protected");
 		
 		return hostdata;
 		
