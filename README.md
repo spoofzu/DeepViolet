@@ -2,7 +2,9 @@ DeepViolet<br/>
 ==========<br/>
 <br/>
 Java GUI tool for introspection of SSL\TLS sessions.  Inspired from work by Qualys SSL Labs and Ivan Ristić.  I have also tried to include some attribution where it's deserved at least in the code comments for now.  Original blog article post describing this project, http://www.securitycurmudgeon.com/2014/07/ssltls-introspection.html<br/>
-<br/>
+<p/>
+TRY NOW, 1) make sure Java 8 installed, 2) download dvUI.jar to your desktop and double-click to run, 3) alternatively, download dvCMD.jar and run in your shell scripts.  See <a href=http://www.securitycurmudgeon.com/2015/02/deepviolet-improvements-for-feb-2015.html>DeepViolet Improvements for Feb 2015</a> for more details.
+<p/>
 This program is provided for educational purposes.  Use at your own risk.  This program is only available in US English.<br/>
 <br/>
 Sample Output from GUI tool (anonymized)<br/>
