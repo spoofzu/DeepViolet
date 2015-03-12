@@ -153,43 +153,46 @@ public class MainFrm extends JFrame {
 		pnlMain.add(btnSave,c);
 		
 		tpResults = new JTextPane();
-
+        Font font = new Font("Courier New", Font.PLAIN, 12);
+        tpResults.setFont(font);
+        
 	    doc = tpResults.getStyledDocument();
-
-	    // Load the default style and add it as the "regular" text
-	    Style def = StyleContext.getDefaultStyleContext().getStyle( StyleContext.DEFAULT_STYLE );
-	    Style regular = doc.addStyle( "regular", def );
-
-	    // Create an italic style
-	    Style italic = doc.addStyle( "italic", regular );
-	    StyleConstants.setItalic( italic, true );
-
-	    // Create a bold style
-	    Style sectionhead = doc.addStyle( "sectionhead", regular );
-	    StyleConstants.setBold( sectionhead, true );
-	    
-	    // Create a bold style
-	    Style subsectionhead = doc.addStyle( "subsectionhead", regular );
-	    StyleConstants.setItalic( subsectionhead, true );
-
-	    // Create a small style
-	    Style small = doc.addStyle( "small", regular );
-	    StyleConstants.setFontSize( small, 10 );
-
-	    // Create a large style
-	    Style large = doc.addStyle( "large", regular );
-	    StyleConstants.setFontSize( large, 16 );
-
-	    // Create a highlight style
-	    Style highlight = doc.addStyle( "highlight", regular );
-	    StyleConstants.setBackground( highlight, Color.yellow );
-	    
-	    // Create a highlight style
-	    Style error = doc.addStyle( "highlight", regular );
-	    StyleConstants.setBackground( highlight, Color.red );
+//
+//	    // Load the default style and add it as the "regular" text
+//	    Style def = StyleContext.getDefaultStyleContext().getStyle( StyleContext.DEFAULT_STYLE );
+//	    Style regular = doc.addStyle( "regular", def );
+//
+//	    // Create an italic style
+//	    Style italic = doc.addStyle( "italic", regular );
+//	    StyleConstants.setItalic( italic, true );
+//
+//	    // Create a bold style
+//	    Style sectionhead = doc.addStyle( "sectionhead", regular );
+//	    StyleConstants.setBold( sectionhead, true );
+//	    
+//	    // Create a bold style
+//	    Style subsectionhead = doc.addStyle( "subsectionhead", regular );
+//	    StyleConstants.setItalic( subsectionhead, true );
+//
+//	    // Create a small style
+//	    Style small = doc.addStyle( "small", regular );
+//	    StyleConstants.setFontSize( small, 10 );
+//
+//	    // Create a large style
+//	    Style large = doc.addStyle( "large", regular );
+//	    StyleConstants.setFontSize( large, 16 );
+//
+//	    // Create a highlight style
+//	    Style highlight = doc.addStyle( "highlight", regular );
+//	    StyleConstants.setBackground( highlight, Color.yellow );
+//	    
+//	    // Create a highlight style
+//	    Style error = doc.addStyle( "highlight", regular );
+//	    StyleConstants.setBackground( highlight, Color.red );
 		
 		JScrollPane spScrollResults = new JScrollPane(tpResults);
 		spScrollResults.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		spScrollResults.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		spScrollResults.setBackground( new Color(255,255,255) );
 		//spScrollResults.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 		c.fill = GridBagConstraints.BOTH;

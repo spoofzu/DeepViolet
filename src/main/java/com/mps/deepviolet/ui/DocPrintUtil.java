@@ -63,12 +63,20 @@ public class DocPrintUtil {
 	 */
 	public static final void printReportHeader( StringBuffer con, URL url ) {
 		
+		Date d = new Date();
+		DocPrintUtil.println(con,"");
+		DocPrintUtil.println(con,"***********************************************************************");
+		DocPrintUtil.println(con,"*  NOTICE: THIS SOFTWARE IS PROVIDED FOR RESEARCH PURPOSES AND NOT    *");
+		DocPrintUtil.println(con,"*          RECOMMENDED FOR USE ON PRODUCTION SYSTEMS.  SEE PROJECT    *");
+		DocPrintUtil.println(con,"*          INFORMATION ON GITHUB FOR FURTHER DETAILS,                 *");
+		DocPrintUtil.println(con,"*          https://github.com/spoofzu/DeepViolet                      *");
+		DocPrintUtil.println(con,"***********************************************************************");
 		DocPrintUtil.println(con,"");
 		DocPrintUtil.println(con,"[Report run information]");
-		DocPrintUtil.println(con,"DeepViolet V0.2");
-		Date d = new Date();
+		DocPrintUtil.println(con,"DeepViolet V0.3.000");
 		DocPrintUtil.println(con,"Report generated on "+d.toString());
 		DocPrintUtil.println(con,"Target url "+url.toString());	
+		//TODO: PRINT THE LOGBACK FILE LOCATION, LOCATION OF CACERTS, AND VERSION OF JAVA
 		
 	}
 	
@@ -168,6 +176,7 @@ public class DocPrintUtil {
 		
 		//DocPrintUtil.println(con,"");
 		DocPrintUtil.println(con,"[Server analysis]");
+		DocPrintUtil.println(con,"DISABLED, Uncomment code and recompile to experiment.");
 
         try {
         	
@@ -362,7 +371,7 @@ public class DocPrintUtil {
 			certs = CipherSuiteUtil.getServerCertificateChain(url);
 		        	
 		    boolean istrusted = CipherSuiteUtil.checkTrustedCertificate(certs,url);
-		    String truststate = (istrusted) ?"TRUSTED" : "NOT TRUSTED";
+		    String truststate = (istrusted) ?"TRUSTED" : ">>>NOT TRUSTED<<<";
 		    
             DocPrintUtil.println(con, "Trusted Status="+truststate);
             
@@ -411,38 +420,75 @@ public class DocPrintUtil {
 		try {
 			certs = CipherSuiteUtil.getServerCertificateChain(url);
 			
-			int i=0; boolean selfsigned = false;
+			boolean firstcert = true; 
+			X509Certificate lastcert = null;
+			String fingerprint = "";
+			int n=0;
 			
 	        for (X509Certificate c : certs) {
         	 
-	        	// print server cert and intermediary CAs
+				fingerprint = CipherSuiteUtil.sha1Fingerprint(c.getEncoded());
+	        	
 				DocPrintUtil.println(con,buff.toString()+"|" ); 
-				DocPrintUtil.println(con,buff.toString()+"|" ); 
-				if( i==0 ) {
-					DocPrintUtil.println(con,buff.toString()+"End-Entity Certificate--->"+ c.getSubjectDN() );  
+				DocPrintUtil.println(con,buff.toString()+"|" );
+				
+				StringBuffer attributes = new StringBuffer();
+				
+				attributes.append("NODE"+n+"(");
+				
+				if( firstcert ) {
+					
+					attributes.append("End-Entity ");
+					
 				} else {
-					if( !CipherSuiteUtil.isSelfSignedCertificate(c ) ) {
-						DocPrintUtil.println(con,buff.toString()+"Intermediate CA--->"+ c.getSubjectDN() );
-					} else {
-						DocPrintUtil.println(con,buff.toString()+"Self-Signed Root--->"+ c.getSubjectDN() );
-						selfsigned=true;
+					
+					if( CipherSuiteUtil.isSelfSignedCertificate(c) ) {
+						
 						break;
 					}
+					
+					attributes.append("Intermediate CA ");
+					
 				}
 				
-				i++;
+				attributes.append(")--->");
+				attributes.append("SubjectDN="+c.getSubjectDN().getName()+" IssuerDN="+c.getIssuerDN().getName());
+				attributes.append(", SHA1="+fingerprint);
+				
+				DocPrintUtil.println(con,buff.toString()+attributes.toString() );
+				
+				firstcert = false;
+				lastcert = c;
 				buff.append("   ");
+				
+				n++;
 	
 	        }
-	        // Print root cert unless it's self-signed then there is no Java root.
-	        if( !selfsigned ) {
-				buff.append("   ");
-		        String lca = certs[certs.length-1].getIssuerDN().getName();
-		        DocPrintUtil.println(con,buff.toString()+"|" ); 
-				DocPrintUtil.println(con,buff.toString()+"|" ); 
-				DocPrintUtil.println(con,buff.toString()+"Root CA(Java CACERTS)--->"+ lca );  
-	        }
-
+	        
+			DocPrintUtil.println(con,buff.toString()+"|" ); 
+			DocPrintUtil.println(con,buff.toString()+"|" );
+			buff.append( "NODE"+n+"(");
+	        
+	        // At this point we have printed all certs returned by the server
+	        // (via getServerCertificateChain()).  Note the server does NOT
+			// return the root CA cert to us.  However, we can infer the
+			// root by checking IssuerDN of the last Intermediate CA and
+			// the AuthorityKeyIdentifier (if present).	         		
+			if( CipherSuiteUtil.isJavaRootCertificateDN(lastcert.getIssuerDN().getName()) ) {
+				
+				buff.append("Java Root CA ");
+				
+			} else {
+				
+				buff.append("Unknown Root CA ");
+				
+			}
+			
+			buff.append(")--->");
+			buff.append("SubjectDN="+lastcert.getIssuerDN().getName());
+			buff.append(", SHA1= ***TBD***");
+			
+			DocPrintUtil.println(con,buff.toString() );
 
 	        buff = new StringBuffer();
 
@@ -498,11 +544,11 @@ public class DocPrintUtil {
                     DocPrintUtil.println(con, "Validity Status= VALID.  Certificate valid between "+cert.getNotBefore().toString()+" and "+cert.getNotAfter().toString() );
                     
                 } catch (CertificateNotYetValidException e) {
-                    DocPrintUtil.println(con, "Validiy Status= INVALID.  Certificate valid between "+cert.getNotBefore().toString()+" and "+cert.getNotAfter().toString() );
+                    DocPrintUtil.println(con, "Validiy Status= >>>INVALID<<<.  Certificate valid between "+cert.getNotBefore().toString()+" and "+cert.getNotAfter().toString() );
 					e.printStackTrace();
 				}
             } catch(CertificateExpiredException c) {
-                DocPrintUtil.println(con, "Validiy Status= INVALID. Certificate valid between "+cert.getNotBefore().toString()+" and "+cert.getNotAfter().toString() );
+                DocPrintUtil.println(con, "Validiy Status= >>>INVALID<<<. Certificate valid between "+cert.getNotBefore().toString()+" and "+cert.getNotAfter().toString() );
 				c.printStackTrace();
             }
 			DocPrintUtil.println(con, "SubjectDN="+cert.getSubjectDN() );

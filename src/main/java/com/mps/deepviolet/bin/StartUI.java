@@ -1,11 +1,6 @@
 package com.mps.deepviolet.bin;
 
 
-/**
- * Entry point to start DeepViolet as desktop application.
- * @author Milton Smith
- */
-
 import javax.swing.SwingUtilities;
 
 import org.slf4j.Logger;

@@ -3,6 +3,8 @@ package com.mps.deepviolet.suite;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -11,6 +13,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
@@ -19,6 +22,8 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.PKIXParameters;
+import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,7 +36,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
@@ -54,6 +61,7 @@ import org.bouncycastle.asn1.DLSequence;
 import org.bouncycastle.asn1.x500.style.IETFUtils;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,6 +84,10 @@ public class CipherSuiteUtil {
 	
 	// Common OIDs to Extension Mappings
 	private static final HashMap<String,String> OIDMAP = new HashMap<String,String>();
+	
+	private static final SSLSocketFactory dsc = HttpsURLConnection.getDefaultSSLSocketFactory();
+	
+	private static final HostnameVerifier dhv = HttpsURLConnection.getDefaultHostnameVerifier();
 	
 	static final int MAX_RECORD_LEN = 16384;
 	static final int CHANGE_CIPHER_SPEC = 20;
@@ -662,12 +674,12 @@ public class CipherSuiteUtil {
 			}
 		}
 		
-		
-		hostdata.setScalarValue("analysis","MINIMAL_ENCRYPTION_STRENGTH", strengthString(agMinStrength));
-		hostdata.setScalarValue("analysis","ACHIEVABLE_ENCRYPTION_STRENGTH", strengthString(agMinStrength));
-		hostdata.setScalarValue("analysis","BEAST_VULNERABLE", vulnBEAST ? "vulnerable" : "protected");
-		hostdata.setScalarValue("analysis","CRIME_VULNERABLE", compress ? "vulnerable" : "protected");
-		hostdata.setScalarValue("analysis","FREAK_VULNERABLE", vulnFREAK ? "vulnerable" : "protected");
+//TODO: NEEDS TO BE CHECKED AND TESTED.  COMMENT OUT AT YOUR OWN RISK.
+//		hostdata.setScalarValue("analysis","MINIMAL_ENCRYPTION_STRENGTH", strengthString(agMinStrength));
+//		hostdata.setScalarValue("analysis","ACHIEVABLE_ENCRYPTION_STRENGTH", strengthString(agMinStrength));
+//		hostdata.setScalarValue("analysis","BEAST_VULNERABLE", vulnBEAST ? "vulnerable" : "protected");
+//		hostdata.setScalarValue("analysis","CRIME_VULNERABLE", compress ? "vulnerable" : "protected");
+//		hostdata.setScalarValue("analysis","FREAK_VULNERABLE", vulnFREAK ? "vulnerable" : "protected");
 		
 		return hostdata;
 		
@@ -833,10 +845,27 @@ public class CipherSuiteUtil {
 	 */
 	public static final Map<String, List<String>> getHttpResponseHeaders(URL url) throws Exception {
 		
-        HttpsURLConnection conn = (HttpsURLConnection)url.openConnection();
-        conn.connect();
+		HttpsURLConnection conn = null;
 		
-        return conn.getHeaderFields();
+		Map<String, List<String>> result = new HashMap<String, List<String>>();
+		
+		try {
+			
+			enableTLSChainTesting(false);
+		
+	        conn = (HttpsURLConnection)url.openConnection();
+	        
+	        conn.connect();
+	        
+	        result = conn.getHeaderFields();
+			
+		} finally {
+			
+			enableTLSChainTesting(true);
+		}
+		
+		
+        return result;
         
 	}
 	
@@ -874,29 +903,144 @@ public class CipherSuiteUtil {
 //	}
 	
 	/**
-	 * Retrieve a certificate chain based upon URL
+	 * Enable default testing for TLS certificate trust chains.
+	 * @param value true, chain will be tested.  false, chain will not be tested.
+	 * @throws Exception 
+	 */
+	public static final void enableTLSChainTesting( boolean value ) throws Exception {
+
+		if( value ) {
+			
+			HttpsURLConnection.setDefaultSSLSocketFactory(dsc);
+			HttpsURLConnection.setDefaultHostnameVerifier(dhv);
+			
+		} else {
+			
+			SSLContext sc = SSLContext.getInstance("TLS");
+			sc.init(null, new TrustManager[] { new TrustAllX509TrustManager() }, new java.security.SecureRandom());
+			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+			HttpsURLConnection.setDefaultHostnameVerifier( new HostnameVerifier(){
+			    public boolean verify(String string,SSLSession ssls) {
+			        return true;
+			    }
+			});
+			
+		}
+		
+	}
+	
+	/**
+	 * Retrieve a certificate chain based upon URL.  Note this API will return
+	 * certificates with unvalidated and possibly bad trust chains.
 	 * @param url Target URL
 	 * @return X509Certificate Certificate chain
 	 * @throws  Thrown on problems.
+	 * @see http://stackoverflow.com/questions/19723415/java-overriding-function-to-disable-ssl-certificate-check
 	 */
 	public static final X509Certificate[] getServerCertificateChain(URL url) throws Exception {
-	   
-        HttpsURLConnection conn = (HttpsURLConnection)url.openConnection();
-        conn.connect();
-        Certificate[] certs = conn.getServerCertificates();
-        
+
         ArrayList<X509Certificate> list = new ArrayList<X509Certificate>();
-        
-        for (Certificate cert : certs) {
-        	
-            if(cert instanceof X509Certificate) {            	
-            	list.add( (X509Certificate)cert );           
-            } else {
-            	logger.info("Unsupported certificate type.  type="+cert.getClass().getName());
-            }
-        }
+		
+		try {
+			
+			enableTLSChainTesting(false);
+			
+	        HttpsURLConnection conn = (HttpsURLConnection)url.openConnection();
+	        conn.connect();
+	        Certificate[] certs = conn.getServerCertificates();
+	        
+	        for (Certificate cert : certs) {
+	        	
+	            if(cert instanceof X509Certificate) {            	
+	            	list.add( (X509Certificate)cert );           
+	            } else {
+	            	logger.info("Unsupported certificate type.  type="+cert.getClass().getName());
+	            }
+	        }
+	        
+		} finally {
+			
+			enableTLSChainTesting(true);
+			
+		}
 	
         return list.toArray(new X509Certificate[0]);
+	}
+	
+	/**
+	 * Get a list of the Java root certificates
+	 * @return
+	 * @throws Exception
+	 * @see http://stackoverflow.com/questions/3508050/how-can-i-get-a-list-of-trusted-root-certificates-in-java
+	 */
+	public static final X509Certificate[] getJavaRootCertificates() throws Exception {
+		
+		//TODO: Maybe be good to consider caching this at some point (at least for a few seconds)
+		
+		// Load the JDK's cacerts keystore file
+		String filename = System.getProperty("java.home") + "/lib/security/cacerts".replace('/', File.separatorChar);
+    	logger.debug("CACERTS file, "+filename);
+		FileInputStream is = new FileInputStream(filename);
+		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+		String password = "changeit"; //default password
+		keystore.load(is, password.toCharArray());
+		
+		// This class retrieves the most-trusted CAs from the keystore
+		PKIXParameters params = new PKIXParameters(keystore);
+		
+		// Get the set of trust anchors, which contain the most-trusted CA certificates,
+		// and return the java root certs.
+		Iterator<TrustAnchor> it = params.getTrustAnchors().iterator();
+		ArrayList<X509Certificate> result = new ArrayList<X509Certificate>();
+		while( it.hasNext() ) {
+			TrustAnchor ta = it.next();
+			result.add(ta.getTrustedCert());
+		}
+		
+		return (X509Certificate[])result.toArray(new X509Certificate[0]);
+
+	}
+
+	/**
+	 * Test to see if a particular SHA1 hash is a root in the Java system keystore.
+	 * @param sha1hash
+	 * @return true, SHA1 hash belongs to a Java root.  false, no Java root found.
+	 */
+	public static final boolean isJavaRootCertificateSHA1(String sha1hash) throws Exception {
+		
+		boolean result = false;
+		
+		for( X509Certificate cert : getJavaRootCertificates() ) {
+			
+			String fingerprint = sha1Fingerprint(cert.getEncoded());
+		
+			if( fingerprint.equals(sha1hash) ) {
+				
+				result = true; break;
+			}
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Test to see if a particular IssuerDN is a root in the Java system keystore.
+	 * @param IssuerDN
+	 * @return true, IssuerDN matches a Java root.  false, no matching IssuerDN found.
+	 */
+	public static final boolean isJavaRootCertificateDN(String IssuerDN) throws Exception {
+		
+		boolean result = false;
+		
+		for( X509Certificate cert : getJavaRootCertificates() ) {
+			
+			if ( cert.getIssuerDN().getName().equals(IssuerDN) ) {
+				
+				result = true; break;
+			}
+		}
+		
+		return result;
 	}
 	
 	/**
@@ -1013,6 +1157,7 @@ public class CipherSuiteUtil {
 		
 		}
 	
+	
 	   /**
 	    * Generate SHA1 fingerprint from certificate bytes
 	    * @param der Certificate in bytes
@@ -1082,13 +1227,17 @@ public class CipherSuiteUtil {
 	 */
 	public static final ASN1Primitive toDERObject(byte[] data) throws IOException
 	{
-	    ByteArrayInputStream inStream = new ByteArrayInputStream(data);
-	    ASN1InputStream asnInputStream = new ASN1InputStream(inStream);
+
+
+		   
+		ByteArrayInputStream inStream = new ByteArrayInputStream(data);
+		
+		ASN1InputStream asnInputStream = new ASN1InputStream(inStream);
 	    
 	    ASN1Primitive p = asnInputStream.readObject();
-	    
+
 	    asnInputStream.close();
-	
+	    
 	    return p;
 	}
 
@@ -1108,10 +1257,20 @@ public class CipherSuiteUtil {
 		
 	    if (primitive instanceof DEROctetString) {
 	    	
-	    	ASN1Primitive p = toDERObject(((DEROctetString) primitive).getOctets());
-	
-	    	walkASN1Sequence(p, buff);
+	    	byte[] bytes = ((DEROctetString) primitive).getOctets();
 	    	
+	    	ASN1Primitive p = null;
+	    	
+	    	try {
+	    	
+	    		p = toDERObject(bytes);
+		    	walkASN1Sequence(p, buff);
+	
+	    	} catch (IOException e ) {
+	    	
+	    		buff.append( byteArrayToHex(bytes));
+	    		
+	    	}
 	    	
 	    } else if( primitive instanceof DLSequence ) {
 	    	
@@ -1256,7 +1415,7 @@ public class CipherSuiteUtil {
 	    		
 	            buff.append( "type="+t.getTagNo()+" ");
 	            String hex = CipherSuiteUtil.byteArrayToHex(b);
-	            buff.append( " hex="+hex );
+	            buff.append( " hex=0x"+hex );
 	            buff.append( " string="+new String(b, 2, length) );
 	            buff.append( " | ");
 	    		
