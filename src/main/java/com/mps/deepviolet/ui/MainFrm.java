@@ -30,6 +30,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
@@ -47,6 +48,7 @@ import org.slf4j.LoggerFactory;
 import com.mps.deepviolet.job.DeepScanTask;
 import com.mps.deepviolet.job.UIBackgroundTask;
 import com.mps.deepviolet.suite.CipherSuiteUtil;
+import com.mps.deepviolet.util.FileUtils;
 
 /**
  * Build main application UI used by StartUI.  Creates the JFrame and deploys user interface control
@@ -57,6 +59,8 @@ import com.mps.deepviolet.suite.CipherSuiteUtil;
 public class MainFrm extends JFrame {
 
 	private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.ui.MainFrm");
+	
+	private static final String EOL = System.getProperty("line.separator");
 	
 	private static final long serialVersionUID = -7591324908851824818L;
 	private JTextField txtServer;
@@ -131,7 +135,7 @@ public class MainFrm extends JFrame {
 		c.gridheight=1;
 		pnlMain.add(txtServer,c);		
 		
-		btnDeepScan = new JButton("DeepScan");
+		btnDeepScan = new JButton("Scan");
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 0.1;
 		c.weighty = 0.1;
@@ -257,9 +261,8 @@ public class MainFrm extends JFrame {
 	private void selectionBtnDeepScanPressed() {
 		
 		setEnableControls(false);
-		
-		
-//		final Style regular = doc.getStyle("regular");
+	
+		final Style regular = doc.getStyle("regular");
 //		final Style sectionhead = doc.getStyle("sectionhead");
 //		final Style error = doc.getStyle("error");
 
@@ -286,7 +289,6 @@ public class MainFrm extends JFrame {
 	   // Background SSL scanning thread
 	   final DeepScanTask st = new DeepScanTask(url); 
 	   st.start();
-	    
 	   // Background UI update thread.  Display scan results in progress
 	   updateLongRunningUIStatus(st);
 
@@ -305,21 +307,21 @@ public class MainFrm extends JFrame {
 	   // Background UI update thread.  Display scan results in progress
 	   int delay = 500; //UI update interval
 	   ActionListener taskPerformer = new ActionListener() {
+		   long s1 = System.currentTimeMillis();
 		   public void actionPerformed(ActionEvent evt) {
 			   if( task.isWorking() ) {
 				   updateWorkStatus(task.getStatusBarMessage());
 				   try {
+
 					   doc.remove(0,doc.getLength());
 					   doc.insertString(0, task.getLargeStatusMessage(), regular);
 					} catch (BadLocationException e) {
 						e.printStackTrace();
 					}
 			   } else {
-		    	    updateWorkStatus("Ready");  	    	
-		    		logger.info( "Processing for url="+url.toString()+" is complete, finished.");
-		    		setEnableControls(true);
 		    		// Update display before we exit timer.
-					try {
+				   long f1 = System.currentTimeMillis();
+					try { 
 					   doc.remove(0,doc.getLength());
 					   doc.insertString(0, task.getLargeStatusMessage(), regular);
 					} catch (BadLocationException e) {
@@ -327,6 +329,8 @@ public class MainFrm extends JFrame {
 					}
 					// Scan done, stop timer.
 		    	    ((Timer)evt.getSource()).stop();
+		    	    updateWorkStatus("Ready, "+(f1-s1)+"(ms)");  	    	
+		    		setEnableControls(true);
 			   }	
 		      }
 		  };
@@ -355,9 +359,11 @@ public class MainFrm extends JFrame {
 		String h = url.getHost().replace('.', '-');
 		
 		// Note, java does not understand tilde (e.g., ~) for the user home.  say what?
-		File default_file = new File("/Users/milton/DeepViolet/DeepViolet-"+h+"-"+d+".txt");	
+		String violetdir = FileUtils.getWorkingDirectory();
+		violetdir = violetdir+"DeepViolet-"+h+"-"+d+".txt";	
+		logger.info("Default DeepViolet report name, name="+violetdir);
 		
-		logger.trace("Default save file assigned.  File="+default_file.toString());
+		File default_file = new File(violetdir);	
 
 		File currentdirectory = new File(default_file.getPath());
 		fc = new JFileChooser();
@@ -375,7 +381,7 @@ public class MainFrm extends JFrame {
 			
 			selectedfile = fc.getSelectedFile().getAbsoluteFile();
 
-            logger.info("Saving results.  File=" + selectedfile.getName() );
+            logger.info("Saving report results to file.  Name=" + selectedfile.getName() );
             
     		PrintWriter p = null;
     		try {

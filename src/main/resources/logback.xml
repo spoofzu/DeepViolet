@@ -2,24 +2,27 @@
 <configuration>
 
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <layout class="ch.qos.logback.classic.PatternLayout">
-      <Pattern>%d{HH:mm:ss.SSS} %-5level - %msg%n</Pattern>
-    </layout>
+      <encoder>
+       <pattern>%msg%n</pattern>
+      </encoder>
   </appender>
   
    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-    <file>/Users/milton/DeepViolet/DeepVioletLog.txt</file>
+    <!--  ${dv_user_directory} is OS dependent and set by DeepViolet -->
+   	<file>${dv_user_directory}deepviolet.log</file>
     <encoder>
       <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%file:%line] - %msg%n</pattern>
     </encoder>
   </appender>
-  
-  <!-- 
-  <logger name="com.mps.deepviolet" level="TRACE"/>
-  -->
-
-  <root level="DEBUG">
+     
+   <!-- sink logback messages for now, noisy -->
+   <logger name="ch.qos.logback" level="ERROR" additivity="false">
+   		 <appender-ref ref="FILE" />
+   </logger>
+     
+  <root level="INFO">
     <appender-ref ref="STDOUT" />
     <appender-ref ref="FILE" />
   </root>
+  
 </configuration>

@@ -1,8 +1,13 @@
 package com.mps.deepviolet.ui;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.KeyStoreException;
@@ -13,6 +18,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.PKIXParameters;
@@ -20,6 +26,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,6 +48,8 @@ import javax.swing.text.StyledDocument;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.util.encoders.Base64Encoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +63,11 @@ import com.mps.deepviolet.suite.ServerMetadata;
  */
 public class DocPrintUtil {
 
+	private static final String VERSION = "V1.1.000";
+	
 	private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.ui.DocPrintUtil");
+	
+	private static final String EOL = System.getProperty("line.separator");
 	
 	/**
 	 * Print start of scan report.
@@ -73,9 +86,11 @@ public class DocPrintUtil {
 		DocPrintUtil.println(con,"***********************************************************************");
 		DocPrintUtil.println(con,"");
 		DocPrintUtil.println(con,"[Report run information]");
-		DocPrintUtil.println(con,"DeepViolet V0.3.000");
+		DocPrintUtil.println(con,"DeepViolet "+VERSION);
 		DocPrintUtil.println(con,"Report generated on "+d.toString());
-		DocPrintUtil.println(con,"Target url "+url.toString());	
+		if( url != null ) {
+			DocPrintUtil.println(con,"Target url "+url.toString());	
+		}
 		//TODO: PRINT THE LOGBACK FILE LOCATION, LOCATION OF CACERTS, AND VERSION OF JAVA
 		
 	}
@@ -153,9 +168,10 @@ public class DocPrintUtil {
 	        for (InetAddress address : addresses ) {
 	        	
 	            try { 
-	            	DocPrintUtil.print(con, "host="+address.getHostName()+" ["+address.getHostAddress()+"], " );
-	            	DocPrintUtil.print(con, "canonical="+address.getCanonicalHostName());
-	            	DocPrintUtil.println(con, "" );
+	            	StringBuffer buff = new StringBuffer();
+	            	buff.append( "host="+address.getHostName()+" ["+address.getHostAddress()+"], ");
+	            	buff.append("canonical="+address.getCanonicalHostName());
+	            	DocPrintUtil.println(con, buff.toString());
 		        } catch( Exception e ){
 		        	DocPrintUtil.println(con,"skipping host, err="+e.getMessage());
 		        	DocPrintUtil.println(con, "" );
@@ -353,16 +369,172 @@ public class DocPrintUtil {
 		}  		
 	}
 	
-	/**
-	 * Print security for the server certificate. 
-	 * @param con StringBuffer for the output report.
-	 * @param url Target URL of assessment.
-	 */
-	public static final void printServerCertificate(StringBuffer con, URL url) {
+	public static final void printServerCertificate(StringBuffer con, String file ) {
 		
-		DocPrintUtil.println(con, "" );
-		DocPrintUtil.println(con, "[Server certificate information]" );
-	   
+		  try {
+			  File f = new File(file);
+		      FileInputStream fis = new FileInputStream(f);
+		      
+		      CertificateFactory cf = CertificateFactory.getInstance("X.509");
+		      Collection c = cf.generateCertificates(fis);
+		      Iterator i = c.iterator();
+		      while (i.hasNext()) {
+		    	  X509Certificate cert = (X509Certificate)i.next();
+				 printTrustState( con, cert );
+		    	 printX509Certificate( con, cert );
+		      }
+		  } catch( FileNotFoundException e ) {
+				DocPrintUtil.println(con,"Read certificate failed. reason=file not found.  file="+file );
+				DocPrintUtil.println(con,"");
+		  } catch( CertificateException e ) {
+				DocPrintUtil.println(con,"Read certificate failed.  reason="+e.getMessage()+" file="+file );
+				DocPrintUtil.println(con,"");
+				logger.error("Read certificate failed.  reason="+e.getMessage()+" file="+file );
+		  }
+		
+	}
+	
+	public static final void writeCertificate(StringBuffer con, URL url, String file ) {
+		
+        X509Certificate cert;
+        byte[] derenccert = null;
+		try {
+		
+			cert = CipherSuiteUtil.getServerCertificate(url);
+			File f = new File(file);
+			String path = f.getParentFile().getCanonicalPath();
+			File dir = new File(path);
+			
+			if( dir.exists() ) {
+				// Check permissions if file exists
+				if(  !dir.canWrite() ) {
+					DocPrintUtil.println(con,"Write certificate failed. reason=directory WRITE required.  dir="+path );
+					DocPrintUtil.println(con,"");
+					return;
+				}
+			} else {
+				// Create the folder if it does not exist
+				dir.mkdirs();
+			}
+		    // Write the file
+			FileOutputStream out = new FileOutputStream(f);
+			try {
+				 Base64.Encoder encoder = Base64.getEncoder();
+				 String cert_begin = "-----BEGIN CERTIFICATE-----\n";
+				 String end_cert = "\n-----END CERTIFICATE-----";
+				 derenccert = cert.getEncoded();
+				 String pemB64 = new String(encoder.encode(derenccert));
+				 StringBuffer pemBuff = new StringBuffer(pemB64.length());
+				 int ct = 0;
+				 for( int i=0; i< pemB64.length(); i++ ) {
+					 ct++;
+					 pemBuff.append(pemB64.charAt(i));
+					 // Wrap line after 65-bytes. Looks better.
+					 if ( (ct % 64) == 0 ) {
+						 pemBuff.append(EOL);
+						 ct=0;
+					 }
+				 }
+				 String pemCert = cert_begin + pemBuff.toString() + end_cert;
+				 out.write(pemCert.getBytes()); // PEM encoded certificate
+			} catch(IOException e) {
+				DocPrintUtil.println(con,"Write certificate failed.  reason="+e.getMessage()+" file="+file );
+				DocPrintUtil.println(con,"");
+				logger.error("Write certificate failed.  reason="+e.getMessage()+" file="+file );
+				return;
+			} finally {
+				try { out.close(); } catch(IOException e1) {}	
+			}
+
+		} catch (SSLHandshakeException e ) {
+			if( e.getMessage().indexOf("PKIX") > 0 ) {
+				DocPrintUtil.println(con,"Certificate chain failed validation." );
+				DocPrintUtil.println(con,"");
+				logger.error("Certificate chain failed validation. err="+e.getMessage(),e );
+			}else{
+				DocPrintUtil.println(con,"SSLHandshakeException. err="+e.getMessage() );
+				DocPrintUtil.println(con,"");
+				logger.error("SSLHandshakeException. err="+e.getMessage(),e );
+			}  	
+			return;
+		} catch (Exception e1) {
+			DocPrintUtil.println(con,"Problem fetching certificate. err="+e1.getMessage() );
+			DocPrintUtil.println(con,"");
+			logger.error ("Problem fetching certificate. err="+e1.getMessage(), e1 );
+			return;
+		}
+		
+		long sz = (derenccert!=null) ? derenccert.length : 0;
+		DocPrintUtil.println(con,"Certificate written successfully, bytes="+sz+" file="+file );
+		DocPrintUtil.println(con,"");
+
+	}
+	
+	//TODO: The utility of this method is that we don't have the URL of the server
+	// that this certificate came from.  Scenario is we read from file.  To check trust
+	// we need a connection to the server.  Here we try to create a host based upon
+	// some assumptions.  If we could check trust without the signing algorithm in
+	// checkTrustedCertificate( X509Certificate[] certs, URL url) then all this URL finding
+	// could be elimated.  Need to look into this more.  All this is only a best effort to
+	// establish the trust relationship while offline (e.g., --serverurl not specified).
+	public static final void printTrustState(StringBuffer con, X509Certificate cert ) {
+		
+		String subjectDN = cert.getSubjectDN().getName();
+		
+		// Should not happen unless certificate is malformed.
+		if( subjectDN.length() < 0 ) {
+			DocPrintUtil.println(con, "Trusted State= >>>UNKNOWN<<<");
+			logger.error("Can't form url.  reason=DN missing.");
+			return;
+		}
+		
+		String CN = "CN=";
+		int start = subjectDN.indexOf(CN);
+		int end = subjectDN.indexOf(' ',start)-1;
+		
+		// CN was found but trailing space was not then assume EOL follows CN.
+		if( start>0 && end<0 ) {
+		
+			end = subjectDN.length();
+		
+	    // CN not found
+		} else if( start<0 ) {
+					
+            DocPrintUtil.println(con, "Trusted State= >>>UNKNOWN<<<");
+			logger.error("Can't form url.  reason=CN format error. subjectDN="+subjectDN.toString()+" s="+start+" e="+end);
+			return;
+			
+		}
+		
+	    // Pull host from DN (if present) and wrap with https://host/
+		// Abort on string processing errors and mark unknown state.
+		URL url = null;
+		String host = null;
+		String surl = null;
+		try {
+			String WC = "*.";
+			int s2 = subjectDN.lastIndexOf(WC);
+			if( s2>0 ) { // Prune wildcards, if present, like CN=*.host.com to host.com
+				host = subjectDN.substring(s2+WC.length(),end);
+			} else { // Prune wildcards, if present, like CN=www.host.com to www.host.com
+				host = subjectDN.substring(start+CN.length(),end);
+			}
+			surl = "https://"+host+"/";
+			url = new URL(surl); 
+			
+		//Sink all exceptions and mark trust state unknown if problems.	
+		} catch( Exception e ) {
+            DocPrintUtil.println(con, "Trusted State= >>>UNKNOWN<<<");
+			logger.error("Can't form url.  reason="+e.getMessage()+" surl="+surl+" s="+start+" e="+end);
+			return;
+		}
+		
+		printTrustState( con, url);
+		
+	}
+	
+	public static final void printTrustState(StringBuffer con, URL url ) {
+		
         X509Certificate cert;
         X509Certificate[] certs;
 		try {
@@ -372,16 +544,13 @@ public class DocPrintUtil {
 		        	
 		    boolean istrusted = CipherSuiteUtil.checkTrustedCertificate(certs,url);
 		    String truststate = (istrusted) ?"TRUSTED" : ">>>NOT TRUSTED<<<";
-		    
-            DocPrintUtil.println(con, "Trusted Status="+truststate);
-            
-//            String ocspstatus = CipherSuiteUtil.checkOCSPStatus( cert, certs[1]);
-//            
-//            DocPrintUtil.println(doc, "OCSP Status="+ocspstatus,regular);
-			
-        	printX509Certificate( con, cert );
+            DocPrintUtil.println(con, "Trusted State="+truststate);
 
-	        
+	      
+		} catch (UnknownHostException e ) {
+			
+            DocPrintUtil.println(con, "Trusted State= >>>UNKNOWN<<<");
+            
 		} catch (SSLHandshakeException e ) {
 			
 			if( e.getMessage().indexOf("PKIX") > 0 ) {
@@ -393,6 +562,52 @@ public class DocPrintUtil {
 				DocPrintUtil.println(con,"");
 				logger.error("SSLHandshakeException. err="+e.getMessage(),e );
 			}  	
+        	
+		} catch (Exception e1) {
+			DocPrintUtil.println(con,"Problem fetching certificate. err="+e1.getMessage() );
+			DocPrintUtil.println(con,"");
+			logger.error ("Problem fetching certificate. err="+e1.getMessage(), e1 );
+		}
+		
+	}
+	
+	/**
+	 * Print security for the server certificate. 
+	 * @param con StringBuffer for the output report.
+	 * @param url Target URL of assessment.
+	 */
+	public static final void printServerCertificate(StringBuffer con, URL url) {
+		
+		DocPrintUtil.println(con, "" );
+		DocPrintUtil.println(con, "[Server certificate information]" );
+	   
+        X509Certificate cert;
+//        X509Certificate[] certs;
+		try {
+		
+			cert = CipherSuiteUtil.getServerCertificate(url);
+//			certs = CipherSuiteUtil.getServerCertificateChain(url);
+//		        	
+//		    boolean istrusted = CipherSuiteUtil.checkTrustedCertificate(certs,url);
+//		    String truststate = (istrusted) ?"TRUSTED" : ">>>NOT TRUSTED<<<";
+//            DocPrintUtil.println(con, "Trusted State="+truststate);
+			
+		    printTrustState( con, url );
+		
+        	printX509Certificate( con, cert );
+
+	        
+//		} catch (SSLHandshakeException e ) {
+//			
+//			if( e.getMessage().indexOf("PKIX") > 0 ) {
+//				DocPrintUtil.println(con,"Certificate chain failed validation." );
+//				DocPrintUtil.println(con,"");
+//				logger.error("Certificate chain failed validation. err="+e.getMessage(),e );
+//			}else{
+//				DocPrintUtil.println(con,"SSLHandshakeException. err="+e.getMessage() );
+//				DocPrintUtil.println(con,"");
+//				logger.error("SSLHandshakeException. err="+e.getMessage(),e );
+//			}  	
         	
 		} catch (Exception e1) {
 			DocPrintUtil.println(con,"Problem fetching certificate. err="+e1.getMessage() );
@@ -413,7 +628,7 @@ public class DocPrintUtil {
 		
 		StringBuffer buff = new StringBuffer();
 		
-		DocPrintUtil.println(con,"Chain Summary, leaf --> root" );
+		DocPrintUtil.println(con,"Chain Summary, end-entity --> root" );
 		
         X509Certificate[] certs;
         
@@ -427,7 +642,12 @@ public class DocPrintUtil {
 			
 	        for (X509Certificate c : certs) {
         	 
-				fingerprint = CipherSuiteUtil.sha1Fingerprint(c.getEncoded());
+				//fingerprint = CipherSuiteUtil.sha1Fingerprint(c.getEncoded());
+	        	
+				if( CipherSuiteUtil.isSelfSignedCertificate(c) ) {
+					
+					break;
+				}
 	        	
 				DocPrintUtil.println(con,buff.toString()+"|" ); 
 				DocPrintUtil.println(con,buff.toString()+"|" );
@@ -442,19 +662,21 @@ public class DocPrintUtil {
 					
 				} else {
 					
-					if( CipherSuiteUtil.isSelfSignedCertificate(c) ) {
-						
-						break;
-					}
-					
 					attributes.append("Intermediate CA ");
 					
 				}
 				
 				attributes.append(")--->");
 				attributes.append("SubjectDN="+c.getSubjectDN().getName()+" IssuerDN="+c.getIssuerDN().getName());
-				attributes.append(", SHA1="+fingerprint);
 				
+	  		    //TODO: Signature algorithm is different than a digest algorithm.  Need to understand
+	  		    // if parsing SHA256withRSA into SHA256 will work consistently.
+				byte[] encx509 = c.getEncoded();
+	        	String calgo = c.getSigAlgName();
+	  		    String sa = calgo.substring(0,calgo.indexOf("with"));
+	  		    attributes.append(", "+sa+"(Fingerprint)="+CipherSuiteUtil.signerFingerprint(encx509,sa));
+				
+
 				DocPrintUtil.println(con,buff.toString()+attributes.toString() );
 				
 				firstcert = false;
@@ -480,13 +702,19 @@ public class DocPrintUtil {
 				
 			} else {
 				
-				buff.append("Unknown Root CA ");
+				buff.append("Self-Signed CA ");
 				
 			}
 			
 			buff.append(")--->");
 			buff.append("SubjectDN="+lastcert.getIssuerDN().getName());
-			buff.append(", SHA1= ***TBD***");
+			
+  		    //TODO: Signature algorithm is different than a digest algorithm.  Need to understand
+  		    // if parsing SHA256withRSA into SHA256 will work consistently.
+			byte[] encx509 = lastcert.getEncoded();
+        	String calgo = lastcert.getSigAlgName();
+  		    String sa = calgo.substring(0,calgo.indexOf("with"));
+			buff.append(", "+sa+"(Fingerprint)="+CipherSuiteUtil.signerFingerprint(encx509,sa));
 			
 			DocPrintUtil.println(con,buff.toString() );
 
@@ -495,9 +723,12 @@ public class DocPrintUtil {
 			DocPrintUtil.println(con,"" ); 
 			DocPrintUtil.println(con, "[Chain details]" );
 	        
+			int n1=0;
 	        for (X509Certificate c : certs) {
-	        	 
+	        	
+				DocPrintUtil.println(con,"[NODE"+n1+"] ");
 				printX509Certificate(con,c);
+				n1++;
 				
 	
 	        }
@@ -541,43 +772,41 @@ public class DocPrintUtil {
         		try {
                 	
         			cert.checkValidity();
-                    DocPrintUtil.println(con, "Validity Status= VALID.  Certificate valid between "+cert.getNotBefore().toString()+" and "+cert.getNotAfter().toString() );
+                    DocPrintUtil.println(con, "Validity Check= VALID, certificate valid between "+cert.getNotBefore().toString()+" and "+cert.getNotAfter().toString() );
                     
                 } catch (CertificateNotYetValidException e) {
-                    DocPrintUtil.println(con, "Validiy Status= >>>INVALID<<<.  Certificate valid between "+cert.getNotBefore().toString()+" and "+cert.getNotAfter().toString() );
-					e.printStackTrace();
+                    DocPrintUtil.println(con, "Validity Check= >>>NOT YET VALID<<<, certificate valid between "+cert.getNotBefore().toString()+" and "+cert.getNotAfter().toString() );
+					//e.printStackTrace();
 				}
             } catch(CertificateExpiredException c) {
-                DocPrintUtil.println(con, "Validiy Status= >>>INVALID<<<. Certificate valid between "+cert.getNotBefore().toString()+" and "+cert.getNotAfter().toString() );
-				c.printStackTrace();
+                DocPrintUtil.println(con, "Validity Check= >>>EXPIRED<<<, certificate valid between "+cert.getNotBefore().toString()+" and "+cert.getNotAfter().toString() );
+				//c.printStackTrace();
             }
+        	
+        	String calgo = cert.getSigAlgName();
+        	
 			DocPrintUtil.println(con, "SubjectDN="+cert.getSubjectDN() );
         	DocPrintUtil.println(con, "IssuerDN="+cert.getIssuerDN() );
         	DocPrintUtil.println(con, "Serial Number="+cert.getSerialNumber().toString() );     	
-        	DocPrintUtil.println(con, "Signature Algorithm="+cert.getSigAlgName() );
+        	DocPrintUtil.println(con, "Signature Algorithm="+calgo);
         	DocPrintUtil.println(con, "Signature Algorithm OID="+cert.getSigAlgOID() );
         	DocPrintUtil.println(con, "Certificate Version ="+cert.getVersion() );
         	
         	try {
 			
-        		DocPrintUtil.println(con, "SHA1 Fingerprint="+CipherSuiteUtil.sha1Fingerprint(encx509) );
+     		   //TODO: Signature algorithm is different than a digest algorithm.  Need to understand
+     		   // if parsing SHA256withRSA into SHA256 will work consistently.
+     		   String sa = calgo.substring(0,calgo.indexOf("with"));
+        		
+        		DocPrintUtil.println(con, sa+"(Fingerprint)="+CipherSuiteUtil.signerFingerprint(encx509,sa) );
+//        		DocPrintUtil.println(con, "SHA1 Fingerprint="+CipherSuiteUtil.sha1Fingerprint(encx509) );
+//        		DocPrintUtil.println(con, "MD5 Fingerprint="+CipherSuiteUtil.md5Fingerprint(encx509) );	
 			
         	} catch (NoSuchAlgorithmException e) {
 			
-        		DocPrintUtil.println(con,"Problem generating certificate SHA1 fingerprint. err="+e.getMessage() );
+        		DocPrintUtil.println(con,"Problem generating certificate Fingerprints. err="+e.getMessage() );
 				DocPrintUtil.println(con,"");
-        		logger.error( "Problem generating certificate SHA1 fingerprint. err="+e.getMessage(), e);
-			
-        	}
-        	try {
-    			
-        		DocPrintUtil.println(con, "MD5 Fingerprint="+CipherSuiteUtil.md5Fingerprint(encx509) );
-			
-        	} catch (NoSuchAlgorithmException e) {
-			
-        		DocPrintUtil.println(con,"Problem generating certificate MD5 fingerprint. err="+e.getMessage() );
-				DocPrintUtil.println(con,"");
-				logger.error("Problem generating certificate MD5 fingerprint. err="+e.getMessage(),e );
+        		logger.error( "Problem generating Fingerprints. err="+e.getMessage(), e);
 			
         	}
         	
@@ -607,6 +836,11 @@ public class DocPrintUtil {
 		
     	Set<String> oids = cert.getNonCriticalExtensionOIDs();
     	
+    	if( oids == null) {
+			DocPrintUtil.println(con,"<None>");
+			return;
+    	}
+    	
     	printOIDs( con, cert, oids );
 		
 	}
@@ -619,6 +853,11 @@ public class DocPrintUtil {
 	private static final void printCritOIDs(StringBuffer con, X509Certificate cert) {
 		
     	Set<String> oids = cert.getCriticalExtensionOIDs();
+    	
+    	if( oids == null) {
+			DocPrintUtil.println(con,"<None>");
+			return;
+    	}
     	
     	printOIDs( con, cert, oids );
 		
@@ -672,8 +911,8 @@ public class DocPrintUtil {
 	 */
 	private static final void println( StringBuffer con, String text ) {
 		
-		con.append( text );
-		con.append('\n');
+		con.append(text);
+		con.append(EOL);
 		
 		logger.info(text);
 				
@@ -684,10 +923,10 @@ public class DocPrintUtil {
 	 * @param con StringBuffer for the output report.
 	 * @param text
 	 */
-	private static final void print( StringBuffer con, String text ) {
-		
-		con.append( text );
-				
-	}
+//	private static final void print( StringBuffer con, String text ) {
+//		
+//		con.append( text );
+//				
+//	}
 	
 }

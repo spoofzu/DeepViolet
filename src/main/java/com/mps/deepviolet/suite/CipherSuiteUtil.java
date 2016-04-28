@@ -27,6 +27,7 @@ import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -52,11 +53,17 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.BERTags;
+import org.bouncycastle.asn1.DERApplicationSpecific;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.DERVisibleString;
 import org.bouncycastle.asn1.DLSequence;
 import org.bouncycastle.asn1.x500.style.IETFUtils;
 import org.bouncycastle.asn1.x509.X509Name;
@@ -530,6 +537,8 @@ public class CipherSuiteUtil {
 		OIDMAP.put( "1.3.6.1.5.5.7.48.1.1","BasicOCSPResponse");
 		OIDMAP.put( "1.2.840.113549.1.1.5","SignatureAlgorithm");
 		OIDMAP.put( "1.3.6.1.5.5.7.1.1","AuthorityInfoAccess");
+		OIDMAP.put("1.3.6.1.4.1.11129.2.4.2", "SignedCertificateTimestampList");
+		OIDMAP.put("1.3.6.1.5.5.7.2.2", "CPSUserNotice");
 		OIDMAP.put( "2.5.29.31","CRLDistributionPoints");
 		OIDMAP.put( "2.5.29.32","CertificatePolicies");
 		OIDMAP.put( "1.3.6.1.4.1.6449.1.2.1.5.1","CertificatePolicyId");
@@ -1076,7 +1085,8 @@ public class CipherSuiteUtil {
 			        	x509TrustManager.checkServerTrusted(certs,keyexchalgo);
 			        	valid = true;
 			        } catch( CertificateException e ) {
-			        	logger.error( "url="+url.toString(), e);
+			        	// Eat the stacktrace
+			        	logger.error( "url="+url.toString() );
 			        }
 			    }
 			        
@@ -1157,6 +1167,25 @@ public class CipherSuiteUtil {
 		
 		}
 	
+	   /**
+	    * Generate signer fingerprint from certificate bytes
+	    * @param der Certificate in bytes
+	    * @param String signatureAlgorithm algorithm the certificate was signed, ex: SHA256
+	    * @return String Signer fingerprint in hex.
+	    * @throws NoSuchAlgorithmException
+	    */
+	   public static final String signerFingerprint( byte[] der, String signatureAlgorithm ) throws NoSuchAlgorithmException {
+		   
+		   MessageDigest sha1 = MessageDigest.getInstance(signatureAlgorithm);
+		   sha1.update( der );
+		   
+		   StringBuffer buff = new StringBuffer();
+		   buff.append("0x");
+		   buff.append(byteArrayToHex(sha1.digest()));
+		   
+		   return buff.toString();
+		   
+	   }	
 	
 	   /**
 	    * Generate SHA1 fingerprint from certificate bytes
@@ -1296,6 +1325,18 @@ public class CipherSuiteUtil {
 	    		
 	    	}
 	    	
+	    } else if( primitive instanceof DERApplicationSpecific ) {
+	    	
+	    	//TODO: May be useful to parse differently depending upon tag type in future.
+	    	DERApplicationSpecific app = (DERApplicationSpecific)primitive;
+	    	int tag = app.getApplicationTag();
+
+    		StringBuffer buff2 = new StringBuffer();
+    		buff2.append( "tag="+tag+" ");
+            String hex = CipherSuiteUtil.byteArrayToHex(app.getContents());
+            buff2.append( " 0x"+hex );
+            buff.append(buff2.toString());
+
 	    // Assistance by https://svn.cesecore.eu/svn/ejbca/branches/Branch_3_11/ejbca/conf/extendedkeyusage.properties
 	    } else if (primitive instanceof ASN1ObjectIdentifier ) {
 	    	
@@ -1335,7 +1376,7 @@ public class CipherSuiteUtil {
 	    		
 	    	} else if (kn.equals("1.3.6.1.5.5.7.3.21") ) {
 	    		buff.append( "eku_pkix_sshclient ");
-	    		
+	   
 	    	} else {	
 	    		    	
 	    		buff.append( CipherSuiteUtil.getOIDKeyName(i.toString()) );
@@ -1343,10 +1384,22 @@ public class CipherSuiteUtil {
 	    	
 	    	}
 	    	
+	    } else if (primitive instanceof DERVisibleString ) {
+	    	
+	    	DERVisibleString vstring = (DERVisibleString)primitive;
+	    	buff.append( vstring.getString() );
+	    	buff.append( ' ' );
+	    	
 	    } else if (primitive instanceof DERIA5String ) {
 	    	
 	    	DERIA5String ia5string = (DERIA5String)primitive;
 	    	buff.append( ia5string.getString() );
+	    	buff.append( ' ' );
+	    	
+	    } else if (primitive instanceof DERUTF8String ) {
+	    	
+	    	DERUTF8String utf8string = (DERUTF8String)primitive;
+	    	buff.append( utf8string.toString() );
 	    	buff.append( ' ' );
 	    	
 	    } else if (primitive instanceof DERBitString ) {
@@ -1395,6 +1448,12 @@ public class CipherSuiteUtil {
 	    	buff.append( ans1int.toString() );
 	    	buff.append( ' ' );
 	    	
+	    } else if (primitive instanceof DERSet ) {
+	    	
+	    	DERSet derset = (DERSet)primitive;
+	    	buff.append( derset.toString() );
+	    	buff.append( ' ' );
+	    	
 	    // Assistance fm http://stackoverflow.com/questions/16058889/java-bouncy-castle-ocsp-url
 	    } else if (primitive instanceof DERTaggedObject ) {
 	    	
@@ -1405,21 +1464,30 @@ public class CipherSuiteUtil {
 	    	if( t.getTagNo() == 6 ) { // Several
 	            buff.append( new String(b, 2, length) );
 	            buff.append( " | ");
-	    	} else if( t.getTagNo() == 2 ) { //SubjectAlternativeName
+	    	} else if( t.getTagNo() == 2 ) { // SubjectAlternativeName
 		        buff.append( new String(b, 2, length) );
 		        buff.append( " | ");
+	    	} else if( t.getTagNo() == 1 ) { // NameContraints
+	    		ASN1Primitive p = t.getObject();
+	    		walkASN1Sequence( p, buff ); 
 	    	} else if( t.getTagNo() == 0 ) { // CRLDistributionPoints	
+	    		ASN1Primitive p = t.getObject();
+	    		walkASN1Sequence( p, buff ); 
+	    	} else if( t.getTagNo() == 4 ) { // AuthorityKeyIdentifier	
 	    		ASN1Primitive p = t.getObject();
 	    		walkASN1Sequence( p, buff ); 
 	    	} else {
 	    		
-	            buff.append( "type="+t.getTagNo()+" ");
-	            String hex = CipherSuiteUtil.byteArrayToHex(b);
-	            buff.append( " hex=0x"+hex );
-	            buff.append( " string="+new String(b, 2, length) );
-	            buff.append( " | ");
+	    		StringBuffer buff2 = new StringBuffer();
 	    		
-	    		logger.warn("Unhandled DERTaggedObject type.  Printing raw info., type="+t.getTagNo() );
+	    		buff2.append( "type="+t.getTagNo()+" ");
+	            String hex = CipherSuiteUtil.byteArrayToHex(b);
+	            buff2.append( " 0x"+hex );
+	            buff2.append( " | ");
+	    		
+	            buff.append(buff2.toString());
+	            
+	    		logger.info("Unhandled DERTaggedObject type. RAW="+buff2.toString() );
 	    	}
 	    	
 	    } else {

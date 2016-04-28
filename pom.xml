@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.mps.violet</groupId>
-  <artifactId>DeepViolet2</artifactId>
+  <artifactId>DeepViolet</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <dependencies>
   
+  <dependencies>
   	<dependency>
   		<groupId>ch.qos.logback</groupId>
   		<artifactId>logback-classic</artifactId>
@@ -22,6 +22,36 @@
 		<artifactId>commons-cli</artifactId>
 		<version>1.2</version>
 	</dependency>
-  
   </dependencies>
+  
+    <build>
+    <plugins>
+      <!--  To build DeepViolet jars do, 1) maven clean, 2) maven install -->
+      <!--  Change the mainClass to StartCMD or StartUI depending -->
+      <!--  upon the type of class you want to start.  Not sure how -->
+      <!--  to get maven to generate both jars at same time yet.   -->
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+	       	 <archive>
+	          <manifest>
+	            <mainClass>com.mps.deepviolet.bin.StartCMD</mainClass>
+	          </manifest>
+	        </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+      </plugin>
+    </plugins>
+    </build>
+  
 </project>
