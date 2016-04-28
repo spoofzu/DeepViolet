@@ -41,5 +41,5 @@ The help command produces output like the following.<br/>
 <code>&nbsp;&nbsp;&nbsp;-wc,--writecertificate <arg>   Optional, write PEM encoded certificate to</code><br/>
 <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;disk. Ex: -wc ~/certs/mycert.pem</code><br/>
 <p/>
-This program is provided for educational purposes.  Use at your own risk.  This program is only available in US English.<br/>
-<i>This project leverages the works of other open source community projects.  Attention has been given to ensure attribution is provided as appropriate.</i>
+<i>This program is provided for educational purposes.  Use at your own risk.  This program is only available in US English.<br/>
+This project leverages the works of other open source community projects.  Attention has been given to ensure attribution is provided as appropriate.</i>
