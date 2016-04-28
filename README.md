@@ -1,7 +1,7 @@
-DeepViolet<br/>
-==========<br/>
-<br/>
-Java GUI tool for introspection of SSL\TLS sessions.  Inspired from work by Qualys SSL Labs and Ivan Ristić.  I have also tried to include attribution where it's deserved in code comments.  Original blog article post describing this project, http://www.securitycurmudgeon.com/2014/07/ssltls-introspection.html<br/>
+<h1>DeepViolet, SSL/TLS Introspection Tool</h1><br/>
+==========
+<p/>
+DeepViolet is a Java tool for introspection of SSL\TLS sessions.  DeepViolet can be run from the command line or via a GUI desktop application.  The tool was originally inspired by the work of Qualys SSL Labs and Ivan Ristić.  Original blog article post describing this project, http://www.securitycurmudgeon.com/2014/07/ssltls-introspection.html<br/>
 <p/>
 <b>TRY NOW</b>, 1) make sure Java 8+ installed, 2) download dvUI.jar to your desktop from the Release tab near the top of the screen, double-click to run 3) alternatively, download dvCMD.jar and run in your shell scripts.  Following are some sample command lines.
 <p/>
@@ -42,3 +42,4 @@ The help command produces output like the following.<br/>
 <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;disk. Ex: -wc ~/certs/mycert.pem</code><br/>
 <p/>
 This program is provided for educational purposes.  Use at your own risk.  This program is only available in US English.<br/>
+<i>This project leverages the works of other open source community projects.  Attention has been given to ensure attribution is provided as appropriate.</i>
