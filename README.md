@@ -3,7 +3,22 @@
 <p/>
 DeepViolet is a Java tool for introspection of SSL\TLS sessions.  DeepViolet can be run from the command line or via a GUI desktop application.  The tool was originally inspired by the work of Qualys SSL Labs and Ivan Ristić.  Original blog article post describing this project, http://www.securitycurmudgeon.com/2014/07/ssltls-introspection.html<br/>
 <p/>
-<b>TRY NOW</b>, 1) make sure Java 8+ installed, 2) download dvUI.jar to your desktop from the Release tab near the top of the screen, double-click to run 3) alternatively, download dvCMD.jar and run in your shell scripts.  Following are some sample command lines.
+<b>BENEFITS</b>
+This tool helps you understand state of X.509 certificates run on servers.  Some ideas you may find useful.
+<ul>
+<li>Certificates that don't chain to trusted roots</li>
+<li>Assess revocation status</li>
+<li>Certificates signed with weak signing algorithms</li>
+<li>Weak cipher suits on the web server</li>
+<li>Warn on certificates with approaching expiration</li>
+<li>View X.509 certificate metadata</li>
+<li>Easily visualize X.509 trust chains</li>
+<li>DOXX organizational computing enviroments by examinging infrastructure metadata</li>
+</ul>
+<p/>
+Use certificate metadata along with your own shell scripts in new and creative ways.  Let me know what you find useful, missing, or broken.
+<p/>
+<b>INSTALLATION & USE INSTRUCTIONS</b>, 1) make sure Java 8+ installed, 2) download dvUI.jar to your desktop from the Release tab near the top of the screen, double-click to run 3) alternatively, download dvCMD.jar and run in your shell scripts.  Following are some sample command lines.
 <p/>
 The following command line executes a scan against www.github.com and includes all reporting sections.  The output of the report is the same as the sample included in this file.<br/>
 <code>java -jar dvCMD.jar -serverurl https://www.github.com/</code>
@@ -18,8 +33,9 @@ Conversely the following command line reads a PEM encoded certificate and genera
 <code>java -jar dvCMD.jar -rc ~/milton/DeepViolet/github.pem</code>
 <p/>
 If you need some help while your in the shell, command line help is available.<br/>
-<code> java -jar dvCMD.jar -h</code><br/>
-The help command produces output like the following.<br/>
+<code> java -jar dvCMD.jar -h</code>
+<p/>
+The previous help command produces output like the following.<br/>
 <code>Miltons-Air:Desktop milton$ java -jar dvCMD.jar -h</code><br/>
 <code>Starting headless via dvCMD</code><br/>
 <code>DeepViolet user report directory available, name=/Users/milton/DeepViolet/</code><br/>
