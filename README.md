@@ -20,12 +20,12 @@ Use certificate metadata along with your own shell scripts in new and creative w
 <p/>
 <b>INSTALLATION & USE INSTRUCTIONS</b>, 1) make sure Java 8+ installed, 2) download dvUI.jar to your desktop from the Release tab near the top of the screen, double-click to run 3) alternatively, download dvCMD.jar and run in your shell scripts.  
 <p/>
-To run DeepViolet as a GUI application.  Simply double-click on the dvGUI.jar on your desktop or launch the desktop application from the command line.  Note: there are no command line options when staring the DeepViolet GUI from the command line.<br/>
+<b>RUNNING FROM DESKTOP</b>, Simply double-click on the dvGUI.jar on your desktop or launch the desktop application from the command line.  Note: there are no command line options when staring the DeepViolet GUI from the command line.<br/>
 <code>java -jar dvUI.jar</code>
 <p/>
 ![deepviolet-git](https://cloud.githubusercontent.com/assets/8450615/14919921/e04f22c4-0ddf-11e6-9d16-2b15e1a57c37.jpg)
 <p/>
-The following command line executes a scan against www.github.com and includes all reporting sections.  The output of the report is the same as the sample included in this file.<br/>
+<b>RUNNING FROM COMMAND LINE</b>The following command line executes a scan against www.github.com and includes all reporting sections.  The output of the report is the same as the sample included in this file.<br/>
 <code>java -jar dvCMD.jar -serverurl https://www.github.com/</code>
 <p/>
 The following command line produces the same report but specifies each report section individually.  Including less sections increases the speed of the scan.<br/>
