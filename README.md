@@ -20,6 +20,8 @@ Use certificate metadata along with your own shell scripts in new and creative w
 <p/>
 <b>INSTALLATION & USE INSTRUCTIONS</b>, 1) make sure Java 8+ installed, 2) download dvUI.jar to your desktop from the Release tab near the top of the screen, double-click to run 3) alternatively, download dvCMD.jar and run in your shell scripts.  
 <p/>
+<b>CAUTION</b>, use care to review reports for sensitive information prior to distribution or posting to the Internet.
+<p/>
 <b>RUNNING FROM DESKTOP</b>, Simply double-click on the dvGUI.jar on your desktop or launch the desktop application from the command line.  Note: there are no command line options when staring the DeepViolet GUI from the command line.<br/>
 <code>java -jar dvUI.jar</code>
 <p/>
