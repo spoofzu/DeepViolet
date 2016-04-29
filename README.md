@@ -16,7 +16,7 @@ This tool helps you understand state of X.509 certificates run on servers.  Some
 <li>DOXX organizational computing enviroments by examinging infrastructure metadata</li>
 </ul>
 <p/>
-Use certificate metadata along with your own shell scripts in new and creative ways.  Let me know what you find useful, missing, or broken.
+Use certificate metadata along with your own shell scripts in new and creative ways.
 <p/>
 <b>INSTALLATION & USE INSTRUCTIONS</b>, 1) make sure Java 8+ installed, 2) download dvUI.jar to your desktop from the Release tab near the top of the screen, double-click to run 3) alternatively, download dvCMD.jar and run in your shell scripts.  
 <p/>
@@ -61,6 +61,10 @@ The previous help command produces output like the following.<br/>
 <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scan.</code><br/>
 <code>&nbsp;&nbsp;&nbsp;-wc,--writecertificate <arg>   Optional, write PEM encoded certificate to</code><br/>
 <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;disk. Ex: -wc ~/certs/mycert.pem</code><br/>
+<p/>
+<b>FEATURE REQUESTS & BUG REPORTS</b>, to report new features or bug reports navigate to the Issues tab at the top of the page.  Log your new feature or bug as an issue. 
+<p/>
+<b>WANT TO HELP?</b>, want to help make this into a full featured project?  See the following GitHub document for more details, [Contributing to Open Source on GitHub](https://guides.github.com/activities/contributing-to-open-source/). 
 <p/>
 <i>This program is provided for educational purposes.  Use at your own risk.  This program is only available in US English.<br/>
 This project leverages the works of other open source community projects.  Attention has been given to ensure attribution is provided as appropriate.</i>
