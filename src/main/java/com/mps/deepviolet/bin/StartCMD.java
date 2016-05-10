@@ -24,6 +24,7 @@ import ch.qos.logback.core.joran.spi.JoranException;
 import com.mps.deepviolet.job.DeepScanTask;
 import com.mps.deepviolet.util.FileUtils;
 
+
 /**
  * Entry point to start DeepViolet and run headless.  Useful for running
  * DeepViolet from scripts.
@@ -68,6 +69,10 @@ public class StartCMD {
 	    //StatusPrinter.print(lc);
 	    
 	    logger.info("Starting headless via dvCMD");
+	    
+	    // Print diagnostics and system state information
+//		IntervalLoggerController wd = SecurityLoggingFactory.getControllerInstance();
+//		wd.start();
 		
 		// Create ~/DeepViolet/ working directory on OS
 	    FileUtils.createWorkingDirectory();
@@ -75,11 +80,23 @@ public class StartCMD {
 		int err = 0;
 		
 		try {
-
+			
+			//TODO: Java8 java -Djdk.tls.client.protocols="TLSv1,TLSv1.1,TLSv1.2"  enable/disable protocols to test
+            //  Java7 -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2
+			// proxy support
+			// -Djava.net.useSystemProxies=true
+			//  -Dhttp.proxyHost=proxy.example.com -Dhttp.proxyPort=8080
+		//  -Dhttps.proxyHost=proxy.example.com -Dhttps.proxyPort=808
+		//  -Dhttp.proxyUser=msmith -Dhttp.proxyPassword=xxxx
+			//  -Dhttps.proxyUser=msmith -Dhttps.proxyPassword=xxxx
+			// JCE policy files, unlimited strength
+			// http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html
+			
 			// Create command line options
 			Options options = new Options();
 			options.addOption("wc", "writecertificate", true, "Optional, write PEM encoded certificate to disk. Ex: -wc ~/certs/mycert.pem");
 			options.addOption("s", "sections", true, "Optional, unspecified prints all sections or specify sections. [t|h|r|c|i|s|n]");
+			options.addOption("d", "debug", false, "Optional, debug SSL/TLS connection.");
 			
 			// Mutually exclusive options
 			OptionGroup certsource = new OptionGroup();	
@@ -118,13 +135,22 @@ public class StartCMD {
 				}
 			}
 						
+		   // Process debug option
+			if( cmdline.hasOption("d") ) {
+				System.setProperty("javax.net.debug", "all");
+			} else {
+				if(System.getProperties().contains("javax.net.debug"));
+					System.getProperties().remove("javax.net.debug");
+			}
+			
 		   // print help options
 		   if( cmdline.hasOption("h") ) {
 			   // Generate help options
 			   
 			   StringBuffer hm = new StringBuffer();
-			   hm.append( "java -jar dvCMD.jar -serverurl <host|ip> [-wc <file> | -rc <file>] [-h -s{t|h|r|c|i|s|n}]"+EOL );
+			   hm.append( "java -jar dvCMD.jar -d -serverurl <host|ip> [-wc <file> | -rc <file>] [-h -s{t|h|r|c|i|s|n}]"+EOL );
 			   hm.append( "Ex: dvCMD.jar -serverurl https://www.host.com/ -sections ts"+EOL );
+			   hm.append( "-d SSL/TLS connection debugging"+EOL );
 			   hm.append( "Where sections are the following,"+EOL);
 			   hm.append( "t=header section, h=host section, r=http response section,"+EOL);
 			   hm.append( "c=connection characteristics section, i=ciphersuite section,"+EOL);
@@ -235,7 +261,6 @@ public class StartCMD {
 		   }
 		   
 		   long finish = System.currentTimeMillis();
-		   logger.info( "");
 		   logger.info( "Processing complete, execution(ms)="+(finish-start));
 		   
 		} catch (Throwable t ) {
@@ -256,13 +281,13 @@ public class StartCMD {
 	   final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.bin.StartCMD");
 		
 	   // Background update thread.  Display scan results in progress
-	   final int delay = 5000; //Update interval
+	   final int delay = 500; //Update interval
 	   ActionListener taskPerformer = new ActionListener() {
 		   int ct = 0;
 		   public void actionPerformed(ActionEvent evt) {
 			   if( task.isWorking() ) {
 				   ct += delay;
-				   logger.info("Still busy, "+ct/1000+" seconds elapsed."); 
+				   if( ct % 15000==0 ) { logger.info("Still busy, "+ct/1000+" seconds elapsed."); }
 			   } else {  	    	
 					// Scan done, stop timer.
 		    	    ((Timer)evt.getSource()).stop();

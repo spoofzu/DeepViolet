@@ -601,7 +601,7 @@ public class CipherSuiteUtil {
 		}
 
 		if (sv.size() == 0) {
-			logger.error("Server may not be SSL\\TLS enabled. host=" + isa);
+			logger.error("Server may not be SSL/TLS enabled. host=" + isa);
 			return null;
 		}
 
@@ -1010,27 +1010,27 @@ public class CipherSuiteUtil {
 
 	}
 
-	/**
-	 * Test to see if a particular SHA1 hash is a root in the Java system keystore.
-	 * @param sha1hash
-	 * @return true, SHA1 hash belongs to a Java root.  false, no Java root found.
-	 */
-	public static final boolean isJavaRootCertificateSHA1(String sha1hash) throws Exception {
-		
-		boolean result = false;
-		
-		for( X509Certificate cert : getJavaRootCertificates() ) {
-			
-			String fingerprint = sha1Fingerprint(cert.getEncoded());
-		
-			if( fingerprint.equals(sha1hash) ) {
-				
-				result = true; break;
-			}
-		}
-		
-		return result;
-	}
+//	/**
+//	 * Test to see if a particular SHA1 hash is a root in the Java system keystore.
+//	 * @param sha1hash
+//	 * @return true, SHA1 hash belongs to a Java root.  false, no Java root found.
+//	 */
+//	public static final boolean isJavaRootCertificateSHA1(String sha1hash) throws Exception {
+//		
+//		boolean result = false;
+//		
+//		for( X509Certificate cert : getJavaRootCertificates() ) {
+//			
+//			String fingerprint = sha1Fingerprint(cert.getEncoded());
+//		
+//			if( fingerprint.equals(sha1hash) ) {
+//				
+//				result = true; break;
+//			}
+//		}
+//		
+//		return result;
+//	}
 	
 	/**
 	 * Test to see if a particular IssuerDN is a root in the Java system keystore.
@@ -1187,43 +1187,43 @@ public class CipherSuiteUtil {
 		   
 	   }	
 	
-	   /**
-	    * Generate SHA1 fingerprint from certificate bytes
-	    * @param der Certificate in bytes
-	    * @return String SHA1 fingerprint in hex.
-	    * @throws NoSuchAlgorithmException
-	    */
-	   public static final String sha1Fingerprint( byte[] der ) throws NoSuchAlgorithmException {
-		   
-		   MessageDigest sha1 = MessageDigest.getInstance("SHA1");
-		   sha1.update( der );
-		   
-		   StringBuffer buff = new StringBuffer();
-		   buff.append("0x");
-		   buff.append(byteArrayToHex(sha1.digest()));
-		   
-		   return buff.toString();
-		   
-	   }
+//	   /**
+//	    * Generate SHA1 fingerprint from certificate bytes
+//	    * @param der Certificate in bytes
+//	    * @return String SHA1 fingerprint in hex.
+//	    * @throws NoSuchAlgorithmException
+//	    */
+//	   public static final String sha1Fingerprint( byte[] der ) throws NoSuchAlgorithmException {
+//		   
+//		   MessageDigest sha1 = MessageDigest.getInstance("SHA1");
+//		   sha1.update( der );
+//		   
+//		   StringBuffer buff = new StringBuffer();
+//		   buff.append("0x");
+//		   buff.append(byteArrayToHex(sha1.digest()));
+//		   
+//		   return buff.toString();
+//		   
+//	   }
 	   
-	   /**
-	    * Generate MD5 fingerprint from certificate bytes
-	    * @param der Certificate in bytes
-	    * @return String MD5 fingerprint in hex.
-	    * @throws NoSuchAlgorithmException
-	    */	   
-	   public static final String md5Fingerprint( byte[] der ) throws NoSuchAlgorithmException {
-		   
-		   MessageDigest sha1 = MessageDigest.getInstance("MD5");
-		   sha1.update( der );
-		   
-		   StringBuffer buff = new StringBuffer();
-		   buff.append("0x");
-		   buff.append(byteArrayToHex(sha1.digest()));
-		   
-		   return buff.toString();
-		   
-	   }
+//	   /**
+//	    * Generate MD5 fingerprint from certificate bytes
+//	    * @param der Certificate in bytes
+//	    * @return String MD5 fingerprint in hex.
+//	    * @throws NoSuchAlgorithmException
+//	    */	   
+//	   public static final String md5Fingerprint( byte[] der ) throws NoSuchAlgorithmException {
+//		   
+//		   MessageDigest sha1 = MessageDigest.getInstance("MD5");
+//		   sha1.update( der );
+//		   
+//		   StringBuffer buff = new StringBuffer();
+//		   buff.append("0x");
+//		   buff.append(byteArrayToHex(sha1.digest()));
+//		   
+//		   return buff.toString();
+//		   
+//	   }
 	   
 	   /**
 	    * Convert an array of bytes to a String based hex representation
@@ -1240,6 +1240,11 @@ public class CipherSuiteUtil {
 		   return sb.toString().toUpperCase();
 		}
 
+	   /**
+	    * Returns human readable OID name for the OID number.
+	    * @param oidkey OID number sequence.  Ex: 2.5.29.15
+	    * @return  Human readable String representation of the OID number sequence.  Ex: keyusage
+	    */
 	   public static String getOIDKeyName(String oidkey) {
 		   
 		   // TODO: Need to figure out a better way to do this.
@@ -1254,10 +1259,7 @@ public class CipherSuiteUtil {
 	 * @throws IOException
 	 * @see http://stackoverflow.com/questions/2409618/how-do-i-decode-a-der-encoded-string-in-java
 	 */
-	public static final ASN1Primitive toDERObject(byte[] data) throws IOException
-	{
-
-
+	public static final ASN1Primitive toDERObject(byte[] data) throws IOException {
 		   
 		ByteArrayInputStream inStream = new ByteArrayInputStream(data);
 		

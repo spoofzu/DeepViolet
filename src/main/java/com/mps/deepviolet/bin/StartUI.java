@@ -1,7 +1,15 @@
 package com.mps.deepviolet.bin;
 
 
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
+
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +54,7 @@ public class StartUI {
 	 * Initialization
 	 */
 	private void init(String[] args) {
-		
-
+	
 		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 	    ContextInitializer ci = new ContextInitializer(lc);
 	    lc.reset();
@@ -65,6 +72,28 @@ public class StartUI {
 		
 	    SwingUtilities.invokeLater(new Runnable() {
 	       public void run() {
+	    	    try {
+					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+					logger.debug( "Look and feel assigned.  Class="+UIManager.getSystemLookAndFeelClassName() );
+				} catch (Exception e) {
+					logger.error("Error setting lookandfeel, msg="+e.getMessage());
+				}	    	   
+	    	    
+	    	    try {
+	    	        Class util = Class.forName("com.apple.eawt.Application");
+	    	        Method getApplication = util.getMethod("getApplication", new Class[0]);
+	    	        Object application = getApplication.invoke(util);
+	    	        Class params[] = new Class[1];
+	    	        params[0] = Image.class;
+	    	        Method setDockIconImage = util.getMethod("setDockIconImage", params);
+	    	        URL url = this.getClass().getClassLoader().getResource("dv-raw.png");
+	    	        Image image = Toolkit.getDefaultToolkit().getImage(url);
+	    	        setDockIconImage.invoke(application, image);
+					logger.debug( "Dock icon assigned, url="+url.toString() );
+	    	    } catch (Exception e) {
+					logger.error("Error setting dockicon image, msg="+e.getMessage());
+	    	    } 
+	    	    
 	    		MainFrm main = new MainFrm();
 	    		main.initComponents();
 	    		main.setVisible(true);
