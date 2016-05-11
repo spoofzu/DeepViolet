@@ -278,6 +278,10 @@ public class DocPrintUtil {
 		
 			Map<String,List<String>> all_ciphers = new HashMap<String, List<String>>();
 			ServerMetadata m = CipherSuiteUtil.getServerMetadataInstance( url );
+			if( m == null ) {
+				logger.error("No server metadata returned.");
+				return;
+			}
 			if( m.containsKey("getServerMetadataInstance","SSLv2") ) all_ciphers.put("SSLv2",m.getVectorValue("getServerMetadataInstance","SSLv2"));
 			if( m.containsKey("getServerMetadataInstance","SSLv3") ) all_ciphers.put("SSLv3",m.getVectorValue("getServerMetadataInstance","SSLv3"));
 			if( m.containsKey("getServerMetadataInstance","TLSv1.0") ) all_ciphers.put("TLSv1.0",m.getVectorValue("getServerMetadataInstance","TLSv1.0"));
@@ -772,7 +776,7 @@ public class DocPrintUtil {
         		try {
                 	
         			cert.checkValidity();
-                    DocPrintUtil.println(con, "Validity Check= VALID, certificate valid between "+cert.getNotBefore().toString()+" and "+cert.getNotAfter().toString() );
+                    DocPrintUtil.println(con, "Validity Check=VALID, certificate valid between "+cert.getNotBefore().toString()+" and "+cert.getNotAfter().toString() );
                     
                 } catch (CertificateNotYetValidException e) {
                     DocPrintUtil.println(con, "Validity Check= >>>NOT YET VALID<<<, certificate valid between "+cert.getNotBefore().toString()+" and "+cert.getNotAfter().toString() );
@@ -887,7 +891,7 @@ public class DocPrintUtil {
     		try {
     			aval = CipherSuiteUtil.getExtensionValue(cert,oid);
     		} catch( IOException e ) {
-    			logger.error("Can't print ANS.1 value", e);
+    			logger.error("Can't print ASN.1 value", e);
     		}
 
     		oidbuff.append( "  -");
