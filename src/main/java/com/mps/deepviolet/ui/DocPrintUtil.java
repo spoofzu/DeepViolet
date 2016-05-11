@@ -63,7 +63,7 @@ import com.mps.deepviolet.suite.ServerMetadata;
  */
 public class DocPrintUtil {
 
-	private static final String VERSION = "V1.1.000";
+	private static final String VERSION = "V1.2.000";
 	
 	private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.ui.DocPrintUtil");
 	

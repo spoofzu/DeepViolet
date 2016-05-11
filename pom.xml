@@ -62,7 +62,7 @@
         <configuration>
 	       	 <archive>
 	          <manifest>
-	            <mainClass>com.mps.deepviolet.bin.StartCMD</mainClass>
+	            <mainClass>com.mps.deepviolet.bin.StartUI</mainClass>
 	          </manifest>
 	        </archive>
           <descriptorRefs>
