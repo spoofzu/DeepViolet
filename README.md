@@ -64,7 +64,7 @@ The previous help command produces output like the following.<br/>
 <code>&nbsp;&nbsp;&nbsp;-wc,--writecertificate <arg>   Optional, write PEM encoded certificate to</code><br/>
 <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;disk. Ex: -wc ~/certs/mycert.pem</code><br/>
 <p/>
-<b>FEATURE REQUESTS & BUG REPORTS</b>, to report new features or bug reports navigate to the Issues tab at the top of the page.  Log your new feature or bug as an issue. 
+<b>FEATURE REQUESTS & BUG REPORTS</b>, [See DeepViolet Wiki](https://github.com/spoofzu/DeepViolet/wiki)
 <p/>
 <b>WANT TO HELP?</b>, want to help make this into a full featured project?  See the following GitHub document for more details, [Contributing to Open Source on GitHub](https://guides.github.com/activities/contributing-to-open-source/). 
 <p/>
