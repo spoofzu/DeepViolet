@@ -46,6 +46,9 @@ If you need some help while your in the shell, command line help is available.<b
 The previous help command produces output like the following.<br/>
 ![dvcmd-snapshot](https://cloud.githubusercontent.com/assets/8450615/15344407/8209d2ba-1c5b-11e6-9321-3397ba35359d.png)
 <p/>
+<b>DEEPVIOLET API IN YOUR PROJECT</b>, Include DeepViolet API within your own Java project to extend your projects SSL/TLS scanning capabilities.  To get started check out the samples package, [com.mps.deepviolet.api.samples](https://github.com/spoofzu/DeepViolet/tree/master/src/main/java/com/mps/deepviolet/api/samples)
+Generate your own JavaDocs or view the pregenerated API documentation available in the docs folder.  
+<p/>
 <b>FEATURE REQUESTS & BUG REPORTS</b>, [See DeepViolet Wiki](https://github.com/spoofzu/DeepViolet/wiki)
 <p/>
 <b>WANT TO HELP?</b>, want to help make this into a full featured project?  See the following GitHub document for more details, [Contributing to Open Source on GitHub](https://guides.github.com/activities/contributing-to-open-source/). 
