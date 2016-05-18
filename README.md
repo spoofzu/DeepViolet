@@ -19,7 +19,7 @@ This tool helps you understand state of X.509 certificates run on servers.  Some
 <p/>
 Use certificate metadata along with your own shell scripts in new and creative ways.
 <p/>
-<b>INSTALLATION & USE INSTRUCTIONS</b>, 1) make sure Java 8+ installed, 2) download dvUI.jar to your desktop from the Release tab near the top of the screen, double-click to run 3) alternatively, download dvCMD.jar and run in your shell scripts.  
+<b>INSTALLATION & USE INSTRUCTIONS</b>, 1) [DOWNLOAD BINARIES](https://github.com/spoofzu/DeepViolet/releases) or compile source, 2) make sure Java 8+ installed, 3) download dvUI.jar to your desktop from the Release tab near the top of the screen, double-click to run.
 <p/>
 <b>CAUTION</b>, use care to review reports for sensitive information prior to distribution or posting to the Internet.
 <p/>
