@@ -1,13 +1,20 @@
 package com.mps.deepviolet.job;
 
+import java.io.IOException;
 import java.net.URL;
+import java.net.UnknownHostException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mps.deepviolet.suite.CipherSuiteUtil;
-import com.mps.deepviolet.suite.ServerMetadata;
-import com.mps.deepviolet.ui.DocPrintUtil;
+import com.mps.deepviolet.api.DVFactory;
+import com.mps.deepviolet.api.IDVOnEng;
+import com.mps.deepviolet.api.DVException;
+
+import com.mps.deepviolet.api.IDVOffEng;
+import com.mps.deepviolet.api.IDVOffPrint;
+import com.mps.deepviolet.api.IDVOnPrint;
+import com.mps.deepviolet.api.IDVSession;
 
 /**
  * Coordinates the order and execution of scan tasks
@@ -19,8 +26,12 @@ public class DeepScanTask extends UIBackgroundTask {
 	
 	protected volatile StringBuffer con = new StringBuffer();	
 	
+	private IDVOnPrint p;
+	private IDVOffPrint op;
+	private IDVOffEng oeng;
+	private IDVOnEng eng;
 	private URL url;
-	private String filename = "";
+	private String filename;
 	
 	public volatile boolean bHeader = true;
 	public volatile boolean bHostSection = true;
@@ -29,34 +40,49 @@ public class DeepScanTask extends UIBackgroundTask {
 	public volatile boolean bCiperSuitSection = true;
 	public volatile boolean bServerCertficateSection = true;
 	public volatile boolean bCertChainSection = true;
-	public volatile boolean bServerAnalysisSection = false;
+	//public volatile boolean bServerAnalysisSection = false;
 	public volatile boolean bWriteCertificate = false;
 	public volatile boolean bReadCertificate = false;
 			
 	/**
 	 * CTOR
 	 * @param url Target URL of TLS scan
+	 * @throws DVException thrown on host initialization problems
 	 */
-	public DeepScanTask( URL url ) {
+	public DeepScanTask( URL url ) throws DVException {
 		
-		this.url = url;
+		this( url, "");
 		
 	}
 	
 	/**
 	 * CTOR
-	 * @param urlTarget URL of TLS scan
+	 * @param url Target URL of TLS scan
+	 * @param filename Filename to save offline reports
+	 * @throws DVException thrown on host initialization problems
 	 */
-	public DeepScanTask( URL url, String filename ) {
+	public DeepScanTask( URL url, String filename ) throws DVException {
 		
 		this.url = url;
 		this.filename = filename;
-		
+
+		IDVSession session = null;
+		if( url == null ) {
+			// Supports initializing for offline use.  For example, read/write pem files
+			oeng = DVFactory.getDVOffEng();
+			op = oeng.getDVOffPrint();
+		} else {
+			session = DVFactory.initializeSession(url);
+			eng = DVFactory.getDVEng(session);
+			p = eng.getDVOnPrint(con);
+		}
+
+
 	}
 	
 	/**
 	 * Return the current URL
-	 * @return
+	 * @return Host URL
 	 */
 	public URL getURL() {
 		
@@ -85,7 +111,7 @@ public class DeepScanTask extends UIBackgroundTask {
 			
 			setStatusBarMessage("Working on Report Header");
    
-			DocPrintUtil.printReportHeader(con,url);
+			p.printReportHeader();
    
 		}
 		
@@ -93,7 +119,13 @@ public class DeepScanTask extends UIBackgroundTask {
 			
 			setStatusBarMessage("Writing certificate to disk");
 	   		
-			DocPrintUtil.writeCertificate(con, url, filename);
+			try {
+				eng.writeCertificate( filename);
+			}catch( DVException e ) {
+				String err = "Error writing certificate to disk. msg="+e.getMessage();
+				p.println(err);
+				logger.error(err,e);
+			}
 			
 		}
 		
@@ -101,7 +133,8 @@ public class DeepScanTask extends UIBackgroundTask {
 			
 			setStatusBarMessage("Reading certificate from disk");
 	   		
-			DocPrintUtil.printServerCertificate(con, filename);
+			op.printCertificate(filename);
+
 			
 		}
 		
@@ -109,7 +142,7 @@ public class DeepScanTask extends UIBackgroundTask {
 
 			setStatusBarMessage("Working on Host Information");
 	   		
-			DocPrintUtil.printHostInformation(con, url);
+			p.printHostInformation();
 		
 		}
 		
@@ -118,7 +151,7 @@ public class DeepScanTask extends UIBackgroundTask {
 		
 			setStatusBarMessage("Working on Host HTTP Response Headers");
 			
-			DocPrintUtil.printHostHttpResponseHeaders(con, url);
+			p.printHostHttpResponseHeaders();
 
 		}
 		
@@ -127,7 +160,7 @@ public class DeepScanTask extends UIBackgroundTask {
 			
 			setStatusBarMessage("Working on Connection Characteristics");
 
-			DocPrintUtil.printConnectionCharacteristics(con, url);
+			p.printConnectionCharacteristics();
 	
 		}
 		
@@ -136,7 +169,7 @@ public class DeepScanTask extends UIBackgroundTask {
 			
 			setStatusBarMessage("Working on Supported Cipher Suites");
    
-			DocPrintUtil.printSupportedCipherSuites(con, url);
+			p.printSupportedCipherSuites();
 	
 		}
    
@@ -144,7 +177,7 @@ public class DeepScanTask extends UIBackgroundTask {
 			
 			setStatusBarMessage("Working on Server Certificate");
    		
-			DocPrintUtil.printServerCertificate(con, url);			
+			p.printServerCertificate();		
 
 		}
 	
@@ -152,17 +185,17 @@ public class DeepScanTask extends UIBackgroundTask {
 			
 			setStatusBarMessage("Working on Server Certificate Chain");
 
-			DocPrintUtil.printServerCertificateChain(con, url);
+			p.printServerCertificateChain();
 		
 		}
 		
-		if( bServerAnalysisSection ) {
-		
-			setStatusBarMessage("Working on Server Analysis");
-
-			DocPrintUtil.printServerAnalysis(con, url);
-		
-		}
+//		if( bServerAnalysisSection ) {
+//		
+//			setStatusBarMessage("Working on Server Analysis");
+//
+//			DVPrint.printServerAnalysis();
+//		
+//		}
 	}
 	
 

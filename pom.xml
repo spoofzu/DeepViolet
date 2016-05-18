@@ -3,26 +3,55 @@
   <groupId>com.mps.violet</groupId>
   <artifactId>DeepViolet</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <name>DeepViolet</name>
+  <description>SSL/TLS security introspection tool.</description>
+  <url>>https://github.com/spoofzu/DeepViolet/</url>
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <name>Milton Smith</name>
+      <email>milton.smith.rr@gmail.com</email>
+      <organization>Self</organization>
+      <organizationUrl>http://www.securitycurmudgeon.com/</organizationUrl>
+    </developer>
+  </developers>
   
   <dependencies>
   
+  <dependency>
+	<groupId>junit</groupId>
+	<artifactId>junit</artifactId>
+	<version>4.12</version>
+	<scope>test</scope>
+  </dependency>
+    
+  <dependency>
+    <groupId>org.mockito</groupId>
+    <artifactId>mockito-core</artifactId>
+    <version>1.10.19</version>
+    <scope>test</scope>
+  </dependency>
     <!-- 
 	<dependency>
 	    <groupId>org.owasp</groupId>
 	    <artifactId>security-logging-common</artifactId>
 	    <version>1.1.0</version>
 	</dependency>
-  -->
+    -->
   
-      <!-- 
+    <!-- 
     <dependency>
        <groupId>org.owasp</groupId>
        <artifactId>security-logging-logback</artifactId>
        <version>1.1.0</version>
     </dependency>
-      -->
+    -->
   
-
   	<dependency>
   		<groupId>ch.qos.logback</groupId>
   		<artifactId>logback-classic</artifactId>
@@ -45,10 +74,11 @@
   
     <build>
     <plugins>
-      <!--  To build DeepViolet jars do, 1) maven clean, 2) maven install -->
-      <!--  Change the mainClass to StartCMD or StartUI depending -->
-      <!--  upon the type of class you want to start.  Not sure how -->
-      <!--  to get maven to generate both jars at same time yet.   -->
+      <!--  To build DeepViolet jars do, 1) maven clean, 2) maven install  -->
+      <!--  Change the mainClass to StartCMD, StartUI, or alternatively    -->
+      <!--  comment out the archive tags to get dvCMD.jar, dvUI.jar, and   -->
+      <!--  and dvAPI.jar respectively.  Not sure how to get maven to      -->
+      <!--  generate both jars at same time yet.                           -->
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
@@ -60,11 +90,13 @@
           </execution>
         </executions>
         <configuration>
-	       	 <archive>
+        	<!--
+        	 <archive>
 	          <manifest>
-	            <mainClass>com.mps.deepviolet.bin.StartCMD</mainClass>
+	            <mainClass>com.mps.deepviolet.bin.StartUI</mainClass>
 	          </manifest>
 	        </archive>
+	        -->
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>

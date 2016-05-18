@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -60,14 +61,11 @@ public class MainFrm extends JFrame {
 
 	private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.ui.MainFrm");
 	
-	private static final String EOL = System.getProperty("line.separator");
-	
 	private static final long serialVersionUID = -7591324908851824818L;
 	private JTextField txtServer;
 	private JTextPane tpResults;
 	private StyledDocument doc;
 	private JTextField txtStatus;
-	private final MainFrm main = this;
 	
 	JButton btnDeepScan = null;
 	JButton btnSave = null;
@@ -213,7 +211,7 @@ public class MainFrm extends JFrame {
 		// Status bar at bottom
 		txtStatus = new JTextField(STATUS_HDR + "Ready");
 		txtStatus.setEditable(false);
-		txtStatus.setEnabled(false);
+		txtStatus.setEnabled(true);
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 0.1;
 		c.weighty = 0.1;
@@ -274,12 +272,26 @@ public class MainFrm extends JFrame {
 		try {
 			url = new URL(surl);		
 		} catch (MalformedURLException e) {
-			logger.error( "Bad host url, err="+e.getMessage());
+			String malformed_url = "Bad host url, err="+e.getMessage();
+	    	try {
+				doc.remove(0,doc.getLength());
+				doc.insertString(0, malformed_url, regular);
+	    	}catch( Exception e1 ) {
+	    		logger.error(e1.getMessage(), e1);
+	    	}
+			logger.error(malformed_url);
 		}
 		
 	    if( url == null ||
 	        !url.getProtocol().toLowerCase().equals("https") ) {
-        	logger.error( "Bad host url, url="+url);
+	    	String bad_url = "bad host url, url="+url;
+	    	try {
+				doc.remove(0,doc.getLength());
+				doc.insertString(0, bad_url, regular);
+	    	}catch( Exception e ) {
+	    		logger.error(e.getMessage(), e);
+	    	}
+        	logger.error(bad_url);
         	setEnableControls(true);
         	return;
 	    }
@@ -287,7 +299,26 @@ public class MainFrm extends JFrame {
 	    try { doc.remove(0,doc.getLength()); } catch (BadLocationException e1) { e1.printStackTrace();}
 	    
 	   // Background SSL scanning thread
-	   final DeepScanTask st = new DeepScanTask(url); 
+	   DeepScanTask st = null;
+	   try {
+		   st = new DeepScanTask(url);
+	   } catch (Exception e) {
+		    String msg = "";
+		    if( url.getHost().equals(e.getMessage())) {
+		    	msg = "Host not found or bad URL formatting.  url="+surl;
+		    } else {
+		    	msg = "Problem initializing host.  err="+e.getMessage();
+		    }
+			logger.error( msg );
+	    	try {
+				doc.remove(0,doc.getLength());
+				doc.insertString(0, msg, regular);
+	    	}catch( Exception e1 ) {
+	    		logger.error(e1.getMessage(), e);
+	    	}
+        	setEnableControls(true);
+			return;
+	   } 
 	   st.start();
 	   // Background UI update thread.  Display scan results in progress
 	   updateLongRunningUIStatus(st);

@@ -7,16 +7,6 @@ import org.slf4j.LoggerFactory;
 
 public class FileUtils {
 
-	static {
-		
-	    System.setProperty("dv_user_directory", FileUtils.getWorkingDirectory());
-	    
-	}
-	
-	// Instance logger.  Need to define working dir before we can create.
-	private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.util.FileUtils");
-
-	
 	/**
 	 * Get the users DeepViolet working directory.  For storing completed reports.
 	 * @return Fully qualified name of working directory.
@@ -75,32 +65,20 @@ public class FileUtils {
 		File workdir = new File(violetdir);
 		
 		if( workdir.exists() ) {
-			
-			logger.info("DeepViolet user report directory available, name="+violetdir);
 			return;
+		} 
 		
-		} else {
-			
-			logger.info("No DeepViolet user report directory exists, creating. name="+violetdir);
-		
-		}
-		
-		if( workdir.exists() ) {
-					
+		if( workdir.exists() ) {	
 			if( !(workdir.canRead() && workdir.canWrite()) ) {
-			
-				logger.error("Failed creating user report directory, reason=READ&WRITE required");
+				System.err.println("Failed creating user report directory, reason=READ&WRITE required");
 				System.exit(10);
 			}
 			
 		}
 		
-		
-		if ( !workdir.mkdirs() ) {
-			
-			logger.error("Can't create a working directory.  reason=File.mkdirs failed");
+		if ( !workdir.mkdirs() ) {	
+			System.err.println("Can't create a working directory.  reason=File.mkdirs failed");
 			System.exit(15);
-			
 		}
 		
 		

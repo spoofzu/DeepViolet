@@ -11,7 +11,7 @@
     <!--  ${dv_user_directory} is OS dependent and set by DeepViolet -->
    	<file>${dv_user_directory}deepviolet.log</file>
     <encoder>
-      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%file:%line] - %msg%n</pattern>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level [%file:%line] - %msg%n</pattern>
     </encoder>
   </appender>
      
@@ -20,7 +20,7 @@
    		 <appender-ref ref="FILE" />
    </logger>
      
-  <root level="INFO">
+  <root level="${dv_user_level}">
     <appender-ref ref="STDOUT" />
     <appender-ref ref="FILE" />
   </root>

@@ -10,10 +10,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
@@ -27,7 +25,6 @@ import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,7 +37,6 @@ import java.util.TreeSet;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -53,8 +49,6 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.BERTags;
 import org.bouncycastle.asn1.DERApplicationSpecific;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERIA5String;
@@ -65,10 +59,7 @@ import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.DERVisibleString;
 import org.bouncycastle.asn1.DLSequence;
-import org.bouncycastle.asn1.x500.style.IETFUtils;
-import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,6 +76,14 @@ import org.slf4j.LoggerFactory;
  */
 public class CipherSuiteUtil {
 
+// Handshake protocol version legend
+//	SSL v1
+//	SSL v2
+//	SSL v3
+//	SSL v3.1 = TLS v1.0
+//	SSL v3.2 = TLS v1.1
+//	SSL v3.3 = TLS v1.2
+	
 	private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.suite.CipherSuiteUtil");
 	
 	private static final HashMap<URL, HostData> hostcache = new HashMap<URL,HostData>();
@@ -546,16 +545,12 @@ public class CipherSuiteUtil {
 		OIDMAP.put( "1.3.6.1.5.5.7.2.1","qualifierID");
 		OIDMAP.put( "2.5.29.37","ExtendedKeyUsages");
 		OIDMAP.put( "2.5.29.15","KeyUsage");
-		
 		OIDMAP.put( "2.5.29.14","SubjectKeyIdentifier");
-		OIDMAP.put( "2.5.29.15","KeyUsage");
-		OIDMAP.put( "2.5.29.15","KeyUsage");
-		OIDMAP.put( "2.5.29.15","KeyUsage");
-		OIDMAP.put( "2.5.29.15","KeyUsage");
-		OIDMAP.put( "2.5.29.15","KeyUsage");
 		
 	}
 		
+	//todo this needs to go bye bye.  bad idea.  I'm thinking a better way to do this is eventually
+	// get to a MVC type architecture.  This would better address the ways deepviolet can be used
 	public static synchronized ServerMetadata getServerMetadataInstance( URL url ) throws Exception {
 		
 		HostData hostdata = null;
@@ -564,7 +559,7 @@ public class CipherSuiteUtil {
 		// return cached instance of server TLS data if available and not expired.
 		if ( hostcache.containsKey( url ) ) {
 			hostdata = hostcache.get(url);
-//TODOMS: FOR NOW DON'T CACHE ANYTHING.  NOT SURE THIS MAKES SENSE.
+//TODO: FOR NOW DON'T CACHE ANYTHING.  NOT SURE THIS MAKES SENSE.
 //			if( !hostdata.isExpired() )
 //				return hostdata;
 		// No cached instance of TLS data so create some
@@ -653,7 +648,8 @@ public class CipherSuiteUtil {
 			
 			} else {
 
-				listv.add( NO_CIPHERS );
+				//don't add anything for now.
+				//listv.add( NO_CIPHERS );
 			}
 			hostdata.setVectorValue( "getServerMetadataInstance",versionString(v), listv.toArray(tmp));
 			
@@ -778,20 +774,20 @@ public class CipherSuiteUtil {
 	 * @return java.security.cert.X509Certificate Converted object
 	 * @see http://exampledepot.8waytrips.com/egs/javax.security.cert/ConvertCert.html
 	 */
-	public static java.security.cert.X509Certificate convert(javax.security.cert.X509Certificate cert) {
-	    try {
-	        byte[] encoded = cert.getEncoded();
-	        ByteArrayInputStream bis = new ByteArrayInputStream(encoded);
-	        java.security.cert.CertificateFactory cf
-	            = java.security.cert.CertificateFactory.getInstance("X.509");
-	        return (java.security.cert.X509Certificate)cf.generateCertificate(bis);
-	    } catch (javax.security.cert.CertificateEncodingException e) {
-			logger.error(e.getMessage(),e);
-	    } catch (java.security.cert.CertificateException e) {
-			logger.error(e.getMessage(),e);
-	    }
-	    return null;
-	}
+//	public static java.security.cert.X509Certificate convert(javax.security.cert.X509Certificate cert) {
+//	    try {
+//	        byte[] encoded = cert.getEncoded();
+//	        ByteArrayInputStream bis = new ByteArrayInputStream(encoded);
+//	        java.security.cert.CertificateFactory cf
+//	            = java.security.cert.CertificateFactory.getInstance("X.509");
+//	        return (java.security.cert.X509Certificate)cf.generateCertificate(bis);
+//	    } catch (javax.security.cert.CertificateEncodingException e) {
+//			logger.error(e.getMessage(),e);
+//	    } catch (java.security.cert.CertificateException e) {
+//			logger.error(e.getMessage(),e);
+//	    }
+//	    return null;
+//	}
 	
 	/**
 	 * Analysis to determine ciphersuite strength.
@@ -800,7 +796,7 @@ public class CipherSuiteUtil {
 	 */
 	public static final String getStrength(String protocol) {
 		
-		String clear = "CLEAR(no encryption)";
+		String clear = "CLEAR{no encryption}";
 		String weak = "WEAK";
 		String medium = "MEDIUM";
 		String strong = "STRONG";
@@ -850,7 +846,7 @@ public class CipherSuiteUtil {
 	 * Return server responses
 	 * @param url Target URL
 	 * @return Map HTTPS response headers
-	 * @throws  Thrown on problems.
+	 * @throws Exception Thrown on problems.
 	 */
 	public static final Map<String, List<String>> getHttpResponseHeaders(URL url) throws Exception {
 		
@@ -943,8 +939,8 @@ public class CipherSuiteUtil {
 	 * certificates with unvalidated and possibly bad trust chains.
 	 * @param url Target URL
 	 * @return X509Certificate Certificate chain
-	 * @throws  Thrown on problems.
-	 * @see http://stackoverflow.com/questions/19723415/java-overriding-function-to-disable-ssl-certificate-check
+	 * @throws Thrown on problems.
+	 * @see <a href="http://stackoverflow.com/questions/19723415/java-overriding-function-to-disable-ssl-certificate-check">java-overriding-function-to-disable-ssl-certificate-check</a>
 	 */
 	public static final X509Certificate[] getServerCertificateChain(URL url) throws Exception {
 
@@ -978,7 +974,7 @@ public class CipherSuiteUtil {
 	
 	/**
 	 * Get a list of the Java root certificates
-	 * @return
+	 * @return 
 	 * @throws Exception
 	 * @see http://stackoverflow.com/questions/3508050/how-can-i-get-a-list-of-trusted-root-certificates-in-java
 	 */
@@ -1180,7 +1176,6 @@ public class CipherSuiteUtil {
 		   sha1.update( der );
 		   
 		   StringBuffer buff = new StringBuffer();
-		   buff.append("0x");
 		   buff.append(byteArrayToHex(sha1.digest()));
 		   
 		   return buff.toString();
@@ -1199,7 +1194,6 @@ public class CipherSuiteUtil {
 //		   sha1.update( der );
 //		   
 //		   StringBuffer buff = new StringBuffer();
-//		   buff.append("0x");
 //		   buff.append(byteArrayToHex(sha1.digest()));
 //		   
 //		   return buff.toString();
@@ -1218,7 +1212,6 @@ public class CipherSuiteUtil {
 //		   sha1.update( der );
 //		   
 //		   StringBuffer buff = new StringBuffer();
-//		   buff.append("0x");
 //		   buff.append(byteArrayToHex(sha1.digest()));
 //		   
 //		   return buff.toString();
@@ -1336,7 +1329,7 @@ public class CipherSuiteUtil {
     		StringBuffer buff2 = new StringBuffer();
     		buff2.append( "tag="+tag+" ");
             String hex = CipherSuiteUtil.byteArrayToHex(app.getContents());
-            buff2.append( " 0x"+hex );
+            buff2.append( hex );
             buff.append(buff2.toString());
 
 	    // Assistance by https://svn.cesecore.eu/svn/ejbca/branches/Branch_3_11/ejbca/conf/extendedkeyusage.properties
@@ -1390,19 +1383,19 @@ public class CipherSuiteUtil {
 	    	
 	    	DERVisibleString vstring = (DERVisibleString)primitive;
 	    	buff.append( vstring.getString() );
-	    	buff.append( ' ' );
+	    	//buff.append( ' ' );
 	    	
 	    } else if (primitive instanceof DERIA5String ) {
 	    	
 	    	DERIA5String ia5string = (DERIA5String)primitive;
 	    	buff.append( ia5string.getString() );
-	    	buff.append( ' ' );
+	    	//buff.append( ' ' );
 	    	
 	    } else if (primitive instanceof DERUTF8String ) {
 	    	
 	    	DERUTF8String utf8string = (DERUTF8String)primitive;
 	    	buff.append( utf8string.toString() );
-	    	buff.append( ' ' );
+	    	//buff.append( ' ' );
 	    	
 	    } else if (primitive instanceof DERBitString ) {
 	    	
@@ -1442,19 +1435,19 @@ public class CipherSuiteUtil {
 	    	
 	    	ASN1Boolean ans1boolean = (ASN1Boolean)primitive;
 	    	buff.append( ans1boolean.isTrue() ? "TRUE" : "FALSE" );
-	    	buff.append( ' ' );
+	    	//buff.append( ' ' );
 	    	
 	    } else if (primitive instanceof ASN1Integer ) {
 	    	
 	    	ASN1Integer ans1int = (ASN1Integer)primitive;
 	    	buff.append( ans1int.toString() );
-	    	buff.append( ' ' );
+	    	//buff.append( ' ' );
 	    	
 	    } else if (primitive instanceof DERSet ) {
 	    	
 	    	DERSet derset = (DERSet)primitive;
 	    	buff.append( derset.toString() );
-	    	buff.append( ' ' );
+	    	//buff.append( ' ' );
 	    	
 	    // Assistance fm http://stackoverflow.com/questions/16058889/java-bouncy-castle-ocsp-url
 	    } else if (primitive instanceof DERTaggedObject ) {
@@ -1484,7 +1477,7 @@ public class CipherSuiteUtil {
 	    		
 	    		buff2.append( "type="+t.getTagNo()+" ");
 	            String hex = CipherSuiteUtil.byteArrayToHex(b);
-	            buff2.append( " 0x"+hex );
+	            buff2.append( hex );
 	            buff2.append( " | ");
 	    		
 	            buff.append(buff2.toString());
@@ -1523,8 +1516,15 @@ public class CipherSuiteUtil {
 	    	
 	    walkASN1Sequence( toDERObject(extensionValue), buff);
 	    
-	    if( buff.toString().endsWith("| "))
+	    if( buff.toString().endsWith(" | ")) {
+	    	buff.setLength(buff.length()-3);
+	    
+	    } else if( buff.toString().endsWith("| ")) {
 	    	buff.setLength(buff.length()-2);
+	    
+	    } else if( buff.toString().endsWith(" ")) {
+	    	buff.setLength(buff.length()-1);
+	    }
 		
 	    buff.append(']');
 	
@@ -1862,7 +1862,7 @@ public class CipherSuiteUtil {
 	{
 		CipherSuite cs = CIPHER_SUITES.get(suite);
 		if (cs == null) {
-			return String.format("UNKNOWN_SUITE:0x%04X", cs);
+			return String.format("UNKNOWN_SUITE:%04X", cs);
 		} else {
 			return cs.name;
 		}

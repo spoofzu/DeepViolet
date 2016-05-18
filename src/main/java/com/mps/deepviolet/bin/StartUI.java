@@ -28,15 +28,14 @@ import com.mps.deepviolet.util.FileUtils;
  *
  */
 public class StartUI {
-	
+
 	// Must execute before logback initializes
 	static {
 		
-	    // Pass deepviolet report directory to logback to write log file
 	    System.setProperty("dv_user_directory", FileUtils.getWorkingDirectory());
-		
-	}
-	
+	    System.setProperty("dv_user_level", "INFO");
+	    
+	}	
 	
     private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.bin.StartUI");
 	
@@ -54,7 +53,8 @@ public class StartUI {
 	 * Initialization
 	 */
 	private void init(String[] args) {
-	
+		
+	    // Pass deepviolet report directory to logback to write log file
 		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 	    ContextInitializer ci = new ContextInitializer(lc);
 	    lc.reset();
@@ -64,7 +64,7 @@ public class StartUI {
 	      e.printStackTrace();
 	    }
 	    //StatusPrinter.print(lc);
-	    
+		
 		logger.info("Starting UI via dvUI");
 		
 		// Create ~/DeepViolet/ working directory on OS
