@@ -1,7 +1,7 @@
 <h1>DeepViolet, SSL/TLS Introspection Tool</h1><br/>
 ==========
 <p/>
-DeepViolet is a Java tool for introspection of SSL\TLS sessions.  DeepViolet can be run from the **command line**, **GUI desktop application**, or you can include the **DeepViolet API** within your own Java projects.  The tool was originally inspired by the work of Qualys SSL Labs and Ivan Ristić.  Original blog article post describing this project, http://www.securitycurmudgeon.com/2014/07/ssltls-introspection.html<br/>
+DeepViolet is a Java tool for introspection of SSL\TLS sessions.  DeepViolet can be run from the **command line**, **GUI desktop application**, or you can include the **DeepViolet API** within your own Java projects.  Original blog article post describing this project, http://www.securitycurmudgeon.com/2014/07/ssltls-introspection.html<br/>
 <p/>
 <b>BENEFITS</b>
 This tool helps you understand state of X.509 certificates run on servers.  Some ideas you may find useful.
@@ -19,6 +19,9 @@ This tool helps you understand state of X.509 certificates run on servers.  Some
 <p/>
 Use certificate metadata along with your own shell scripts in new and creative ways.
 <p/>
+<b>ACKNOWLEDGEMENTS</b>
+This tool impliments ideas, code, and takes inspriation from other projects and leaders like: Qualys SSL Labs and Ivan Ristić, OpenSSL, and Oracle's Java Security Team. 
+</p>
 <b>INSTALLATION & USE INSTRUCTIONS</b>, 1) [DOWNLOAD BINARIES](https://github.com/spoofzu/DeepViolet/releases) or compile source, 2) make sure Java 8+ installed, 3) download dvUI.jar to your desktop from the Release tab near the top of the screen, double-click to run.
 <p/>
 <b>CAUTION</b>, use care to review reports for sensitive information prior to distribution or posting to the Internet.
