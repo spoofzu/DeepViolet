@@ -37,6 +37,7 @@ public class StartCMD {
 	static {
 		
 	    System.setProperty("dv_user_directory", FileUtils.getWorkingDirectory());
+	    System.setProperty("dv_user_level", "INFO");
 	    
 	}
 	
@@ -57,7 +58,6 @@ public class StartCMD {
 	private void init(String[] args) {
 		
 	    // Pass deepviolet report directory to logback to write log file
-	    System.setProperty("dv_user_directory", FileUtils.getWorkingDirectory());
 		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 	    ContextInitializer ci = new ContextInitializer(lc);
 	    lc.reset();
@@ -76,8 +76,6 @@ public class StartCMD {
 		
 		// Create ~/DeepViolet/ working directory on OS
 	    FileUtils.createWorkingDirectory();
-	    
-		int err = 0;
 		
 		try {
 			
@@ -97,6 +95,7 @@ public class StartCMD {
 			options.addOption("wc", "writecertificate", true, "Optional, write PEM encoded certificate to disk. Ex: -wc ~/certs/mycert.pem");
 			options.addOption("s", "sections", true, "Optional, unspecified prints all sections or specify sections. [t|h|r|c|i|s|n]");
 			options.addOption("d", "debug", false, "Optional, debug SSL/TLS connection.");
+			options.addOption("d2", "debuglogging", false, "Optional, enable logback DEBUG logging.");
 			
 			// Mutually exclusive options
 			OptionGroup certsource = new OptionGroup();	
@@ -143,15 +142,21 @@ public class StartCMD {
 					System.getProperties().remove("javax.net.debug");
 			}
 			
+			// Process debug option
+			if( cmdline.hasOption("d2") ) {
+			    System.setProperty("dv_user_level", "DEBUG");
+			}
+			
 		   // print help options
 		   if( cmdline.hasOption("h") ) {
 			   // Generate help options
 			   
 			   StringBuffer hm = new StringBuffer();
-			   hm.append( "java -jar dvCMD.jar -d -serverurl <host|ip> [-wc <file> | -rc <file>] [-h -s{t|h|r|c|i|s|n}]"+EOL );
+			   hm.append( "java -jar dvCMD.jar -serverurl <host|ip> [-wc <file> | -rc <file>] [-h -s{t|h|r|c|i|s|n}]"+EOL );
 			   hm.append( "Ex: dvCMD.jar -serverurl https://www.host.com/ -sections ts"+EOL );
 			   hm.append( "-d SSL/TLS connection debugging"+EOL );
-			   hm.append( "Where sections are the following,"+EOL);
+			   hm.append( "-d2 Enable logback DEBUG level logging"+EOL );
+			   hm.append( "With -s option, sections are the following,"+EOL);
 			   hm.append( "t=header section, h=host section, r=http response section,"+EOL);
 			   hm.append( "c=connection characteristics section, i=ciphersuite section,"+EOL);
 			   hm.append( "s=server certificate section, n=certificate chain section"+EOL);
