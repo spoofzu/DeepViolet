@@ -1,8 +1,6 @@
-[![Build Status](https://travis-ci.org/javabeanz/owasp-security-logging.svg?branch=master)](https://travis-ci.org/javabeanz/owasp-security-logging)
+[![Build Status](https://travis-ci.org/spoofzu/DeepViolet.svg?branch=master)](https://travis-ci.org/spoofzu/DeepViolet)
 
-[![Coverity Scan Status](https://scan.coverity.com/projects/3657/badge.svg)](https://scan.coverity.com/projects/3657)
-
-[![License][license-image]][license-url]
+[![Coverity Scan Status](https://scan.coverity.com/projects/8958/badge.svg)](https://scan.coverity.com/projects/8958)
 
 <h1>DeepViolet, SSL/TLS Introspection Tool</h1><br/>
 ==========
