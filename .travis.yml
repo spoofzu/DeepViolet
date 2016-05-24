@@ -1,8 +1,4 @@
 language: java
-before_install:
-- pip install --user codecov
-after_success:
-- codecov
 jdk:
 - oraclejdk8
 env:
