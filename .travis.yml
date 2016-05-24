@@ -1,0 +1,24 @@
+language: java
+before_install:
+- pip install --user codecov
+after_success:
+- codecov
+jdk:
+- oraclejdk8
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   secure: "IzAX6GIiDdMGOC/qm7BJ9O54XWikdTOpNvmKbGpcjzh7flSSRNJY+gO3yC3+va5G87MnobFc99GYsGQHwLp60cSDb6IrGt1mcClSuz01JDkuaKevnpUeHns9D7Kxvrqr6sV5W4yUtU+cN4wfKbMEtGlSZ3Lcy2mtSL5PdKQ/aQQKrs8cHARtTPQ6+f8UkYuvVFkI3qEQIo4ogd0dAvmvbyJPg1ERUIa+2+IfUgKEpfHMSWHBAZqvYsTQbmuagXFZTMRhAej/UsWgVKenwbqVt3dpNwchdyUp7KmYEBcla6ToooS8FsqRPTulzulcGwrfjtb9jvtKsdRNuFej+gZQFMz96Pz8nwb8E0jNHKrkX+3iY3lFL36wi4sW+C7fmKji9PRHQ9masFRiCcitr9rzVmwRmKggoHNAEabAS7Di4YxJParIFpt97EuAlhn5Sc4V64UhkdM2SGzSKR0utI0aKqTj9UQWIUb/+Ldxi/R7YisFqvMBer1KK9CiwRA4bgksE0bM+aWxYVsB58sxfCh6/rRbhLb+3bgHijOv8quA+JhOmTNaOrNbPeVWKmmtrGngP9QFRPTN1RvGClkExUgueUkDkjcAjo8o3QXXsaeEtJjfuiZvmiVl21SPe/a4B5yiH811Dz0VJ84B9mf9aPF/R8Ue0bP/1nkJpNplnysvJsU="
+   # The next declaration is the encrypted GH_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+
+addons:
+  coverity_scan:
+    project:
+      name: spoofzu/DeepViolet
+      description: DeepViolet SSL/TLS Introspection Tool 
+    notification_email: milton.smith.rr@gmail.com
+    build_command_prepend: mvn clean
+    build_command: mvn install
+    branch_pattern: master
