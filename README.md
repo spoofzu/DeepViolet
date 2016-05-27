@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/spoofzu/DeepViolet.svg?branch=master)](https://travis-ci.org/spoofzu/DeepViolet)
-<p/>
+
+[![Coverity Scan Status](https://scan.coverity.com/projects/8958/badge.svg)](https://scan.coverity.com/projects/8958)<br/>
 <i>Update May 24, 2016: I'm in the process of installing these badges.  The status are not correct but will be soon.  DeepViolet code will build or you can download the release binaries according to instructions in the following documentation.</i>
 
 <h1>DeepViolet, SSL/TLS Introspection Tool</h1><br/>
