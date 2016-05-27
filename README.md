@@ -59,5 +59,4 @@ Generate your own JavaDocs or view the pregenerated API documentation available 
 <p/>
 <b>WANT TO HELP?</b>, want to help make this into a full featured project?  See the following GitHub document for more details, [Contributing to Open Source on GitHub](https://guides.github.com/activities/contributing-to-open-source/). 
 <p/>
-<i>This program is provided for educational purposes.  Use at your own risk.<br/>
-This project leverages the works of other open source community projects.  This program is only available in US English.</i>
+<i>This project leverages the works of other open source community projects and is provided for educational purposes.  Use at your own risk.  See LICENSE for further information.</i>
