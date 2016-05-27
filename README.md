@@ -1,24 +1,31 @@
+[![Build Status](https://travis-ci.org/spoofzu/DeepViolet.svg?branch=master)](https://travis-ci.org/spoofzu/DeepViolet)
+<p/>
+
 <h1>DeepViolet, SSL/TLS Introspection Tool</h1><br/>
 ==========
 <p/>
-DeepViolet is a Java tool for introspection of SSL\TLS sessions.  DeepViolet can be run from the command line or via a GUI desktop application.  The tool was originally inspired by the work of Qualys SSL Labs and Ivan Ristić.  Original blog article post describing this project, http://www.securitycurmudgeon.com/2014/07/ssltls-introspection.html<br/>
+DeepViolet is a Java tool for introspection of SSL\TLS sessions.  DeepViolet can be run from the **command line**, **GUI desktop application**, or you can include the **DeepViolet API** within your own Java projects.  Original blog article post describing this project, http://www.securitycurmudgeon.com/2014/07/ssltls-introspection.html<br/>
 <p/>
 <b>BENEFITS</b>
 This tool helps you understand state of X.509 certificates run on servers.  Some ideas you may find useful.
 <ul>
 <li>Certificates that don't chain to trusted roots</li>
+<li>Examine trust relationships, flag self-signed roots, etc</li>
 <li>Assess revocation status</li>
 <li>Certificates signed with weak signing algorithms</li>
 <li>Weak cipher suits on the web server</li>
 <li>Warn on certificates with approaching expiration</li>
 <li>View X.509 certificate metadata</li>
 <li>Easily visualize X.509 trust chains</li>
-<li>DOXX organizational computing enviroments by examinging infrastructure metadata</li>
+<li>Information to support forensics</li>
 </ul>
 <p/>
 Use certificate metadata along with your own shell scripts in new and creative ways.
 <p/>
-<b>INSTALLATION & USE INSTRUCTIONS</b>, 1) make sure Java 8+ installed, 2) download dvUI.jar to your desktop from the Release tab near the top of the screen, double-click to run 3) alternatively, download dvCMD.jar and run in your shell scripts.  
+<b>ACKNOWLEDGEMENTS</b>
+This tool impliments ideas, code, and takes inspriation from other projects and leaders like: Qualys SSL Labs and Ivan Ristić, OpenSSL, and Oracle's Java Security Team. 
+</p>
+<b>INSTALLATION & USE INSTRUCTIONS</b>, 1) [DOWNLOAD BINARIES](https://github.com/spoofzu/DeepViolet/releases) or compile source, 2) make sure Java 8+ installed, 3) download dvUI.jar to your desktop from the Release tab near the top of the screen, double-click to run.
 <p/>
 <b>CAUTION</b>, use care to review reports for sensitive information prior to distribution or posting to the Internet.
 <p/>
@@ -43,30 +50,13 @@ If you need some help while your in the shell, command line help is available.<b
 <code> java -jar dvCMD.jar -h</code>
 <p/>
 The previous help command produces output like the following.<br/>
-<code>Miltons-Air:Desktop milton$ java -jar dvCMD.jar -h</code><br/>
-<code>Starting headless via dvCMD</code><br/>
-<code>DeepViolet user report directory available, name=/Users/milton/DeepViolet/</code><br/>
-<code>usage: java -jar dvCMD.jar -serverurl <host|ip> [-wc <file> | -rc <file>]</code><br/>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[-h -s{t|h|r|c|i|s|n}]</code><br/>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ex: dvCMD.jar -serverurl https://www.host.com/ -sections ts</code><br/>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Where sections are the following,</code><br/>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;t=header section, h=host section, r=http response section,</code><br/>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c=connection characteristics section, i=ciphersuite section,</code><br/>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;s=server certificate section, n=certificate chain section</code><br/>
-<code>&nbsp;&nbsp;&nbsp;-h,--help                      Optional, print dvCMD help options.</code><br/>
-<code>&nbsp;&nbsp;&nbsp;-rc,--readcertificate <arg>    Optional, read PEM encoded certificate</code><br/>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from disk. Ex: -rc ~/certs/mycert.pem</code><br/>
-<code>&nbsp;&nbsp;&nbsp;-s,--sections <arg>            Optional, unspecified prints all section</code><br/>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or specify sections. [t|h|r|c|i|s|n]</code><br/>
-<code>&nbsp;&nbsp;&nbsp;-u,--serverurl <arg>           Required for all options except</code><br/>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-readcertificate, HTTPS server URL to</code><br/>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scan.</code><br/>
-<code>&nbsp;&nbsp;&nbsp;-wc,--writecertificate <arg>   Optional, write PEM encoded certificate to</code><br/>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;disk. Ex: -wc ~/certs/mycert.pem</code><br/>
+![dvcmd-snapshot](https://cloud.githubusercontent.com/assets/8450615/15344407/8209d2ba-1c5b-11e6-9321-3397ba35359d.png)
 <p/>
-<b>FEATURE REQUESTS & BUG REPORTS</b>, to report new features or bug reports navigate to the Issues tab at the top of the page.  Log your new feature or bug as an issue. 
+<b>DEEPVIOLET API IN YOUR PROJECT</b>, Include DeepViolet API within your own Java project to extend your projects SSL/TLS scanning capabilities.  To get started check out the samples package, [com.mps.deepviolet.api.samples](https://github.com/spoofzu/DeepViolet/tree/master/src/main/java/com/mps/deepviolet/api/samples)
+Generate your own JavaDocs or view the pregenerated API documentation available in the docs folder.  
+<p/>
+<b>FEATURE REQUESTS & BUG REPORTS</b>, [See DeepViolet Wiki](https://github.com/spoofzu/DeepViolet/wiki)
 <p/>
 <b>WANT TO HELP?</b>, want to help make this into a full featured project?  See the following GitHub document for more details, [Contributing to Open Source on GitHub](https://guides.github.com/activities/contributing-to-open-source/). 
 <p/>
-<i>This program is provided for educational purposes.  Use at your own risk.<br/>
-This project leverages the works of other open source community projects.  This program is only available in US English.</i>
+<i>This project leverages the works of other open source community projects and is provided for educational purposes.  Use at your own risk.  See LICENSE for further information.</i>
