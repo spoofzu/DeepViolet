@@ -1,6 +1,4 @@
 [![Build Status](https://travis-ci.org/spoofzu/DeepViolet.svg?branch=master)](https://travis-ci.org/spoofzu/DeepViolet)
-
-[![License][license-image]][license-url]
 <p/>
 
 <h1>DeepViolet, SSL/TLS Introspection Tool</h1><br/>
