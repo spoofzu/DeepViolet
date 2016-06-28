@@ -1,4 +1,4 @@
-package com.mps.deepviolet.test.api;
+package com.mps.deepviolet.api;
 
 import static org.junit.Assert.assertTrue;
 

@@ -1,1 +1,5 @@
 /target/
+/.classpath
+.project
+.classpath
+*.log

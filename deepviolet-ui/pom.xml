@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>deepviolet-parent</artifactId>
+    <groupId>com.mps.violet</groupId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>deepviolet-ui</artifactId>
+  <dependencies>
+    <dependency>
+      <artifactId>deepviolet-api</artifactId>
+      <groupId>com.mps.violet</groupId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <!--  To build DeepViolet jars do, 1) maven clean, 2) maven install  -->
+      <!--  Change the mainClass to StartCMD, StartUI, or alternatively    -->
+      <!--  comment out the archive tags to get dvCMD.jar, dvUI.jar, and   -->
+      <!--  and dvAPI.jar respectively.  Not sure how to get maven to      -->
+      <!--  generate both jars at same time yet.                           -->
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>com.mps.deepviolet.bin.StartCMD</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
