@@ -15,8 +15,9 @@
   </licenses>
 <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-  <developers>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+</properties>  <developers>
     <developer>
       <name>Milton Smith</name>
       <email>milton.smith.rr@gmail.com</email>

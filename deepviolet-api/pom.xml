@@ -5,7 +5,6 @@
     <artifactId>deepviolet-parent</artifactId>
     <groupId>com.mps.violet</groupId>
     <version>0.0.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>deepviolet-api</artifactId>
 </project>
