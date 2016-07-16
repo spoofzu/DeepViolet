@@ -25,7 +25,7 @@ This tool helps you understand state of X.509 certificates run on servers.  Some
 Use certificate metadata along with your own shell scripts in new and creative ways.
 <p/>
 <b>ACKNOWLEDGEMENTS</b>
-This tool impliments ideas, code, and takes inspriation from other projects and leaders like: Qualys SSL Labs and Ivan Ristić, OpenSSL, and Oracle's Java Security Team. 
+This tool impliments ideas, code, and takes inspriation from other projects and leaders like: Qualys SSL Labs and Ivan Ristić, OpenSSL, and Oracle's Java Security Team.  Many thanks for around negotiating TLS handshakes and cipher suite handling adapted from code examples by Thomas Pornin.
 </p>
 <b>INSTALLATION & USE INSTRUCTIONS</b>, 1) [DOWNLOAD BINARIES](https://github.com/spoofzu/DeepViolet/releases) or compile source, 2) make sure Java 8+ installed, 3) download dvUI.jar to your desktop from the Release tab near the top of the screen, double-click to run.
 <p/>
