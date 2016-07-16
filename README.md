@@ -1,25 +1,25 @@
 [![Build Status](https://travis-ci.org/spoofzu/DeepViolet.svg?branch=master)](https://travis-ci.org/spoofzu/DeepViolet)
 <p/>
 
-<h1>OWASP DeepViolet, SSL/TLS Introspection Tool</h1><br/>
+<h1>OWASP DeepViolet, TLS/SSL Introspection Tool</h1><br/>
 ==========
 <p/>
-OWASP project landing page, [OWASP DeepViolet TLS/SSL Scanner](https://www.owasp.org/index.php/OWASP_DeepViolet_TLS/SSL_Scanner)
+<b>OWASP project landing page</b>, [OWASP DeepViolet TLS/SSL Scanner](https://www.owasp.org/index.php/OWASP_DeepViolet_TLS/SSL_Scanner)
 <p/>
-DeepViolet is a Java tool for introspection of SSL\TLS sessions.  DeepViolet can be run from the **command line**, **GUI desktop application**, or you can include the **DeepViolet API** within your own Java projects.  Original blog article post describing this project, http://www.securitycurmudgeon.com/2014/07/ssltls-introspection.html<br/>
+DeepViolet is a Java tool for introspection of TLS/SSL sessions.  DeepViolet can be run from the **command line**, **GUI desktop application**, or you can include the **DeepViolet API** within your own Java projects.  Original blog article post describing this project, http://www.securitycurmudgeon.com/2014/07/ssltls-introspection.html<br/>
 <p/>
 <b>BENEFITS</b>
 This tool helps you understand state of X.509 certificates run on servers.  Some ideas you may find useful.
 <ul>
-<li>Certificates that don't chain to trusted roots</li>
-<li>Examine trust relationships, flag self-signed roots, etc</li>
 <li>Assess revocation status</li>
 <li>Certificates signed with weak signing algorithms</li>
 <li>Weak cipher suits on the web server</li>
 <li>Warn on certificates with approaching expiration</li>
 <li>View X.509 certificate metadata</li>
 <li>Easily visualize X.509 trust chains</li>
+<li>Explore trust chains, flag self-signed roots</li>
 <li>Information to support forensics</li>
+<li>and more...</li>
 </ul>
 <p/>
 Use certificate metadata along with your own shell scripts in new and creative ways.
