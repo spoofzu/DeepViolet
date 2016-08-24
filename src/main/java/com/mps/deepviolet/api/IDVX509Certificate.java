@@ -16,15 +16,19 @@ public interface IDVX509Certificate {
 	//TODO: Properties guarenteed to be present
 	
 	public static final String UNSUPPORTED_OID = "<UNSUPPORTED>";
-	
-	public static final int TRUST_STATE_TRUSTED = 1;
-	public static final int TRUST_STATE_UNKNOWN = 2;
-	public static final int TRUST_STATE_UNTRUSTED = 3;
-	
-	
-	public static final int VALID_STATE_EXPIRED = 4;
-	public static final int VALID_STATE_VALID = 5;
-	public static final int VALID_STATE_NOT_YET_VALID = 6;
+
+	public enum TrustState {
+	    TRUSTED,
+        UNKNOWN,
+        UNTRUSTED
+    }
+
+    public enum ValidState {
+        EXPIRED,
+        VALID,
+        NOT_YET_VALID
+    }
+
 
 	/**
 	 * Certificate signing algorithm
@@ -69,7 +73,7 @@ public interface IDVX509Certificate {
 	 * certificate is not ready for use.  VALID_STATE_VALID, certifidate ready for deployment
 	 * and operations.
 	 */
-	public int getValidityState();
+	public ValidState getValidityState();
 	
 	/**
 	 * Certificate Distinguished Name.  Includes information that uniquely
@@ -103,7 +107,7 @@ public interface IDVX509Certificate {
      * @return State information, TRUST_STATE_UNTRUSTED, TRUST_STATE_UNKNOWN, 
      * TRUST_STATE_TRUSTED.
 	 */
-	public int getTrustState();
+	public TrustState getTrustState();
 	
 	/**
 	 * The signing authority is also the subject.

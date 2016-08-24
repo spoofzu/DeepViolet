@@ -317,17 +317,17 @@ class DVPrint implements IDVOnPrint, IDVOffPrint {
 	private void printTrustState( IDVX509Certificate ldvCert) {
 		
 		String trust_state = "<ERROR>";
-		if( ldvCert.getTrustState() == IDVX509Certificate.TRUST_STATE_TRUSTED ) {
+		if( ldvCert.getTrustState() == IDVX509Certificate.TrustState.TRUSTED ) {
 			trust_state="TRUSTED";
-		}else if(ldvCert.getTrustState() == IDVX509Certificate.TRUST_STATE_UNKNOWN ) {
+		}else if(ldvCert.getTrustState() == IDVX509Certificate.TrustState.UNKNOWN ) {
 			trust_state="UNKNOWN";		
-		}else if(ldvCert.getTrustState() == IDVX509Certificate.TRUST_STATE_UNTRUSTED ) {
+		}else if(ldvCert.getTrustState() == IDVX509Certificate.TrustState.UNTRUSTED ) {
 			trust_state="UNTRUSTED";					
 		}
 		
 		StringBuffer buff = new StringBuffer();
 		buff.append("Trusted State=");
-		boolean trusted = trust_state.equals(IDVX509Certificate.TRUST_STATE_TRUSTED);
+		boolean trusted = trust_state.equals(IDVX509Certificate.TrustState.TRUSTED);
 		
 		if( trusted ) {
 			buff.append("trusted");
@@ -458,13 +458,13 @@ class DVPrint implements IDVOnPrint, IDVOffPrint {
 		
 		String not_before = ldvCert.getNotValidBefore();
 		String not_after = ldvCert.getNotValidAfter();
-		int validity_state = ldvCert.getValidityState();
+		IDVX509Certificate.ValidState validity_state = ldvCert.getValidityState();
 		
-		if (validity_state == IDVX509Certificate.VALID_STATE_VALID){
+		if (validity_state == IDVX509Certificate.ValidState.VALID){
 			println( "Validity Check=VALID, certificate valid between "+not_before+" and "+not_after );
-		} else if(validity_state == IDVX509Certificate.VALID_STATE_NOT_YET_VALID){
+		} else if(validity_state == IDVX509Certificate.ValidState.NOT_YET_VALID){
 			println( "Validity Check=>>>NOT YET VALID<<<, certificate valid between "+not_before+" and "+not_after );
-		} else if(validity_state == IDVX509Certificate.VALID_STATE_EXPIRED){
+		} else if(validity_state == IDVX509Certificate.ValidState.EXPIRED){
 			println( "Validity Check=>>>EXPIRED<<<, certificate valid between "+not_before+" and "+not_after );
 		} 
 		

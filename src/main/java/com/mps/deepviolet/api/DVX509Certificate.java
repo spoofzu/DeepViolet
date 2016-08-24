@@ -42,10 +42,10 @@ class DVX509Certificate implements IDVX509Certificate {
 	int iCertificateVersion;
 	String notValidBefore;
 	String notValidAfter;
-	 int iValidityState;
+	ValidState iValidityState;
 	String subjectDN;
 	String issuerDN;
-	int iTrustState;
+	TrustState iTrustState;
 	boolean bSelfSignedCertificate;
 	boolean bJavaRootCertificate;
 	String certificateFingerPrint;
@@ -75,7 +75,7 @@ class DVX509Certificate implements IDVX509Certificate {
 			issuerDN = cert.getIssuerDN().toString();
 			signingAlgorithmOID = cert.getSigAlgOID();
 			iCertificateVersion = cert.getVersion();
-			iTrustState = TRUST_STATE_UNKNOWN; //default
+			iTrustState = TrustState.UNKNOWN; //default
 			
 			//TODO: Signature algorithm is different than a digest algorithm.  Need to understand
 			//      if parsing SHA256withRSA into SHA256 will work consistently.
@@ -87,12 +87,12 @@ class DVX509Certificate implements IDVX509Certificate {
         	try {
         		try {
         			cert.checkValidity();
-        			iValidityState = VALID_STATE_VALID;            
+        			iValidityState = ValidState.VALID;
                 } catch (CertificateNotYetValidException e) {
-                	iValidityState = VALID_STATE_NOT_YET_VALID;   
+                	iValidityState = ValidState.NOT_YET_VALID;
 				}
             } catch(CertificateExpiredException c) {
-            	iValidityState = VALID_STATE_EXPIRED;
+            	iValidityState = ValidState.EXPIRED;
             }
 	
 			// Gather non-critical OIDs
@@ -191,7 +191,7 @@ class DVX509Certificate implements IDVX509Certificate {
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IDVX509Certificate.getValidityState()
 	 */
-	public int getValidityState(){
+	public ValidState getValidityState(){
 		return iValidityState;
 	}
 	
@@ -212,7 +212,7 @@ class DVX509Certificate implements IDVX509Certificate {
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IDVX509Certificate.getTrustState()
 	 */
-	public int getTrustState(){
+	public TrustState getTrustState(){
 		return iTrustState;
 	}
 	
@@ -299,7 +299,7 @@ class DVX509Certificate implements IDVX509Certificate {
 	
 	/**
 	 * Assign OIDs to the key/value store.
-	 * @param map Map to insert OIDs
+	 * @param lmap Map to insert OIDs
 	 * @param OIDs Set of OIDs to assign.
 	 */
 	void assignOIDs(HashMap<String,String> lmap, Set<String> OIDs) {
@@ -359,7 +359,6 @@ class DVX509Certificate implements IDVX509Certificate {
 	 * checkTrustedCertificate( X509Certificate[] certs, URL url) then all this URL finding
 	 * could be elimated.  Need to look into this more.  All this is only a best effort to
 	 * establish the trust relationship while offline (e.g., --serverurl not specified).
-	 * @param lcert X.509 certificate to determine trust state.
 	 */
 	void assignTrustState() throws DVException {
 		
@@ -369,19 +368,19 @@ class DVX509Certificate implements IDVX509Certificate {
 
 			boolean bTrusted = CipherSuiteUtil.checkTrustedCertificate( chain, eng.getDVSession().getURL() );
 			if( bTrusted ) {
-				iTrustState = TRUST_STATE_TRUSTED;
+				iTrustState = TrustState.TRUSTED;
 			}else{
-				iTrustState = TRUST_STATE_UNTRUSTED;
+				iTrustState = TrustState.UNTRUSTED;
 			}
 			
 		} catch( KeyStoreException e ) {
-			iTrustState = TRUST_STATE_UNKNOWN;
+			iTrustState = TrustState.UNKNOWN;
 			throw new DVException("Problem accessing keystore, err="+e.getMessage(),e);
 		} catch( NoSuchAlgorithmException e ) {
-			iTrustState = TRUST_STATE_UNKNOWN;
+			iTrustState = TrustState.UNKNOWN;
 			throw new DVException("No ciphersuite available, err="+e.getMessage(),e);	
 		} catch( UnknownHostException e ) {
-			iTrustState = TRUST_STATE_UNKNOWN;
+			iTrustState = TrustState.UNKNOWN;
 			throw new DVException("Unknown host, err="+e.getMessage(),e);	
 		} catch( IOException e ) {
 			throw new DVException("File system problem, err="+e.getMessage(),e);	
@@ -422,11 +421,11 @@ class DVX509Certificate implements IDVX509Certificate {
 		buff.append("VALIDITY_STATE");
 		buff.append('=');
 		String state = "<ERROR>";
-		if( iValidityState == VALID_STATE_EXPIRED ) {
+		if( iValidityState == ValidState.EXPIRED ) {
 			state = "EXPIRED";
-		} else if ( iValidityState == VALID_STATE_VALID ) {
+		} else if ( iValidityState == ValidState.VALID ) {
 			state = "VALID";
-		} else if ( iValidityState == VALID_STATE_NOT_YET_VALID ) {
+		} else if ( iValidityState == ValidState.NOT_YET_VALID ) {
 			state = "NOT_YET_VALID";
 		} 
 		buff.append(state);
@@ -435,11 +434,11 @@ class DVX509Certificate implements IDVX509Certificate {
 		buff.append("TRUST_STATE");
 		buff.append('=');
 		state = "<ERROR>";
-		if( iTrustState == TRUST_STATE_TRUSTED ) {
+		if( iTrustState == TrustState.TRUSTED ) {
 			state = "TRUSTED";
-		} else if ( iTrustState == TRUST_STATE_UNKNOWN ) {
+		} else if ( iTrustState == TrustState.UNKNOWN ) {
 			state = "UNKNOWN";
-		} else if ( iTrustState == TRUST_STATE_UNTRUSTED ) {
+		} else if ( iTrustState == TrustState.UNTRUSTED ) {
 			state = "UNTRUSTED";
 		} 
 		buff.append(state);
