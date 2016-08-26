@@ -1,7 +1,6 @@
 package com.mps.deepviolet.api;
 
 import java.net.URL;
-import java.util.HashMap;
 
 /**
  * Implementation of IDVhost
