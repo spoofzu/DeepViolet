@@ -12,6 +12,6 @@ public interface IDVOffPrint {
 	 * Read X.509 PEM encoded certficiate from file and print to console device (UI/or System.out).
 	 * @param file Fully qualified file to save
 	 */
-	public void printCertificate( String file );
+	void printCertificate(String file);
 	
 }

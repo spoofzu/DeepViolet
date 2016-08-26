@@ -10,18 +10,18 @@ public interface IDVCipherSuite {
 	 * IANA cipher suite name.
 	 * @return Cipher name
 	 */
-	public String getIANAName();
+	String getIANAName();
 	
 	/**
 	 * Evaluation of cipher suite strength
-	 * @return Cipher suite valulation, STRONG, WEAK, etc.
+	 * @return Cipher suite valuation, STRONG, WEAK, etc.
 	 */
-	public String getStrengthEvaluation();
+	String getStrengthEvaluation();
 	
 	/**
 	 * Handshake protocol this ciphersuite belongs
 	 * @return Handshake protocol, TLSv1, TLSv1.2, etc.
 	 */
-	public String getHandshakeProtocol();
+	String getHandshakeProtocol();
 	
 }

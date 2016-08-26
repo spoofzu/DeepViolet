@@ -14,7 +14,7 @@ public interface IDVOffEng {
 	 * Callers are urged to test upon implementing new major versions.
 	 * @return Number indicating DeepVioloet Major Version.
 	 */
-	public int getDeepVioletMajorVersion();
+	int getDeepVioletMajorVersion();
 
 	/**
 	 * Return the Minor Version of DeepViolet.  Incrememented upon significant
@@ -22,7 +22,7 @@ public interface IDVOffEng {
 	 * implementing new major versions.
 	 * @return Number indicating DeepVioloet Minor Version.
 	 */
-	public int getDeepVioletMinorVersion();
+	int getDeepVioletMinorVersion();
 
 	/**
 	 * Return the Build Version of DeepViolet.  Incremented on bug fixes to
@@ -30,13 +30,13 @@ public interface IDVOffEng {
 	 * break code.  Callers are urged to perform basic unit tests.
 	 * @return Number indicating DeepVioloet Build Version.
 	 */
-	public int getDeepVioletBuildVersion();
+	int getDeepVioletBuildVersion();
 
 	/**
 	 * Return the DeepViolet version string.  
 	 * @return Suitable for printing in log files, displaying in About boxes, etc.
 	 */
-	public String getDeepVioletStringVersion();
+	String getDeepVioletStringVersion();
 	
 	/**
      * Return offline print engine instance.  Useful for reporting
@@ -45,6 +45,6 @@ public interface IDVOffEng {
 	 * @return Offline print engine instance
 	 * @throws DVException on problems.
 	 */
-	public IDVOffPrint getDVOffPrint() throws DVException;
+	IDVOffPrint getDVOffPrint() throws DVException;
 	
 }
