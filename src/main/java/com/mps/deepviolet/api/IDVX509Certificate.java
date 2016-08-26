@@ -15,15 +15,15 @@ public interface IDVX509Certificate {
 
 	//TODO: Properties guarenteed to be present
 	
-	public static final String UNSUPPORTED_OID = "<UNSUPPORTED>";
+	String UNSUPPORTED_OID = "<UNSUPPORTED>";
 
-	public enum TrustState {
+	enum TrustState {
 	    TRUSTED,
         UNKNOWN,
         UNTRUSTED
     }
 
-    public enum ValidState {
+    enum ValidState {
         EXPIRED,
         VALID,
         NOT_YET_VALID
@@ -34,46 +34,46 @@ public interface IDVX509Certificate {
 	 * Certificate signing algorithm
 	 * @return Signing algorithm
 	 */
-	public String getSigningAlgorithm();
+	String getSigningAlgorithm();
 	
 	/**
 	 * OID of certificate signing algorithm
 	 * @return OID in String form
 	 */
-	public String getSigningAlgorithmOID();
+	String getSigningAlgorithmOID();
 	
 	/**
 	 * Certificate serial number
 	 * @return Certificate serial number
 	 */
-	public BigInteger getCertificateSerialNumber();
+	BigInteger getCertificateSerialNumber();
 	
 	/**
 	 * Certificate version number
 	 * @return Certificate version number
 	 */
-	public int getCertificateVersion();
+	int getCertificateVersion();
 	
 	/**
 	 * Certificate not valid before timestamp
 	 * @return Timestamp certificate not valid before.
 	 */
-	public String getNotValidBefore();
+	String getNotValidBefore();
 	
 	/**
 	 * Certificate not valid after timestamp
 	 * @return Timestamp certificate not valid after.
 	 */
-	public String getNotValidAfter();
+	String getNotValidAfter();
 	
 	/**
 	 * Certificate validity state.
-	 * @return Validity state.  Supported states, VALID_STATE_EXPIRED, certificate is expired.
-	 * The certificate was once valid but no longer valid.  VALID_STATE_NOT_YET_VALID, the
-	 * certificate is not ready for use.  VALID_STATE_VALID, certifidate ready for deployment
+	 * @return Validity state.  Supported states, {@link ValidState#EXPIRED}, certificate is expired.
+	 * The certificate was once valid but no longer valid.  {@link ValidState#NOT_YET_VALID}, the
+	 * certificate is not ready for use.  {@link ValidState#VALID}, certifidate ready for deployment
 	 * and operations.
 	 */
-	public ValidState getValidityState();
+	ValidState getValidityState();
 	
 	/**
 	 * Certificate Distinguished Name.  Includes information that uniquely
@@ -81,39 +81,37 @@ public interface IDVX509Certificate {
 	 * in the future like code signer, etc.
 	 * @return DN of the subject.
 	 */
-	public String getSubjectDN();
+	String getSubjectDN();
 	
 	/**
 	 * Distinguished Name of the issuer.  Includes information that uniquely
 	 * identifies the issuing authority a Certificate Authority.
 	 * @return DN of the issuer.
 	 */
-	public String getIssuerDN();
+	String getIssuerDN();
 	
 	/**
 	 * Digital fingerprint of the certificate using the target algorithm identified
 	 * by the certificate.  For example, an MD5, SHA-1, SHA-256 hash.
 	 * @return String representation of an octet sequence.
 	 */
-	public String getCertificateFingerPrint();
+	String getCertificateFingerPrint();
 	
 	/**
 	 * Trust state of the certificte.  
-     * @return Supported states, TRUST_STATE_UNTRUSTED, certificate is not be trusted.
-     * TRUST_STATE_UNKNOWN, the trust state of the certificate cannot be determined.
+     * @return Supported states, {@link TrustState#UNTRUSTED}, certificate is not be trusted.
+     * {@link TrustState#UNKNOWN}, the trust state of the certificate cannot be determined.
      * For example, if a certificate is being examined and the owning host cannot be
-     * determined or contacted.  TRUST_STATE_TRUSTED, certificate has past trust
+     * determined or contacted. {@link TrustState#TRUSTED}, certificate has past trust
      * certification process.
-     * @return State information, TRUST_STATE_UNTRUSTED, TRUST_STATE_UNKNOWN, 
-     * TRUST_STATE_TRUSTED.
 	 */
-	public TrustState getTrustState();
+	TrustState getTrustState();
 	
 	/**
 	 * The signing authority is also the subject.
 	 * @return true, if the subjectDN of the certificate equals the issuerDN.
 	 */
-	public boolean isSelfSignedCertificate();
+	boolean isSelfSignedCertificate();
 	
 	/**
 	 * The certificate traces back to active Java trust store.  Usually,
@@ -124,40 +122,40 @@ public interface IDVX509Certificate {
 	 * trust store.  false, the current certificate is not a root in the 
 	 * active trust store.
 	 */
-	public boolean isJavaRootCertificate();
+	boolean isJavaRootCertificate();
 	
 	/**
 	 * Non-critical OIDs.  
 	 * @return Property names of non-critical OIDs.
 	 */
-	public String[] getNonCritOIDProperties();
+	String[] getNonCritOIDProperties();
 	
 	/**
 	 * Non-critical OID values
 	 * @param key Key name of key/value pair.
 	 * @return Property values for non-critical OIDs
 	 */
-	public String getNonCritPropertyValue(String key);
+	String getNonCritPropertyValue(String key);
 	
 	/**
 	 * Test for the presence of non-critical OID key names
 	 * @param key Key name of key/value pair.
 	 * @return true, key exists.  false, key does not exist.
 	 */
-	public boolean isContainsNonCritPropertyKey(String key);
+	boolean isContainsNonCritPropertyKey(String key);
 	
 	/**
 	 * Critical OIDs.  
 	 * @return Property names of non-critical OIDs.
 	 */
-	public String[] getCritOIDProperties();
+	String[] getCritOIDProperties();
 	
 	/**
 	 * Critical OID values
 	 * @param key Key name of key/value pair.
 	 * @return Property values for non-critical OIDs
 	 */
-	public String getCritPropertyValue(String key);
+	String getCritPropertyValue(String key);
 	
 	
 	/**
@@ -165,7 +163,7 @@ public interface IDVX509Certificate {
 	 * @param key Key name of key/value pair.
 	 * @return true, key exists.  false, key does not exist.
 	 */
-	public boolean isContainsCritPropertyKey(String key);
+	boolean isContainsCritPropertyKey(String key);
 	
 	/**
 	 * Certificate chain of trust for the current certificate.
@@ -173,7 +171,7 @@ public interface IDVX509Certificate {
 	 * certificates and root may or may not be trusted.
 	 * @throws DVException Thrown on problems.
 	 */
-	public IDVX509Certificate[] getCertificateChain() throws DVException;
+	IDVX509Certificate[] getCertificateChain() throws DVException;
 	
 	/**
 	 * Representation of a certificate provided as key/value pairs.  Order of
@@ -181,7 +179,7 @@ public interface IDVX509Certificate {
 	 * @return Enumerated key/value pairs representing this certificate
 	 * instance.
 	 */
-	public String toString();
+	String toString();
 	
 	/**
 	 * Test for equality.  Two objects are considered equal if, 1) {@code obj} is an instance of
@@ -190,8 +188,7 @@ public interface IDVX509Certificate {
 	 * @return true, {@code obj} and {@code this} are equal.  false, {@code obj} and
 	 * {@code this} are not equal
 	 * @param obj Object to compare
-	 * @return true, objects are equivalent.  false, objects not equivalent.
 	 */
-	public boolean equals(Object obj);
+	boolean equals(Object obj);
 	
 }
