@@ -1,6 +1,8 @@
 package com.mps.deepviolet.api;
 
 
+import java.util.List;
+
 /**
  * Interface specification for engine features available
  * from an initialized host.
@@ -14,7 +16,7 @@ public interface IDVOnEng {
 	 * @return Ciphersuites supported by target host.
 	 * @throws DVException thrown on problems fetching ciphersuites.
 	 */
-	IDVCipherSuite[] getCipherSuites() throws DVException;
+	List<IDVCipherSuite> getCipherSuites() throws DVException;
 
 	/**
 	 * Return session instance for the target host when IDVOnEng.

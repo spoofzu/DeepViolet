@@ -1,6 +1,7 @@
 package com.mps.deepviolet.api;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -128,7 +129,7 @@ public interface IDVX509Certificate {
 	 * Non-critical OIDs.  
 	 * @return Property names of non-critical OIDs.
 	 */
-	String[] getNonCritOIDProperties();
+	Set<String> getNonCritOIDProperties();
 	
 	/**
 	 * Non-critical OID values
@@ -148,7 +149,7 @@ public interface IDVX509Certificate {
 	 * Critical OIDs.  
 	 * @return Property names of non-critical OIDs.
 	 */
-	String[] getCritOIDProperties();
+	Set<String> getCritOIDProperties();
 	
 	/**
 	 * Critical OID values
@@ -167,11 +168,11 @@ public interface IDVX509Certificate {
 	
 	/**
 	 * Certificate chain of trust for the current certificate.
-	 * @return  Array of certificates chaining back to a root.  Note: the
+	 * @return  List of certificates chaining back to a root.  Note: the
 	 * certificates and root may or may not be trusted.
 	 * @throws DVException Thrown on problems.
 	 */
-	IDVX509Certificate[] getCertificateChain() throws DVException;
+	List<DVX509Certificate> getCertificateChain() throws DVException;
 	
 	/**
 	 * Representation of a certificate provided as key/value pairs.  Order of

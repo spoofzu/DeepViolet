@@ -2,7 +2,6 @@ package com.mps.deepviolet.api;
 
 
 class MutableDVCipherSuite implements IDVCipherSuite {
-
 	private String name;
 	private String eval;
 	private String protocol;

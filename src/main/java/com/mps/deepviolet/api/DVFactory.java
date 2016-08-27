@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -51,8 +52,8 @@ public class DVFactory {
 	 * @return Initialized session instance for this host.
 	 * @throws DVException Thrown on problems initializing host. 
 	 */
-	public static final synchronized IDVSession initializeSession(URL url) throws DVException {
-		ArrayList<IDVHost> list = new ArrayList<IDVHost>();
+	public static synchronized IDVSession initializeSession(URL url) throws DVException {
+		List<IDVHost> list = new ArrayList<IDVHost>();
         MutableDVSession session = null;
 		
         SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
@@ -86,9 +87,9 @@ public class DVFactory {
 	        //String oobinline = Boolean.toString(socket.getOOBInline());
 		    
 		    // Grab enabled protocols as reported by socket
-	        String enabledProtocols = String.join(",", socket.getEnabledProtocols());
+	        String enabledProtocols = String.join(",", (CharSequence[]) socket.getEnabledProtocols());
 		    
-		    session = new MutableDVSession(url, (IDVHost[])list.toArray(new ImmutableDVHost[0]));
+		    session = new MutableDVSession(url, list);
 		    session.setProperty("SO_KEEPALIVE",soKeepalive);
 		    session.setProperty("SO_RCVBUF",soRcvbuf);
 		    session.setProperty("SO_LINGER",soLinger);
@@ -118,14 +119,14 @@ public class DVFactory {
 	 * For example, reading PEM encoded X.509 certificates.
 	 * @return Engine instance for offline functions
 	 */
-	public static final synchronized IDVOffEng getDVOffEng() {
+	public static synchronized IDVOffEng getDVOffEng() {
 		URL localhost = null;
 		try {
 			localhost = new URL("https://localhost/");
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
-		return new DVEng(new  MutableDVSession(localhost, new IDVHost[0]) );
+		return new DVEng(new  MutableDVSession(localhost, new ArrayList<IDVHost>()) );
 	}
 	
 	/**
@@ -135,7 +136,7 @@ public class DVFactory {
 	 * @return Engine instance for offline functions
 	 * @see #initializeSession(URL)
 	 */
-	public static final synchronized IDVOnEng getDVEng( IDVSession session ) {
+	public static synchronized IDVOnEng getDVEng(IDVSession session ) {
 		return new DVEng( session );
 	}
 }

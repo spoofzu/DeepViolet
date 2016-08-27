@@ -1,6 +1,8 @@
 package com.mps.deepviolet.api;
 
 import java.net.URL;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created upon successful initialization of a target host.
@@ -13,7 +15,7 @@ public interface IDVSession {
 	 * All host interfaces
 	 * @return Host interfaces
 	 */
-	IDVHost[] getHostInterfaces();
+	List<IDVHost> getHostInterfaces();
 
 	/**
 	 * Return target property name
@@ -25,9 +27,9 @@ public interface IDVSession {
 	/**
 	 * Return property names.  Specify these in {@link #getPropertyValue(String)}
 	 * to return the property value.
-	 * @return Array of a property names
+	 * @return Set of a property names
 	 */
-	String[] getPropertyNames();
+	Set<String> getPropertyNames();
 	
 	/**
 	 * Return a globally unique identity for this object
