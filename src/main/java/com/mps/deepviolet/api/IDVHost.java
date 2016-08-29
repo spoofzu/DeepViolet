@@ -13,25 +13,25 @@ public interface IDVHost {
 	 * Retrieve name of host
 	 * @return Host name
 	 */
-	public String getHostName();
+	String getHostName();
 	
 	/**
 	 * Retrieve address of a host (e.g., IPv4 or IPv6)
 	 * @return IP address
 	 */
-	public String getHostIPAddress();
+	String getHostIPAddress();
 	
 	/**
 	 * Retrieve cannonical host name
 	 * @return Cannonical host name
 	 */
-	public String getHostCannonicalName();
+	String getHostCannonicalName();
 	
 	/**
 	 * URL used to initial IDVSession in DVFactory
 	 * @return Host url
 	 * @see <a href="DVFactory.html#initializeSession(URL)">DVFactory.initializeSession(URL)</a>
 	 */
-	public URL getURL();
+	URL getURL();
 	
 }
