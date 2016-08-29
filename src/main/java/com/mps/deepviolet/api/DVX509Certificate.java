@@ -2,7 +2,6 @@ package com.mps.deepviolet.api;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -11,7 +10,6 @@ import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Set;
 
 import javax.net.ssl.SSLHandshakeException;
@@ -31,39 +29,35 @@ class DVX509Certificate implements IDVX509Certificate {
 	private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.api.DVX509Certificate");
 	private final String EOL = System.getProperty("line.separator");
 	
-	X509Certificate cert;
-	X509Certificate[] chain;
-	DVX509Certificate[] dvChain;
-	IDVOnEng eng;
+	private X509Certificate cert;
+	private X509Certificate[] chain;
+	private DVX509Certificate[] dvChain;
+	private IDVOnEng eng;
 	
-	String signingAlgorithm;
-	String signingAlgorithmOID;
-	BigInteger certificateSerialNumber;
-	int iCertificateVersion;
-	String notValidBefore;
-	String notValidAfter;
-	ValidState iValidityState;
-	String subjectDN;
-	String issuerDN;
-	TrustState iTrustState;
-	boolean bSelfSignedCertificate;
-	boolean bJavaRootCertificate;
-	String certificateFingerPrint;
-	
-	HashMap<String,String> non_crit_oid_map = new HashMap<String,String>();
-	HashMap<String,String> crit_oid_map = new HashMap<String,String>();
-	
-	DVX509Certificate(){}
+	private String signingAlgorithm;
+	private String signingAlgorithmOID;
+	private BigInteger certificateSerialNumber;
+	private int iCertificateVersion;
+	private String notValidBefore;
+	private String notValidAfter;
+	private ValidState iValidityState;
+	private String subjectDN;
+	private String issuerDN;
+	private TrustState iTrustState;
+	private boolean bSelfSignedCertificate;
+	private boolean bJavaRootCertificate;
+	private String certificateFingerPrint;
+
+	private HashMap<String,String> nonCritOidMap = new HashMap<String,String>();
+	private HashMap<String,String> critOidMap = new HashMap<String,String>();
 	
 	/**
 	 * CTOR
-	 * @param cert X509Certificate to inialize
-	 * @throws DVException Thown on trouble
+	 * @param cert X509Certificate to initialize
+	 * @throws DVException Thrown on trouble
 	 */
 	DVX509Certificate( IDVOnEng eng, X509Certificate cert ) throws DVException {
-		
 		try {
-		
 			this.cert = cert;
 			this.eng = eng;
 			
@@ -96,22 +90,18 @@ class DVX509Certificate implements IDVX509Certificate {
             }
 	
 			// Gather non-critical OIDs
-	    	Set<String> oids = cert.getNonCriticalExtensionOIDs();	
-	    	if( oids == null) {
-				// If no OIDs don't add anything to the map.
-	    	}else{
-	    		assignOIDs(non_crit_oid_map,oids);
-	    	}
-	    	
-	    	// Gather critical OIDs
+	    	Set<String> oids = cert.getNonCriticalExtensionOIDs();
+			if (oids != null) {
+                assignOIDs(nonCritOidMap,oids);
+            }
+
+			// Gather critical OIDs
 	    	oids = cert.getCriticalExtensionOIDs();
-	    	if( oids == null) {
-				// If no OIDs don't add anything to the map.
-	    	} else {
-	    		assignOIDs(crit_oid_map,oids);
-	    	}
-		
-	    	// Self-signed or not.
+			if (oids != null) {
+                assignOIDs(critOidMap,oids);
+            }
+
+			// Self-signed or not.
 	    	bSelfSignedCertificate = CipherSuiteUtil.isSelfSignedCertificate(cert);
 			
 	        // At this point we have printed all certs returned by the server
@@ -125,7 +115,7 @@ class DVX509Certificate implements IDVX509Certificate {
 	    	onlineInitializationOnly();
 	    	
 		} catch( Exception e ) {
-			new DVException(e);
+			throw new DVException(e);
 		}	
 		
 	}
@@ -241,7 +231,7 @@ class DVX509Certificate implements IDVX509Certificate {
 	 * @see com.mps.deepviolet.api.IDVX509Certificate.getNonCritOIDProperties()
 	 */
 	public String[] getNonCritOIDProperties() {
-		Set<String> oids = non_crit_oid_map.keySet();
+		Set<String> oids = nonCritOidMap.keySet();
 		return oids.toArray(new String[0]);
 	}
 	
@@ -249,15 +239,15 @@ class DVX509Certificate implements IDVX509Certificate {
 	 * @see com.mps.deepviolet.api.IDVX509Certificate.getNonCritPropertyValue(String)
 	 */
 	public String getNonCritPropertyValue(String key) {
-		if( key==null || !non_crit_oid_map.containsKey(key) ) return null;
-		return non_crit_oid_map.get(key);
+		if( key==null || !nonCritOidMap.containsKey(key) ) return null;
+		return nonCritOidMap.get(key);
 	}
 	
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IDVX509Certificate.getCritPropertyValue()
 	 */
 	public String[] getCritOIDProperties() {
-		Set<String> oids = crit_oid_map.keySet();
+		Set<String> oids = critOidMap.keySet();
 		return oids.toArray(new String[0]);
 	}
 	
@@ -265,22 +255,22 @@ class DVX509Certificate implements IDVX509Certificate {
 	 * @see com.mps.deepviolet.api.IDVX509Certificate.getCritPropertyValue(String)
 	 */
 	public String getCritPropertyValue(String key) {
-		if( key==null || !crit_oid_map.containsKey(key) ) return null;
-		return crit_oid_map.get(key);
+		if( key==null || !critOidMap.containsKey(key) ) return null;
+		return critOidMap.get(key);
 	}
 	
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IDVX509Certificate.isContainsNonCritPropertyKey()
 	 */
 	public boolean isContainsNonCritPropertyKey(String key) {
-		return non_crit_oid_map.containsKey(key);
+		return nonCritOidMap.containsKey(key);
 	}
 	
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IDVX509Certificate.isContainsCritPropertyKey()
 	 */
 	public boolean isContainsCritPropertyKey(String key) {
-		return crit_oid_map.containsKey(key);
+		return critOidMap.containsKey(key);
 	}
 	
 	/* (non-Javadoc)
@@ -302,51 +292,41 @@ class DVX509Certificate implements IDVX509Certificate {
 	 * @param lmap Map to insert OIDs
 	 * @param OIDs Set of OIDs to assign.
 	 */
-	void assignOIDs(HashMap<String,String> lmap, Set<String> OIDs) {
-
-    	Iterator<String> i2 = OIDs.iterator();
-    	while( i2.hasNext() ) {
-    		
-    		String oid = (String)i2.next();
-    		//TODO unsupported oids should be found in logs and improved over time.
-    		String value = UNSUPPORTED_OID;
-    		
-    		try {
-    			value = CipherSuiteUtil.getExtensionValue(cert,oid);
-    		} catch( IOException e ) {
-    			logger.error("Can't print ASN.1 value", e);
-    		}
-    		lmap.put(CipherSuiteUtil.getOIDKeyName(oid), value);
-    		
-    	}
-		
+	private void assignOIDs(HashMap<String, String> lmap, Set<String> OIDs) {
+		for (String oid : OIDs) {
+			//TODO unsupported oids should be found in logs and improved over time.
+			String value = UNSUPPORTED_OID;
+			try {
+				value = CipherSuiteUtil.getExtensionValue(cert, oid);
+			} catch (IOException e) {
+				logger.error("Can't print ASN.1 value", e);
+			}
+			lmap.put(CipherSuiteUtil.getOIDKeyName(oid), value);
+		}
 	}
 
 	/**
 	 * Assign the certificate chain to this certificate.
 	 * @throws DVException Thrown on problems
 	 */
-	void assignCertificateChain() throws DVException {
-				
+	private void assignCertificateChain() throws DVException {
 			try {
 				chain = CipherSuiteUtil.getServerCertificateChain(eng.getDVSession().getURL());
-		        
 			} catch (SSLHandshakeException e ) {
-				
 				if( e.getMessage().indexOf("PKIX") > 0 ) {
-					String msg = "Certificate chain failed validation. err="+e.getMessage();
-					logger.error(msg,e );
-					throw new DVException(msg,e );
+					String msg = "Certificate chain failed validation. err=" + e.getMessage();
+					logger.error(msg,e);
+					throw new DVException(msg,e);
 				}else{
-					String msg = "SSLHandshakeException. err="+e.getMessage();
-					logger.error(msg,e );
-					throw new DVException(msg,e );
+					String msg = "SSLHandshakeException. err=" + e.getMessage();
+					logger.error(msg,e);
+					throw new DVException(msg,e);
 				}
 					
 			} catch (Exception e) {
-				String msg = "Problem fetching certificates. err="+e.getMessage();
-				logger.error(msg,e );
-				throw new DVException(msg,e );
+				String msg = "Problem fetching certificates. err=" + e.getMessage();
+				logger.error(msg,e);
+				throw new DVException(msg,e);
 			}
 			
 	}
@@ -357,43 +337,38 @@ class DVX509Certificate implements IDVX509Certificate {
 	 * we need a connection to the server.  Here we try to create a host based upon
 	 * some assumptions.  If we could check trust without the signing algorithm in
 	 * checkTrustedCertificate( X509Certificate[] certs, URL url) then all this URL finding
-	 * could be elimated.  Need to look into this more.  All this is only a best effort to
+	 * could be eliminated. Need to look into this more.  All this is only a best effort to
 	 * establish the trust relationship while offline (e.g., --serverurl not specified).
 	 */
-	void assignTrustState() throws DVException {
-		
+    private void assignTrustState() throws DVException {
 		try {
-			
 			//todo should look at a differnt way to do this later
-
 			boolean bTrusted = CipherSuiteUtil.checkTrustedCertificate( chain, eng.getDVSession().getURL() );
 			if( bTrusted ) {
 				iTrustState = TrustState.TRUSTED;
-			}else{
+			} else {
 				iTrustState = TrustState.UNTRUSTED;
 			}
-			
 		} catch( KeyStoreException e ) {
 			iTrustState = TrustState.UNKNOWN;
-			throw new DVException("Problem accessing keystore, err="+e.getMessage(),e);
+			throw new DVException("Problem accessing keystore, err=" + e.getMessage(),e);
 		} catch( NoSuchAlgorithmException e ) {
 			iTrustState = TrustState.UNKNOWN;
-			throw new DVException("No ciphersuite available, err="+e.getMessage(),e);	
+			throw new DVException("No ciphersuite available, err=" + e.getMessage(),e);
 		} catch( UnknownHostException e ) {
 			iTrustState = TrustState.UNKNOWN;
-			throw new DVException("Unknown host, err="+e.getMessage(),e);	
+			throw new DVException("Unknown host, err=" + e.getMessage(),e);
 		} catch( IOException e ) {
-			throw new DVException("File system problem, err="+e.getMessage(),e);	
+			throw new DVException("File system problem, err=" + e.getMessage(),e);
 		}
 	}		
-	
 
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IDVX509Certificate.toString()
 	 */
 	public String toString() {
 		
-		StringBuffer buff = new StringBuffer(2500);
+		StringBuilder buff = new StringBuilder();
 		
 		buff.append(super.toString());
 		buff.append(EOL);
@@ -482,13 +457,12 @@ class DVX509Certificate implements IDVX509Certificate {
 		
 		// Non-crit-OIDs
 		buff.append("CRIT_OIDS[");
-		Set<String> oids = crit_oid_map.keySet();
-		Iterator<String> i = oids.iterator();
 		boolean fi = true;
-		while( i.hasNext() ) {
-			String key = i.next();
-			String value = crit_oid_map.get(key);
-			if(!fi) buff.append(", ");
+		for (String key : critOidMap.keySet()) {
+			String value = critOidMap.get(key);
+			if(!fi) {
+			    buff.append(", ");
+            }
 			buff.append(key);
 			buff.append('=');
 			buff.append(value);
@@ -499,12 +473,9 @@ class DVX509Certificate implements IDVX509Certificate {
 		
 		// Non-crit-OIDs
 		buff.append("NON_CRIT_OIDS[");
-		oids = non_crit_oid_map.keySet();
-		i = oids.iterator();
 		fi = true;
-		while( i.hasNext() ) {
-			String key = i.next();
-			String value = non_crit_oid_map.get(key);
+		for (String key : nonCritOidMap.keySet()) {
+			String value = nonCritOidMap.get(key);
 			if(!fi) buff.append(", ");
 			buff.append(key);
 			buff.append('=');
@@ -557,24 +528,22 @@ class DVX509Certificate implements IDVX509Certificate {
 				o12 = certificateFingerPrint.equals(c.getCertificateFingerPrint());
 				
 				o13 = true;
-				Iterator<String> keys = non_crit_oid_map.keySet().iterator();
-				while( keys.hasNext() ) {
-					String key = keys.next();
+				for(String key : nonCritOidMap.keySet()) {
 					if( c.isContainsNonCritPropertyKey(key) ) {
-						o13=false; break;
+						o13 = false;
+                        break;
 					}
 				}
 				
 				o14 = true;
-				keys = crit_oid_map.keySet().iterator();
-				while( keys.hasNext() ) {
-					String key = keys.next();
-					if( c.isContainsCritPropertyKey(key) ) {
-						o14=false; break;
-					}
-				}
+				for(String key : critOidMap.keySet()) {
+                    if (c.isContainsCritPropertyKey(key)) {
+                        o14 = false;
+                        break;
+                    }
+                }
 				
-				o15 = certificateSerialNumber == c.getCertificateSerialNumber();
+				o15 = certificateSerialNumber.equals(c.getCertificateSerialNumber());
 				
 			}
 		}

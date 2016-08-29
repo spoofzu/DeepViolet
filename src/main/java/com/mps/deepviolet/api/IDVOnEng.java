@@ -14,7 +14,7 @@ public interface IDVOnEng {
 	 * @return Ciphersuites supported by target host.
 	 * @throws DVException thrown on problems fetching ciphersuites.
 	 */
-	public IDVCipherSuite[] getCipherSuites() throws DVException;
+	IDVCipherSuite[] getCipherSuites() throws DVException;
 
 	/**
 	 * Return session instance for the target host when IDVOnEng.
@@ -22,7 +22,7 @@ public interface IDVOnEng {
 	 * @return Session instance for target host.
 	 * @see <a href="DVFactory.html#initializeSession(URL)">DVFactory.initializeSession(URL)</a>
 	 */
-	public IDVSession getDVSession();
+	IDVSession getDVSession();
 	
 	/**
      * Return online print engine instance for target.
@@ -31,7 +31,7 @@ public interface IDVOnEng {
 	 * @see <a href="DVFactory.html#initializeSession(URL)">DVFactory.initializeSession(URL)</a>
 	 * @throws DVException Thrown on problems
 	 */
-	public IDVOnPrint getDVOnPrint() throws DVException;
+	IDVOnPrint getDVOnPrint() throws DVException;
 	
 	/**
      * Return online print engine instance for target
@@ -41,7 +41,7 @@ public interface IDVOnEng {
 	 * @see <a href="DVFactory.html#initializeSession(URL)">DVFactory.initializeSession(URL)</a>
 	 * @throws DVException Thrown on problems
 	 */
-	public IDVOnPrint getDVOnPrint( StringBuffer con) throws DVException;
+	IDVOnPrint getDVOnPrint(StringBuffer con) throws DVException;
 
 	/**
 	 * Write PEM encoded X.509 certificate for the target
@@ -51,7 +51,7 @@ public interface IDVOnEng {
 	 * @return Returns the number of bytes written to disk
 	 * @throws DVException Thrown on problems writing to the disk.
 	 */
-	public long writeCertificate(String file) throws DVException;
+	long writeCertificate(String file) throws DVException;
 	
 	/**
 	 * Retrieve a IDVX509Certificate.
@@ -59,7 +59,7 @@ public interface IDVOnEng {
 	 * with IDVOnEng instance.
 	 * @throws DVException Thrown on problems reading certificate.
 	 */
-	public IDVX509Certificate getCertificate() throws DVException;
+	IDVX509Certificate getCertificate() throws DVException;
 	
 	//todo xxxx
 	//public Iterator<IDVX509Certificate> getCertificateChain() throws DVException;

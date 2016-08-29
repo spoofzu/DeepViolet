@@ -12,47 +12,47 @@ public interface IDVOnPrint {
 	/**
 	 * Print start of scan report.
 	 */
-	public void printReportHeader();
+	void printReportHeader();
 
 	/**
 	 * Print a list of HTTPS response heads for the given URL
 	 */
-	public void printHostHttpResponseHeaders();
+	void printHostHttpResponseHeaders();
 
 	/**
 	 * Print various information about host system under assessment.
 	 */
-	public void printHostInformation();
+	void printHostInformation();
 
 	/**
 	 * Print section for the supported ciphersuites.
 	 */
-	public void printSupportedCipherSuites();
+	void printSupportedCipherSuites();
 
 	/**
 	 * Print section for the connection characteristics.
 	 */
-	public void printConnectionCharacteristics();
+	void printConnectionCharacteristics();
 
 	/**
 	 * Print security for the server certificate. 
 	 */
-	public void printServerCertificate();
+	void printServerCertificate();
 
 	/**
 	 * Print security for the server certificate chain.
 	 */
-	public void printServerCertificateChain();
+	void printServerCertificateChain();
 	
 	/**
 	 * OS dependent End of Line character.
 	 * @return EOL
 	 */
-	public String getEOL();
+	String getEOL();
 	
 	/**
 	 * Print a single line to the console buffer.
 	 * @param text Text to print.
 	 */
-	public void println( String text );
+	void println(String text);
 }
