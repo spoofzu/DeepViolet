@@ -6,6 +6,8 @@
 <p/>
 <b>OWASP project landing page</b>, [OWASP DeepViolet TLS/SSL Scanner](https://www.owasp.org/index.php/OWASP_DeepViolet_TLS/SSL_Scanner)
 <p/>
+<b>API JavaDocs</b>, [documentation](https://spoofzu.github.io/DeepViolet/)
+<p/>
 DeepViolet is a Java tool for introspection of TLS/SSL sessions.  DeepViolet can be run from the **command line**, **GUI desktop application**, or you can include the **DeepViolet API** within your own Java projects.  Original blog article post describing this project, http://www.securitycurmudgeon.com/2014/07/ssltls-introspection.html<br/>
 <p/>
 <b>BENEFITS</b>
