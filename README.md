@@ -8,7 +8,7 @@
 <p/>
 <b>API JavaDocs</b>, [documentation](https://spoofzu.github.io/DeepViolet/)
 <p/>
-DeepViolet is a Java tool for introspection of TLS/SSL sessions.  DeepViolet can be run from the **command line**, **GUI desktop application**, or you can include the **DeepViolet API** within your own Java projects.  Original blog article post describing this project, http://www.securitycurmudgeon.com/2014/07/ssltls-introspection.html<br/>
+DeepViolet is a TLS/SSL scanning API written in Java. To keep DeepViolet easy to use, identify bugs, reference implementations have been developed that consume the API. If you want to see what DeepViolet can do, use it from the command line in your scripts or use the graphical tool from the comfort of your desktop. Both tools can be used to scan HTTPS web servers to check server certificate trust chains, revocation status, check certificates for pending expiration, weak signing algorithms and much more.  Original blog article post describing this project, http://www.securitycurmudgeon.com/2014/07/ssltls-introspection.html<br/>
 <p/>
 <b>BENEFITS</b>
 This tool helps you understand state of X.509 certificates run on servers.  Some ideas you may find useful.
