@@ -32,4 +32,4 @@ This tool impliments ideas, code, and takes inspriation from other projects and 
 
 Looking for more information?  See the [project wiki](https://github.com/spoofzu/DeepViolet/wiki) 
 
-<i>This project leverages the works of other open source community projects and is provided for educational purposes.  Use at your own risk.  See LICENSE for further information.</i>
+<i>This project leverages the works of other open source community projects and is provided for educational purposes.  Use at your own risk.  See [LICENSE](https://github.com/spoofzu/DeepViolet/blob/master/LICENSE) for further information.</i>
