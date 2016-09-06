@@ -172,7 +172,7 @@ public interface IDVX509Certificate {
 	 * certificates and root may or may not be trusted.
 	 * @throws DVException Thrown on problems.
 	 */
-	List<DVX509Certificate> getCertificateChain() throws DVException;
+	List<IDVX509Certificate> getCertificateChain() throws DVException;
 	
 	/**
 	 * Representation of a certificate provided as key/value pairs.  Order of

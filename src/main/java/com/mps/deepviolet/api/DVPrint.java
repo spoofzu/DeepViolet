@@ -296,9 +296,9 @@ class DVPrint implements IDVOnPrint, IDVOffPrint {
 		println( "[Server certificate chain]" );
 		StringBuilder buff = new StringBuilder();
 		println("Chain Summary, end-entity --> root" );
-		List<DVX509Certificate> certs;
+		List<IDVX509Certificate> certs;
 		try {
-			certs = dvCert.getCertificateChain();			
+			certs = dvCert.getCertificateChain();
 			boolean firstcert = true; 
 			int n = 0;
 			IDVX509Certificate lastCert = null;

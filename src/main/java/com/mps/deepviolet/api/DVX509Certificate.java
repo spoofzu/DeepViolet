@@ -32,7 +32,7 @@ class DVX509Certificate implements IDVX509Certificate {
 	
 	private X509Certificate cert;
 	private X509Certificate[] chain;
-	private List<DVX509Certificate> dvChain;
+	private List<IDVX509Certificate> dvChain;
 	private IDVOnEng eng;
 	
 	private String signingAlgorithm;
@@ -275,11 +275,11 @@ class DVX509Certificate implements IDVX509Certificate {
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IDVX509Certificate.getCertificateChain()
 	 */
-	public synchronized List<DVX509Certificate> getCertificateChain() throws DVException {
+	public synchronized List<IDVX509Certificate> getCertificateChain() throws DVException {
 		if( dvChain != null ) {
 			return dvChain;
 		}
-		List<DVX509Certificate> list = new ArrayList<DVX509Certificate>();
+		List<IDVX509Certificate> list = new ArrayList<IDVX509Certificate>();
 		for (X509Certificate lcert : chain ) {
 			list.add(new DVX509Certificate(eng, lcert));
 		}
