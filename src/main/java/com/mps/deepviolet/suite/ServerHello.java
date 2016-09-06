@@ -8,18 +8,15 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 public class ServerHello {
-
-	int recordVersion;
+	private int recordVersion;
 	int protoVersion;
-	long serverTime;
+	private long serverTime;
 	int cipherSuite;
 	int compression;
 	String serverCertName;
 	String serverCertHash;
 	
-	ServerHello(InputStream in)
-		throws IOException
-	{
+	ServerHello(InputStream in)	throws IOException	{
 		InputRecord rec = new InputRecord(in);
 		rec.setExpectedType(CipherSuiteUtil.HANDSHAKE);
 
@@ -106,8 +103,7 @@ public class ServerHello {
 		}
 	}
 
-	private void processCertificate(byte[] buf)
-	{
+	private void processCertificate(byte[] buf)	{
 		if (buf.length <= 6) {
 			return;
 		}
@@ -130,14 +126,6 @@ public class ServerHello {
 			serverCertName =
 				xc.getSubjectX500Principal().toString();
 			serverCertHash = CipherSuiteUtil.doSHA1(ec);
-		} catch (CertificateException e) {
-			// ignored
-			return;
-		}
+		} catch (CertificateException ignored) {}
 	}
-	
-	
-
-
-		
 }

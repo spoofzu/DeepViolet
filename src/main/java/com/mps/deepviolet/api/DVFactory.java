@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -51,55 +52,55 @@ public class DVFactory {
 	 * @return Initialized session instance for this host.
 	 * @throws DVException Thrown on problems initializing host. 
 	 */
-	public static final synchronized IDVSession initializeSession(URL url) throws DVException {
-		ArrayList<IDVHost> list = new ArrayList<IDVHost>();
-        MutableDVSession session = null;
+	public static synchronized IDVSession initializeSession(URL url) throws DVException {
+		List<IDVHost> list = new ArrayList<IDVHost>();
+		MutableDVSession session = null;
 		
-        SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-        SSLSocket socket = null;
-      
+		SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+		SSLSocket socket = null;
+
 		try {
 			socket = (SSLSocket)factory.createSocket(url.getHost(), url.getDefaultPort());
-	        
-	        // Add interfaces
-			InetAddress[] addresses = InetAddress.getAllByName(url.getHost());
-		    for (InetAddress address : addresses ) {
-		    	String host = address.getHostName();
-		        String ip = address.getHostAddress();
-		        String canonical = address.getCanonicalHostName();
-		        ImmutableDVHost dvhost = new ImmutableDVHost(host, ip, canonical, url);
-		        list.add( dvhost );
-	        }
 
-	        // TODO: Fix types, e.g. int for size of receive buffer
+			// Add interfaces
+			InetAddress[] addresses = InetAddress.getAllByName(url.getHost());
+			for (InetAddress address : addresses ) {
+				String host = address.getHostName();
+				String ip = address.getHostAddress();
+				String canonical = address.getCanonicalHostName();
+				ImmutableDVHost dvhost = new ImmutableDVHost(host, ip, canonical, url);
+				list.add( dvhost );
+			}
+
+			// TODO: Fix types, e.g. int for size of receive buffer
 			String soKeepalive = Boolean.toString( socket.getKeepAlive() );
-	        String soRcvbuf = Integer.toString( socket.getReceiveBufferSize() );
-	        String soLinger = Integer.toString( socket.getSoLinger() );
-	        String soTimeout = Integer.toString( socket.getSoTimeout() );
-	        String trafficClass = Integer.toString( socket.getTrafficClass() );
-	        String clientAuthReq = Boolean.toString( socket.getNeedClientAuth() );
-	        String clientAuthWant = Boolean.toString( socket.getWantClientAuth() );
-	        String tcpNodelay = Boolean.toString( socket.getTcpNoDelay() );
-		    String soReuseaddr = Boolean.toString(socket.getReuseAddress());
-		    String soSendbuff = Integer.toString( socket.getSendBufferSize() );
-		    //TODO OOBINLINE causes socket to error, leave for now
-	        //String oobinline = Boolean.toString(socket.getOOBInline());
-		    
-		    // Grab enabled protocols as reported by socket
-	        String enabledProtocols = String.join(",", socket.getEnabledProtocols());
-		    
-		    session = new MutableDVSession(url, (IDVHost[])list.toArray(new ImmutableDVHost[0]));
-		    session.setProperty("SO_KEEPALIVE",soKeepalive);
-		    session.setProperty("SO_RCVBUF",soRcvbuf);
-		    session.setProperty("SO_LINGER",soLinger);
-		    session.setProperty("SO_TIMEOUT",soTimeout);
-		    session.setProperty("SO_REUSEADDR",soReuseaddr);
-		    session.setProperty("SO_SENDBUFF",soSendbuff);
-		    session.setProperty("CLIENT_AUTH_REQ",clientAuthReq);
-		    session.setProperty("CLIENT_AUTH_WANT",clientAuthWant);
-		    session.setProperty("TRAFFIC_CLASS",trafficClass);
-		    session.setProperty("TCP_NODELAY",tcpNodelay);
-		    session.setProperty("ENABLED_PROTOCOLS",enabledProtocols);
+			String soRcvbuf = Integer.toString( socket.getReceiveBufferSize() );
+			String soLinger = Integer.toString( socket.getSoLinger() );
+			String soTimeout = Integer.toString( socket.getSoTimeout() );
+			String trafficClass = Integer.toString( socket.getTrafficClass() );
+			String clientAuthReq = Boolean.toString( socket.getNeedClientAuth() );
+			String clientAuthWant = Boolean.toString( socket.getWantClientAuth() );
+			String tcpNodelay = Boolean.toString( socket.getTcpNoDelay() );
+			String soReuseaddr = Boolean.toString(socket.getReuseAddress());
+			String soSendbuff = Integer.toString( socket.getSendBufferSize() );
+			//TODO OOBINLINE causes socket to error, leave for now
+			//String oobinline = Boolean.toString(socket.getOOBInline());
+
+			// Grab enabled protocols as reported by socket
+			String enabledProtocols = String.join(",", (CharSequence[]) socket.getEnabledProtocols());
+
+			session = new MutableDVSession(url, list);
+			session.setProperty("SO_KEEPALIVE",soKeepalive);
+			session.setProperty("SO_RCVBUF",soRcvbuf);
+			session.setProperty("SO_LINGER",soLinger);
+			session.setProperty("SO_TIMEOUT",soTimeout);
+			session.setProperty("SO_REUSEADDR",soReuseaddr);
+			session.setProperty("SO_SENDBUFF",soSendbuff);
+			session.setProperty("CLIENT_AUTH_REQ",clientAuthReq);
+			session.setProperty("CLIENT_AUTH_WANT",clientAuthWant);
+			session.setProperty("TRAFFIC_CLASS",trafficClass);
+			session.setProperty("TCP_NODELAY",tcpNodelay);
+			session.setProperty("ENABLED_PROTOCOLS",enabledProtocols);
 		} catch ( Exception e ) {
 			throw new DVException(e);
 		} finally {
@@ -118,14 +119,14 @@ public class DVFactory {
 	 * For example, reading PEM encoded X.509 certificates.
 	 * @return Engine instance for offline functions
 	 */
-	public static final synchronized IDVOffEng getDVOffEng() {
+	public static synchronized IDVOffEng getDVOffEng() {
 		URL localhost = null;
 		try {
 			localhost = new URL("https://localhost/");
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
-		return new DVEng(new  MutableDVSession(localhost, new IDVHost[0]) );
+		return new DVEng(new  MutableDVSession(localhost, new ArrayList<IDVHost>()) );
 	}
 	
 	/**
@@ -135,7 +136,7 @@ public class DVFactory {
 	 * @return Engine instance for offline functions
 	 * @see #initializeSession(URL)
 	 */
-	public static final synchronized IDVOnEng getDVEng( IDVSession session ) {
+	public static synchronized IDVOnEng getDVEng(IDVSession session ) {
 		return new DVEng( session );
 	}
 }

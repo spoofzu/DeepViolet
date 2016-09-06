@@ -7,12 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateNotYetValidException;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -41,11 +36,11 @@ class DVPrint implements IDVOnPrint, IDVOffPrint {
 	protected static HashMap<String,DVPrint> dvHostMap = new HashMap<String,DVPrint>();
 	
 	protected StringBuffer con;
-	protected IDVHost[] dvHosts;
+	private List<IDVHost> dvHosts;
 	protected IDVSession session;
 	protected IDVOnEng eng;
-	protected IDVOffEng oeng;
-	protected IDVX509Certificate dvCert;
+	IDVOffEng oeng;
+	private IDVX509Certificate dvCert;
 	
 	protected DVPrint() {
 		
@@ -97,29 +92,18 @@ class DVPrint implements IDVOnPrint, IDVOffPrint {
 		println("[HTTP(S) response headers]");
 		
 		try {
-			
 			Map<String, List<String>> headers = CipherSuiteUtil.getHttpResponseHeaders(session.getURL());
-			
 			for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-				
-				String key = (String)entry.getKey();
-				
+				String key = entry.getKey();
 				List<String> vlist = entry.getValue();
-				
 				for ( String value: vlist ) {
-					
 					key = (key == null ) ? "<null>" : key;
 					key = (key.length() > 5000) ? key.substring(0,5000)+"[truncated by DeepViolet sz="+key.length()+"]" : key;
-	
 					value = (value == null ) ? "<null>" : value;
-					value = (value.length() > 5000) ? value.substring(0,5000)+"[truncated by DeepViolet sz="+key.length()+"]" : value;	
-					
-			      	println( key+" : "+value );
-					
+					value = (value.length() > 5000) ? value.substring(0,5000)+"[truncated by DeepViolet sz="+key.length()+"]" : value;
+					println( key+" : "+value );
 				}
-				
 			}
-        	
 		} catch (SSLHandshakeException e ) {
 			
 			if( e.getMessage().indexOf("PKIX") > 0 ) {
@@ -131,45 +115,30 @@ class DVPrint implements IDVOnPrint, IDVOffPrint {
 				println("");
 				logger.error("SSLHandshakeException. err="+e.getMessage(),e );
 			}
-        	
 		} catch (Exception e) {
-		
-        	println("Error printing HTTP headers. err="+e.getMessage() );
+			println("Error printing HTTP headers. err="+e.getMessage() );
 			println("");
-        	logger.error("Error printing HTTP headers. err="+e.getMessage(),e);
-		
+			logger.error("Error printing HTTP headers. err="+e.getMessage(),e);
 		}
-		
-		
 	}
 	
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IDVPrint#printHostInformation()
 	 */
 	public void printHostInformation() {
-		
 		println("");
 		println("[Host information]");
-		
-        try {
-        	
-    		IDVHost[] hosts = this.dvHosts;
-    		
-    		for( IDVHost host : hosts ) {
-    			
-            	StringBuffer buff = new StringBuffer();
-            	buff.append( "host="+host.getHostName()+" ["+host.getHostIPAddress()+"], ");
-            	buff.append("canonical="+host.getHostCannonicalName());
-            	println( buff.toString());
-    			
-    		}
-	        
+		try {
+			List<IDVHost> hosts = this.dvHosts;
+			for( IDVHost host : hosts ) {
+				println(("host=" + host.getHostName() + " [" + host.getHostIPAddress() + "], ") +
+						"canonical=" + host.getHostCannonicalName());
+			}
 		} catch (Exception e) {
-        	println("Can't fetch host. err="+e.getMessage() );
+			println("Can't fetch host. err="+e.getMessage() );
 			println("");
-        	logger.error("Can't fetch host. err="+e.getMessage(),e);
+			logger.error("Can't fetch host. err="+e.getMessage(),e);
 		}
-	
 	}
 	
 //	// TODO: NOT USED AT THE MOMENT
@@ -203,76 +172,53 @@ class DVPrint implements IDVOnPrint, IDVOffPrint {
 	 * @see com.mps.deepviolet.api.IDVPrint#printSupportedCipherSuites()
 	 */
 	public void printSupportedCipherSuites() {
-		
 		println("");
 		println("[Host supported server cipher suites]");
-		
-		
 		try {
-		
-			IDVHost[] hosts = this.dvHosts;
+			List<IDVHost> hosts = this.dvHosts;
 			
 			if( hosts != null ) {
-				
-				IDVCipherSuite[] ciphers = eng.getCipherSuites();
+				List<IDVCipherSuite> ciphers = eng.getCipherSuites();
 				HashMap<String, String> tmap = new HashMap<String, String>();
-		
 				for( IDVCipherSuite cipher : ciphers ) {
-					
-					if( tmap.containsKey(cipher.getIANAName()) ) {
-						// If the cipher belongs to another handshake
-						// protcol then skip.  Only want uniquely named 
-						// ciphersuites.
-					}else{
-						StringBuffer buff = new StringBuffer();
-						buff.append( cipher.getIANAName() );
-						buff.append( " (" ); 
-						buff.append( cipher.getStrengthEvaluation() );
-						buff.append( ',' );
-						buff.append( cipher.getHandshakeProtocol() );
-						buff.append( ')');
-						println( buff.toString() );
+					//noinspection StatementWithEmptyBody
+					if (!tmap.containsKey(cipher.getIANAName())) {
+						println(cipher.getIANAName() + " (" + cipher.getStrengthEvaluation() + ',' +
+								cipher.getHandshakeProtocol() + ')');
 						tmap.put(cipher.getIANAName(), cipher.getStrengthEvaluation());
+					} else {
+						// If the cipher belongs to another handshake
+						// protcol then skip.  Only want uniquely named
+						// ciphersuites.
 					}
-					
 				}
-			
 			} else {
-				
 				println( "Problem fetching host ciphersuites.  See log for details." );
-	        	logger.error("Problem processing server ciphers. err=hosts null");
-				
+				logger.error("Problem processing server ciphers. err=hosts null");
 			}
-		
 		} catch (Exception e) {
-        	println("Problem processing server ciphers. err="+e.getMessage() );
+			println("Problem processing server ciphers. err="+e.getMessage() );
 			println("");
-        	logger.error("Problem processing server ciphers. err="+e.getMessage(),e);
+			logger.error("Problem processing server ciphers. err="+e.getMessage(),e);
 		}
-
-			
 	}
 	
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IDVPrint#printConnectionCharacteristics()
 	 */
 	public void printConnectionCharacteristics() {
-		
 		println( "" );
 		println( "[Connection characteristics]" );
+		List<IDVHost> dvhosts = this.dvHosts;
 		
-		IDVHost[] dvhosts = this.dvHosts;
-		
-		if( dvhosts.length < 1 ) {
-        	println("No host data returned. err=dvhost is null");
-        	return;
+		if( dvhosts.isEmpty() ) {
+			println("No host data returned. err=dvhost is null");
+			return;
 		}
 		
-		String[] connection_properties = session.getPropertyNames();
+		Set<String> connection_properties = session.getPropertyNames();
 		for( String key : connection_properties ) {
-			
-        	println( key+"="+session.getPropertyValue(key) );
-        	
+			println( key+"="+session.getPropertyValue(key) );
 		}
 			
 	}
@@ -281,22 +227,17 @@ class DVPrint implements IDVOnPrint, IDVOffPrint {
 	 * @see com.mps.deepviolet.api.IDVPrint#printCertificate(java.lang.String)
 	 */
 	public void printCertificate( String file ) {
-		
 		  try {
 			  File f = new File(file);
-		      FileInputStream fs = new FileInputStream(f);
-		      
-		      CertificateFactory cf = CertificateFactory.getInstance("X.509");
-		      Collection c = cf.generateCertificates(fs);
-		      Iterator i = c.iterator();
-		      
-		      while (i.hasNext()) {
-		    	 X509Certificate lcert = (X509Certificate)i.next();
-		    	 DVX509OffCertificate ldvCert = new DVX509OffCertificate(eng,lcert);
-		    	 printTrustState( ldvCert );
-		    	 printX509Certificate(ldvCert);
-		      }
-		      
+			  FileInputStream fs = new FileInputStream(f);
+
+			  CertificateFactory cf = CertificateFactory.getInstance("X.509");
+
+			  for(Certificate lcert : cf.generateCertificates(fs)) {
+				 DVX509OffCertificate ldvCert = new DVX509OffCertificate(eng, (X509Certificate)lcert);
+				 printTrustState( ldvCert );
+				 printX509Certificate(ldvCert);
+			  }
 		  } catch( DVException e ) {
 				println("Read certificate failed. reason="+e.getMessage()+" file="+file );
 				println(""); 
@@ -315,7 +256,6 @@ class DVPrint implements IDVOnPrint, IDVOffPrint {
 	 * @see com.mps.deepviolet.api.IDVPrint#printTrustState()
 	 */
 	private void printTrustState( IDVX509Certificate ldvCert) {
-		
 		String trust_state = "<ERROR>";
 		if( ldvCert.getTrustState() == IDVX509Certificate.TrustState.TRUSTED ) {
 			trust_state="TRUSTED";
@@ -324,10 +264,9 @@ class DVPrint implements IDVOnPrint, IDVOffPrint {
 		}else if(ldvCert.getTrustState() == IDVX509Certificate.TrustState.UNTRUSTED ) {
 			trust_state="UNTRUSTED";					
 		}
-		
-		StringBuffer buff = new StringBuffer();
+		StringBuilder buff = new StringBuilder();
 		buff.append("Trusted State=");
-		boolean trusted = trust_state.equals(IDVX509Certificate.TrustState.TRUSTED);
+		boolean trusted = trust_state.equals("TRUSTED");
 		
 		if( trusted ) {
 			buff.append("trusted");
@@ -337,8 +276,6 @@ class DVPrint implements IDVOnPrint, IDVOffPrint {
 			buff.append("<<<");
 		}
 		println(buff.toString());
-	
-		
 	}
 	
 
@@ -346,126 +283,93 @@ class DVPrint implements IDVOnPrint, IDVOffPrint {
 	 * @see com.mps.deepviolet.api.IDVPrint#printServerCertificate()
 	 */
 	public void printServerCertificate() {
-		
 		println( "" );
 		println( "[Server certificate information]" );
-		
-	    printTrustState( dvCert );
-		
-    	printX509Certificate( dvCert );
-	   
-	        
+		printTrustState( dvCert );
+		printX509Certificate( dvCert );
 	}
 	
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IDVPrint#printServerCertificateChain()
 	 */
 	public void printServerCertificateChain() {
-		
 		println( "[Server certificate chain]" );
-		
-		StringBuffer buff = new StringBuffer();
-		
+		StringBuilder buff = new StringBuilder();
 		println("Chain Summary, end-entity --> root" );
-		
-        IDVX509Certificate[] certs;
-        
+		List<IDVX509Certificate> certs;
 		try {
-			certs = dvCert.getCertificateChain();			
+			certs = dvCert.getCertificateChain();
 			boolean firstcert = true; 
-			int n=0;
-			IDVX509Certificate last_cert = null;
-			
+			int n = 0;
+			IDVX509Certificate lastCert = null;
 			for( IDVX509Certificate ldvCert: certs ) {
-
-	        	
 				if( ldvCert.isSelfSignedCertificate() ) {
 					break;
 				}
-	        	
 				println(buff.toString()+"|" ); 
 				println(buff.toString()+"|" );
-				
-				StringBuffer attributes = new StringBuffer();
-				
-				attributes.append("NODE"+n+"(");
-				
+				StringBuilder attributes = new StringBuilder();
+				attributes.append("NODE").append(n).append("(");
 				if( firstcert ) {
 					attributes.append("End-Entity ");
 				} else {
 					attributes.append("Intermediate CA ");
 				}
-				
 				attributes.append(")--->");
-				attributes.append("SubjectDN="+ldvCert.getSubjectDN()+" IssuerDN="+ldvCert.getIssuerDN());			
-	  		    attributes.append(", "+ldvCert.getSigningAlgorithm()+"(Fingerprint)="+ldvCert.getCertificateFingerPrint());
-
+				attributes.append("SubjectDN=").append(ldvCert.getSubjectDN()).append(" IssuerDN=").append(ldvCert.getIssuerDN());
+				attributes.append(", ").append(ldvCert.getSigningAlgorithm()).append("(Fingerprint)=").append(ldvCert.getCertificateFingerPrint());
 				println(buff.toString()+attributes.toString() );
-				
 				firstcert = false;
 				buff.append("   ");
 				n++;
-				last_cert = ldvCert;
-	
-	        }
-	        
+				lastCert = ldvCert;
+			}
 			println(buff.toString()+"|" ); 
 			println(buff.toString()+"|" );
-			buff.append( "NODE"+n+"(");
-	                 		
-			if( last_cert.isJavaRootCertificate() ) {
-				buff.append("Java Root CA ");
-			} else {
-				buff.append("Self-Signed CA ");	
+			buff.append("NODE").append(n).append("(");
+			if (lastCert != null) {
+				if( lastCert.isJavaRootCertificate() ) {
+					buff.append("Java Root CA ");
+				} else {
+					buff.append("Self-Signed CA ");
+				}
+				buff.append(")--->");
+				buff.append("SubjectDN=").append(lastCert.getSubjectDN());
+				buff.append(", ").append(lastCert.getSigningAlgorithm()).append("(Fingerprint)=").append(lastCert.getCertificateFingerPrint());
 			}
-			
-			buff.append(")--->");
-			buff.append("SubjectDN="+last_cert.getSubjectDN());
-			
 
-			buff.append(", "+last_cert.getSigningAlgorithm()+"(Fingerprint)="+last_cert.getCertificateFingerPrint());
-			
 			println(buff.toString() );
-
-	        buff = new StringBuffer();
-
 			println("" ); 
 			println( "[Chain details]" );
-	        
-			int n1=0;
+			int n1 = 0;
 			for( IDVX509Certificate ldvCert: certs ) {
 				println("[NODE"+n1+"] ");
 				printX509Certificate(ldvCert);
 				n1++;
 			}
-				
 		} catch (Exception e) {
 			println("Problem fetching certificates. err="+e.getMessage() );
 			println("");
 			logger.error("Problem fetching certificates. err="+e.getMessage(),e );
 		}
-		
-	
 	}
 	
 	/**
 	 * Print a IDVX509Certificate instance.
 	 * @param ldvCert Host certificate to print
 	 */
-	private final void printX509Certificate( IDVX509Certificate ldvCert ) {
-
+	private void printX509Certificate( IDVX509Certificate ldvCert ) {
 		logger.trace(ldvCert.toString());
+		String notBefore = ldvCert.getNotValidBefore();
+		String notAfter = ldvCert.getNotValidAfter();
+		IDVX509Certificate.ValidState validityState = ldvCert.getValidityState();
 		
-		String not_before = ldvCert.getNotValidBefore();
-		String not_after = ldvCert.getNotValidAfter();
-		IDVX509Certificate.ValidState validity_state = ldvCert.getValidityState();
-		
-		if (validity_state == IDVX509Certificate.ValidState.VALID){
-			println( "Validity Check=VALID, certificate valid between "+not_before+" and "+not_after );
-		} else if(validity_state == IDVX509Certificate.ValidState.NOT_YET_VALID){
-			println( "Validity Check=>>>NOT YET VALID<<<, certificate valid between "+not_before+" and "+not_after );
-		} else if(validity_state == IDVX509Certificate.ValidState.EXPIRED){
-			println( "Validity Check=>>>EXPIRED<<<, certificate valid between "+not_before+" and "+not_after );
+		if (validityState == IDVX509Certificate.ValidState.VALID){
+			println( "Validity Check=VALID, certificate valid between "+notBefore+" and "+notAfter );
+		} else if(validityState == IDVX509Certificate.ValidState.NOT_YET_VALID){
+			println( "Validity Check=>>>NOT YET VALID<<<, certificate valid between "+notBefore+" and "+notAfter );
+		} else if(validityState == IDVX509Certificate.ValidState.EXPIRED){
+			println( "Validity Check=>>>EXPIRED<<<, certificate valid between "+notBefore+" and "+notAfter );
 		} 
 		
 		String subject_dn = ldvCert.getSubjectDN();
@@ -475,54 +379,47 @@ class DVPrint implements IDVOnPrint, IDVOffPrint {
 		String signature_algo_oid = ldvCert.getSigningAlgorithmOID();
 		String certificate_ver = Integer.toString(ldvCert.getCertificateVersion());
 		println( "SubjectDN="+subject_dn );
-    	println( "IssuerDN="+issuer_dn );
-    	println( "Serial Number="+serial_number );     	
-    	println( "Signature Algorithm="+signature_algo);
-    	println( "Signature Algorithm OID="+signature_algo_oid );
-    	println( "Certificate Version ="+certificate_ver );
+		println( "IssuerDN="+issuer_dn );
+		println( "Serial Number="+serial_number );
+		println( "Signature Algorithm="+signature_algo);
+		println( "Signature Algorithm OID="+signature_algo_oid );
+		println( "Certificate Version ="+certificate_ver );
 		
 		String digest_algo = signature_algo.substring(0,signature_algo.indexOf("with"));
 		String fingerprint = ldvCert.getCertificateFingerPrint();
 		println(digest_algo+"(Fingerprint)="+fingerprint);
 			
-    	println( "Non-critical OIDs" );
-    	printNonCritOIDs( ldvCert);
-        	
-    	println( "Critical OIDs" );
-    	printCritOIDs( ldvCert);     	
-        	
-        println( "" );
-		
+		println( "Non-critical OIDs" );
+		printNonCritOIDs( ldvCert);
+
+		println( "Critical OIDs" );
+		printCritOIDs( ldvCert);
+
+		println( "" );
 	}
 	
 	/**
 	 * Print a list of non-critical OIDs.
 	 * @param ldvCert Host certificate
 	 */
-	private final void printNonCritOIDs(IDVX509Certificate ldvCert ) {
-		
-		String[] keys = ldvCert.getNonCritOIDProperties();
-		
+	private void printNonCritOIDs(IDVX509Certificate ldvCert ) {
+		Set<String> keys = ldvCert.getNonCritOIDProperties();
 		for( String key : keys ) {
 			String value = ldvCert.getNonCritPropertyValue(key);
 			println( key +"="+value);
 		}
-		
 	}
 	
 	/**
 	 * Print a list of critical OIDs.
 	 * @param ldvCert Host certificate
 	 */
-	private final void printCritOIDs( IDVX509Certificate ldvCert) {
-		
-		String[] keys = ldvCert.getCritOIDProperties();
-		
+	private void printCritOIDs(IDVX509Certificate ldvCert) {
+		Set<String> keys = ldvCert.getCritOIDProperties();
 		for( String key : keys ) {
 			String value = ldvCert.getCritPropertyValue(key);
 			println( key +"="+value);
 		}
-		
 	}
 	
 	/**
@@ -538,12 +435,9 @@ class DVPrint implements IDVOnPrint, IDVOffPrint {
 	 * @param text Print line of text to console buffer.
 	 */
 	public final void println( String text ) {
-		
 		con.append(text);
 		con.append(EOL);
 		
 		logger.info(text);
-				
 	}
-	
 }

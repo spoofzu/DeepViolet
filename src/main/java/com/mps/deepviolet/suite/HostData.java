@@ -1,62 +1,44 @@
 package com.mps.deepviolet.suite;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class HostData implements ServerMetadata {
-	
-	private HashMap<String, HashMap<String, Object>> featuremap = new HashMap<String, HashMap<String, Object>>();
-	
-	//private HashMap<String, Object> map = new HashMap<String, Object>();
-	
+	private HashMap<String, Map<String, Object>> featuremap = new HashMap<String, Map<String, Object>>();
+
 	private URL host;
-	
 	private long timestamp;
-	
-	private long TTL = 1000 * 60 * 15; // 15 mins 
+	private static final long TTL = 1000 * 60 * 15; // 15 mins
 	
 	public HostData( URL url ) {
-		
 		this.host = url;
-		
 		this.timestamp = System.currentTimeMillis();
-		
 	}
 	
 	public boolean isExpired() {
-		
 		return System.currentTimeMillis() > timestamp + TTL;
-		
 	}
 	
 	public void setHost( URL host ) {
-		
-		this.host=host;
+		this.host = host;
 	}
 	
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.suite.ServerMetadataInf#getHost()
 	 */
 	public URL getHost() {
-		
 		return host;
 	}
 	
 	
-	public void setScalarValue( String feature, String key, String value ) {
-		
-		HashMap<String, Object> map = null;
+	void setScalarValue(String feature, String key, String value) {
+		Map<String, Object> map;
 		if( featuremap.containsKey(feature) ) {
 			map = featuremap.get(feature);
 		} else {
 			map = new HashMap<String, Object>();
-			featuremap.put(feature, map);	
+			featuremap.put(feature, map);
 		}
-			
 		map.put( key, value);
 		
 	}
@@ -65,26 +47,24 @@ public class HostData implements ServerMetadata {
 	 * @see com.mps.deepviolet.suite.ServerMetadataInf#getScalarValue(java.lang.String)
 	 */
 	public String getScalarValue( String feature, String key ) {
-		
-		HashMap<String, Object> map = null;
+		Map<String, Object> map;
 		if( featuremap.containsKey(feature) ) {
 			map = featuremap.get(feature);
 		} else {
 			map = new HashMap<String, Object>();
 			featuremap.put(feature, map);	
 		}
-		
 		return isScalarType(feature, key) ? (String)map.get(key) : null;
 		
 	}
 	
-	public void setVectorValue( String feature, String key, String[] value ) {
+	void setVectorValue(String feature, String key, String[] value) {
 		
-		HashMap<String, Object> map = null;
+		Map<String, Object> map;
 		if( featuremap.containsKey(feature) ) {
 			map = featuremap.get(feature);
 		} else {
-			map = new HashMap<String, Object>();
+			map = new HashMap<>();
 			featuremap.put(feature, map);	
 		}
 		
@@ -95,11 +75,11 @@ public class HostData implements ServerMetadata {
 
 	public boolean containsKey(String feature, String key) {
 
-		HashMap<String, Object> map = null;
+		Map<String, Object> map;
 		if( featuremap.containsKey(feature) ) {
 			map = featuremap.get(feature);
 		} else {
-			map = new HashMap<String, Object>();
+			map = new HashMap<>();
 			featuremap.put(feature, map);	
 		}
 		
@@ -112,18 +92,17 @@ public class HostData implements ServerMetadata {
 		
 		ArrayList<String> result = new ArrayList<String>();
 		
-		HashMap<String, Object> map = null;
+		Map<String, Object> map;
 		if( featuremap.containsKey(feature) ) {
 			map = featuremap.get(feature);
 		} else {
-			map = new HashMap<String, Object>();
+			map = new HashMap<>();
 			featuremap.put(feature, map);	
 		}
 		
 		String[] s = (String[])map.get(key);
-		
-		for( String val : s )
-			result.add(val);
+
+		Collections.addAll(result, s);
 		
 		return result;
 		
@@ -133,20 +112,18 @@ public class HostData implements ServerMetadata {
 		
 		ArrayList<String> result = new ArrayList<String>();
 		
-		HashMap<String, Object> map = null;
+		Map<String, Object> map;
 		if( featuremap.containsKey(feature) ) {
 			map = featuremap.get(feature);
 		} else {
-			map = new HashMap<String, Object>();
+			map = new HashMap<>();
 			featuremap.put(feature, map);	
 		}
 		
 		Set<String> s = map.keySet();
-		
-		Iterator<String> i = s.iterator();
-		
-		while ( i.hasNext() )
-			result.add( i.next() );
+		for (String value : s) {
+			result.add(value);
+		}
 	
 		return result;
 
@@ -158,41 +135,31 @@ public class HostData implements ServerMetadata {
 
 		boolean result = false;
 		
-		HashMap<String, Object> map = null;
+		Map<String, Object> map;
 		if( featuremap.containsKey(feature) ) {
 			map = featuremap.get(feature);
 		} else {
-			map = new HashMap<String, Object>();
+			map = new HashMap<>();
 			featuremap.put(feature, map);	
 		}
 		
-		if( map.containsKey( key ) )
+		if( map.containsKey( key ) ) {
 			result = ( map.get(key) instanceof String );
-		
+		}
+
 		return result;
-		
 	}
 	
 	public String toString() {
 		
-		StringBuffer buff = new StringBuffer(2000);
+		StringBuilder buff = new StringBuilder(2000);
 		
-		StringBuffer scalar = new StringBuffer();
-		StringBuffer vector = new StringBuffer();
-	
-		Iterator<String> fi = featuremap.keySet().iterator();
-		
-		while ( fi.hasNext() ) {
-			
-			String feature = fi.next();
-		
+		StringBuilder scalar = new StringBuilder();
+		StringBuilder vector = new StringBuilder();
+
+		for (String feature : featuremap.keySet()) {
 			List<String> keys = getKeys(feature);
-			Iterator<String> i = keys.iterator();
-			
-			while ( i.hasNext() ) {
-				
-				String key = i.next();
-				
+			for(String key : keys) {
 				if( isScalarType(feature,key) ) {
 					
 					String value = getScalarValue(feature, key);
@@ -205,7 +172,6 @@ public class HostData implements ServerMetadata {
 				}else{
 					
 					List<String> values = getVectorValue(feature, key);
-					Iterator<String> v = values.iterator();
 					
 					vector.append(feature);
 					vector.append(':');
@@ -214,28 +180,24 @@ public class HostData implements ServerMetadata {
 					vector.append('{');
 					boolean firsttime = true;
 					
-					while( v.hasNext() ) {
-						
-						String value = v.next();
+					for(String value : values) {
 						if( !firsttime ) {
 							vector.append(',');
 						} else {
 							firsttime = false;
 						}
 						vector.append(value);
-				
 					}
 				
 					vector.append('}');
 					
 				}
 			}
-		
-		}	
-			
-		buff.append("Class="+this.getClass().getName());
+		}
+
+		buff.append("Class=").append(this.getClass().getName());
 		buff.append(' ');
-		buff.append("Instance="+this.hashCode());
+		buff.append("Instance=").append(this.hashCode());
 		buff.append(' ');
 		buff.append( "Scalar Values:");
 		buff.append(scalar.toString());
@@ -243,7 +205,6 @@ public class HostData implements ServerMetadata {
 		buff.append("Vector Values:");
 		buff.append(vector.toString());	
 		buff.append(' ');
-		
 		return buff.toString();
 	}
 	

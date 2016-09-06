@@ -3,22 +3,14 @@ package com.mps.deepviolet.test.api;
 import static org.junit.Assert.assertTrue;
 
 import java.net.URL;
-import java.util.Iterator;
+import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.mps.deepviolet.api.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import com.mps.deepviolet.api.DVFactory;
-import com.mps.deepviolet.api.IDVCipherSuite;
-import com.mps.deepviolet.api.IDVOffEng;
-import com.mps.deepviolet.api.IDVOnEng;
-import com.mps.deepviolet.api.IDVSession;
-import com.mps.deepviolet.api.IDVX509Certificate;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DVEngTest {
@@ -47,12 +39,11 @@ public class DVEngTest {
 			
 			IDVSession session = DVFactory.initializeSession(url);
 			assertTrue(session != null);
-			assertTrue(session.getHostInterfaces().length > 0);
-			assertTrue(session.getPropertyNames().length > 0);
+			assertTrue(session.getHostInterfaces().size() > 0);
+			assertTrue(session.getPropertyNames().size() > 0);
 			
 			IDVOnEng eng = DVFactory.getDVEng(session);
 			IDVOffEng oeng = DVFactory.getDVOffEng();
-			assertTrue(eng != null);
 			System.out.println("DVEng test complete - host init");
 			
 			System.out.println("DVEng test starting - version string");
@@ -63,9 +54,9 @@ public class DVEngTest {
 			System.out.println("DVEng test complete - version string");
 			
 			System.out.println("DVEng test starting - cipher suites");
-			IDVCipherSuite[] ciphers = eng.getCipherSuites();
+			List<IDVCipherSuite> ciphers = eng.getCipherSuites();
 			assertTrue(ciphers != null);
-			assertTrue(ciphers.length > 0);
+			assertTrue(ciphers.size() > 0);
 			System.out.println("DVEng test complete - cipher suites");
 			
 			System.out.println("DVEng test starting - get host certificate");
@@ -76,7 +67,7 @@ public class DVEngTest {
 			System.out.println("DVEng test complete - get host certificate");
 			
 			System.out.println("DVEng test starting - get host certificate chain");
-			IDVX509Certificate[] chain = dvCert.getCertificateChain();
+			List<IDVX509Certificate> chain = dvCert.getCertificateChain();
 			IDVX509Certificate last_cert = null;
 			int node = 0;
 			for(IDVX509Certificate ldvCert: chain ) {

@@ -1,6 +1,8 @@
 package com.mps.deepviolet.api;
 
 
+import java.util.List;
+
 /**
  * Interface specification for engine features available
  * from an initialized host.
@@ -14,7 +16,7 @@ public interface IDVOnEng {
 	 * @return Ciphersuites supported by target host.
 	 * @throws DVException thrown on problems fetching ciphersuites.
 	 */
-	IDVCipherSuite[] getCipherSuites() throws DVException;
+	List<IDVCipherSuite> getCipherSuites() throws DVException;
 
 	/**
 	 * Return session instance for the target host when IDVOnEng.
@@ -25,8 +27,8 @@ public interface IDVOnEng {
 	IDVSession getDVSession();
 	
 	/**
-     * Return online print engine instance for target.
-     * host when IDVOnEng was created.
+	 * Return online print engine instance for target.
+	 * host when IDVOnEng was created.
 	 * @return Online print engine.
 	 * @see <a href="DVFactory.html#initializeSession(URL)">DVFactory.initializeSession(URL)</a>
 	 * @throws DVException Thrown on problems
@@ -34,9 +36,9 @@ public interface IDVOnEng {
 	IDVOnPrint getDVOnPrint() throws DVException;
 	
 	/**
-     * Return online print engine instance for target
-     * host when IDVOnEng was created.
-     * @param con Buffer to write reports.
+	 * Return online print engine instance for target
+	 * host when IDVOnEng was created.
+	 * @param con Buffer to write reports.
 	 * @return Online print engine.
 	 * @see <a href="DVFactory.html#initializeSession(URL)">DVFactory.initializeSession(URL)</a>
 	 * @throws DVException Thrown on problems

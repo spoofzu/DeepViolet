@@ -1,6 +1,7 @@
 package com.mps.deepviolet.api;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -18,16 +19,16 @@ public interface IDVX509Certificate {
 	String UNSUPPORTED_OID = "<UNSUPPORTED>";
 
 	enum TrustState {
-	    TRUSTED,
-        UNKNOWN,
-        UNTRUSTED
-    }
+		TRUSTED,
+		UNKNOWN,
+		UNTRUSTED
+	}
 
-    enum ValidState {
-        EXPIRED,
-        VALID,
-        NOT_YET_VALID
-    }
+	enum ValidState {
+		EXPIRED,
+		VALID,
+		NOT_YET_VALID
+	}
 
 
 	/**
@@ -99,11 +100,11 @@ public interface IDVX509Certificate {
 	
 	/**
 	 * Trust state of the certificte.  
-     * @return Supported states, {@link TrustState#UNTRUSTED}, certificate is not be trusted.
-     * {@link TrustState#UNKNOWN}, the trust state of the certificate cannot be determined.
-     * For example, if a certificate is being examined and the owning host cannot be
-     * determined or contacted. {@link TrustState#TRUSTED}, certificate has past trust
-     * certification process.
+	 * @return Supported states, {@link TrustState#UNTRUSTED}, certificate is not be trusted.
+	 * {@link TrustState#UNKNOWN}, the trust state of the certificate cannot be determined.
+	 * For example, if a certificate is being examined and the owning host cannot be
+	 * determined or contacted. {@link TrustState#TRUSTED}, certificate has past trust
+	 * certification process.
 	 */
 	TrustState getTrustState();
 	
@@ -128,7 +129,7 @@ public interface IDVX509Certificate {
 	 * Non-critical OIDs.  
 	 * @return Property names of non-critical OIDs.
 	 */
-	String[] getNonCritOIDProperties();
+	Set<String> getNonCritOIDProperties();
 	
 	/**
 	 * Non-critical OID values
@@ -148,7 +149,7 @@ public interface IDVX509Certificate {
 	 * Critical OIDs.  
 	 * @return Property names of non-critical OIDs.
 	 */
-	String[] getCritOIDProperties();
+	Set<String> getCritOIDProperties();
 	
 	/**
 	 * Critical OID values
@@ -167,11 +168,11 @@ public interface IDVX509Certificate {
 	
 	/**
 	 * Certificate chain of trust for the current certificate.
-	 * @return  Array of certificates chaining back to a root.  Note: the
+	 * @return  List of certificates chaining back to a root.  Note: the
 	 * certificates and root may or may not be trusted.
 	 * @throws DVException Thrown on problems.
 	 */
-	IDVX509Certificate[] getCertificateChain() throws DVException;
+	List<IDVX509Certificate> getCertificateChain() throws DVException;
 	
 	/**
 	 * Representation of a certificate provided as key/value pairs.  Order of

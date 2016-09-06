@@ -11,12 +11,13 @@ public class FileUtils {
 	 * Get the users DeepViolet working directory.  For storing completed reports.
 	 * @return Fully qualified name of working directory.
 	 */
+	@SuppressWarnings("FinalStaticMethod")
 	public static final String getWorkingDirectory() {
 		
 		String OS = System.getProperty("os.name");
 		String home = System.getProperty("user.home");
 		
-		StringBuffer buff = new StringBuffer();
+		StringBuilder buff = new StringBuilder();
 		
 		if ( OS.contains("Linux") ) {
 			
@@ -45,7 +46,7 @@ public class FileUtils {
 
 			// Unknown OS then create in the tmp folder.
 			buff.append( System.getProperty("java.io.tmpdir") );
-		    buff.append( File.separator );
+			buff.append( File.separator );
 			buff.append( "DeepViolet" );
 			buff.append( File.separator );
 			
@@ -58,6 +59,7 @@ public class FileUtils {
 	 * Create a directory, depending upon the operating system, to store
 	 * the results for each scanning run.
 	 */
+	@SuppressWarnings("FinalStaticMethod")
 	public static final void createWorkingDirectory() {
 
 		String violetdir = getWorkingDirectory();

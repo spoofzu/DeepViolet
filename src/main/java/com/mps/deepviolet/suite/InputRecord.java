@@ -10,7 +10,6 @@ import java.io.InputStream;
  * are skipped.
  */
 class InputRecord extends InputStream {
-
 		private InputStream in;
 		private byte[] buffer = new byte[CipherSuiteUtil.MAX_RECORD_LEN + 5];
 		private int ptr, end;
@@ -35,9 +34,7 @@ class InputRecord extends InputStream {
 			return version;
 		}
 
-		private void refill()
-			throws IOException
-		{
+		private void refill() throws IOException {
 			for (;;) {
 				CipherSuiteUtil.readFully(in, buffer, 0, 5);
 				type = buffer[0] & 0xFF;
@@ -61,18 +58,14 @@ class InputRecord extends InputStream {
 			}
 		}
 
-		public int read()
-			throws IOException
-		{
+		public int read() throws IOException {
 			while (ptr == end) {
 				refill();
 			}
 			return buffer[ptr ++] & 0xFF;
 		}
 
-		public int read(byte[] buf, int off, int len)
-			throws IOException
-		{
+		public int read(byte[] buf, int off, int len) throws IOException {
 			while (ptr == end) {
 				refill();
 			}

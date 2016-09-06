@@ -1,43 +1,18 @@
 package com.mps.deepviolet.test.api;
 
-import static org.junit.Assert.assertTrue;
+import com.mps.deepviolet.api.*;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.File;
 import java.net.URL;
 import java.rmi.dgc.VMID;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.util.ContextInitializer;
-import ch.qos.logback.core.joran.spi.JoranException;
-
-import com.mps.deepviolet.api.DVFactory;
-import com.mps.deepviolet.api.IDVOffEng;
-import com.mps.deepviolet.api.IDVOffPrint;
-import com.mps.deepviolet.api.IDVOnEng;
-import com.mps.deepviolet.api.IDVOnPrint;
-import com.mps.deepviolet.api.IDVSession;
-import com.mps.deepviolet.util.FileUtils;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DVPrintTest {
-	
-	@Before
-	public void setup() {
-	}
-	
-	@After
-	public void teardown() {
-		
-	}
-	
 	@Test
 	public void injectionTest() {
 		
@@ -51,12 +26,11 @@ public class DVPrintTest {
 			System.out.println("DVPrint tests begining");
 			
 			assertTrue(session != null);
-			assertTrue(session.getHostInterfaces().length > 0);
-			assertTrue(session.getPropertyNames().length > 0);
+			assertTrue(session.getHostInterfaces().size() > 0);
+			assertTrue(session.getPropertyNames().size() > 0);
 			
 			IDVOnEng eng = DVFactory.getDVEng(session);
 			IDVOffEng oeng = DVFactory.getDVOffEng();
-			assertTrue(eng != null);
 			
 			System.out.println("DVEPrint test starting - get host instance");
 			StringBuffer con = new StringBuffer(2000);
@@ -68,36 +42,35 @@ public class DVPrintTest {
 
 			System.out.println("DVEPrint test starting - print dv header");
 			p.printHostInformation();
-			assertTrue(con.toString().indexOf("[Host information]")>-1);
+			assertTrue(con.toString().contains("[Host information]"));
 			System.out.println("DVPrint test complete - print dv header");
 			
 			System.out.println("DVEPrint test starting - print http response headers");
 			p.printHostHttpResponseHeaders();
-			assertTrue(con.toString().indexOf("[HTTP(S) response headers]")>-1);
+			assertTrue(con.toString().contains("[HTTP(S) response headers]"));
 			System.out.println("DVPrint test complete - print http response headers");
 			
 			System.out.println("DVEPrint test starting - print host information");
 			p.printHostInformation();
-			assertTrue(con.toString().indexOf("[Host information]")>-1);
+			assertTrue(con.toString().contains("[Host information]"));
 			System.out.println("DVPrint test complete - print host information");
 			
 			System.out.println("DVEPrint test starting - print supported ciphersuites");
 			p.printSupportedCipherSuites();
-			assertTrue(con.toString().indexOf("[Host supported server cipher suites]")>-1);
+			assertTrue(con.toString().contains("[Host supported server cipher suites]"));
 			System.out.println("DVPrint test complete - print supported ciphersuites");
 			
 			System.out.println("DVEPrint test starting - print connection characteristics");
 			p.printConnectionCharacteristics();
-			assertTrue(con.toString().indexOf("[Connection characteristics]")>-1);
+			assertTrue(con.toString().contains("[Connection characteristics]"));
 			System.out.println("DVPrint test complete - print connection characteristics");
 			
      	    // Test could fail for a variety of reasons, bad permissions, etc.
 			System.out.println("DVEPrint test starting - write PEM encoded certificate to tmp file");
     	    VMID id = new VMID();
-     	    File tpem = File.createTempFile("dvcert-"+session.getURL().getHost()+"-"+id.toString(), ".tmp"); 
-     	    assertTrue(tpem != null);
+     	    File tpem = File.createTempFile("dvcert-"+session.getURL().getHost()+"-"+id.toString(), ".tmp");
 	     	eng.writeCertificate(tpem.getAbsolutePath());	
-			assertTrue(con.toString().indexOf("Certificate written successfully")>-1);
+			assertTrue(con.toString().contains("Certificate written successfully"));
 			System.out.println("DVPrint test complete - write PEM encoded certificate to file");
 		
      	    // Test could fail for a variety of reasons, bad permissions, etc.
@@ -110,7 +83,7 @@ public class DVPrintTest {
 			
 			System.out.println("DVEPrint test starting - print certificate chain");
 			p.printServerCertificateChain();
-			assertTrue(con.toString().indexOf("[Server certificate chain]")>-1);
+			assertTrue(con.toString().contains("[Server certificate chain]"));
 			System.out.println("DVPrint test complete - print certificate chain");
 			
 			//TODO printTrustState(X509Certificate), printTrustState(URL) skipped for now

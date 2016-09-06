@@ -100,7 +100,7 @@ class DVEng implements IDVOnEng, IDVOffEng {
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IDVEng#getCipherSuites()
 	 */
-	public final IDVCipherSuite[] getCipherSuites() throws DVException {
+	public final List<IDVCipherSuite> getCipherSuites() throws DVException {
 		List<IDVCipherSuite> list = new ArrayList<IDVCipherSuite>();
 		URL url = session.getURL();
 		try {
@@ -142,7 +142,7 @@ class DVEng implements IDVOnEng, IDVOffEng {
 			logger.error(msg,e );
 			throw new DVException(msg,e );
 		}
-		return (IDVCipherSuite[])list.toArray(new MutableDVCipherSuite[0]);	
+		return list;
 	}
 
 	/* (non-Javadoc)
@@ -176,12 +176,13 @@ class DVEng implements IDVOnEng, IDVOffEng {
 			if( dir.exists() ) {
 				// Check permissions if file exists
 				if(  !dir.canWrite() ) {
-					DVException e = new DVException("Write certificate failed. reason=directory WRITE required.  dir="+path );
-					throw e;
+					throw new DVException("Write certificate failed. reason=directory WRITE required.  dir="+path );
 				}
 			} else {
 				// Create the folder if it does not exist
-				dir.mkdirs();
+				if (!dir.mkdirs()) {
+					throw new DVException("Failed to create directory " + dir);
+				}
 			}
 		    // Write the file
 			FileOutputStream out = new FileOutputStream(f);
@@ -191,7 +192,7 @@ class DVEng implements IDVOnEng, IDVOffEng {
 				 String end_cert = "\n-----END CERTIFICATE-----";
 				 derenccert = cert.getEncoded();
 				 String pemB64 = new String(encoder.encode(derenccert));
-				 StringBuffer pemBuff = new StringBuffer(pemB64.length());
+				 StringBuilder pemBuff = new StringBuilder(pemB64.length());
 				 int ct = 0;
 				 for( int i=0; i< pemB64.length(); i++ ) {
 					 ct++;
@@ -205,25 +206,21 @@ class DVEng implements IDVOnEng, IDVOffEng {
 				 String pemCert = cert_begin + pemBuff.toString() + end_cert;
 				 out.write(pemCert.getBytes()); // PEM encoded certificate
 			} catch(IOException e) {
-				DVException e1 = new DVException("Error writing file.  file="+f.getAbsolutePath(), e);
-				throw e1;
+				throw new DVException("Error writing file.  file="+f.getAbsolutePath(), e);
 			} finally {
-				try { out.close(); } catch(IOException e1) {}	
+				try { out.close(); } catch(IOException ignored) {}
 			}
 		} catch (SSLHandshakeException e ) {
 			if( e.getMessage().indexOf("PKIX") > 0 ) {
-				DVException e1 = new DVException("Certificate chain failed validation. err="+e.getMessage(),e );
-				throw e1;
+				throw new DVException("Certificate chain failed validation. err="+e.getMessage(),e );
 			} else {
-				DVException e1 = new DVException("SSLHandshakeException. err="+e.getMessage(),e );
-				throw e1;
+				throw new DVException("SSLHandshakeException. err="+e.getMessage(),e );
 			}  	
 		} catch (Exception e) {
-			DVException e1 = new DVException("SSLHandshakeException. err="+e.getMessage(),e);
-			throw e1;
+			throw new DVException("SSLHandshakeException. err="+e.getMessage(),e);
 		}
 		
-		long sz = (derenccert!=null) ? derenccert.length : 0;
+		long sz = derenccert.length;
 		dvPrint.println("Certificate written successfully, byte(s)="+sz);
 		return sz;
 	}

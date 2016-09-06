@@ -5,20 +5,20 @@ import java.util.List;
 
 public interface ServerMetadata {
 
-	public URL getHost();
+	URL getHost();
 	
-	public boolean isExpired();
+	boolean isExpired();
 
-	public  String getScalarValue(String feature, String key);
+	String getScalarValue(String feature, String key);
 
-	public List<String> getVectorValue(String feature, String key);
+	List<String> getVectorValue(String feature, String key);
 
-	public boolean containsKey(String feature, String key);
+	boolean containsKey(String feature, String key);
 	
-	public List<String> getKeys(String feature);
+	List<String> getKeys(String feature);
 	
-	public boolean isScalarType(String feature, String key);
+	boolean isScalarType(String feature, String key);
 	
-	public String toString();
+	String toString();
 
 }
