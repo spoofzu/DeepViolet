@@ -79,58 +79,58 @@ class DVX509Certificate implements IDVX509Certificate {
 			certificateFingerPrint = CipherSuiteUtil.signerFingerprint(encx509,sa);
 			
 			//Check certificate validity, start < now < expiration.
-        	try {
-        		try {
-        			cert.checkValidity();
-        			iValidityState = ValidState.VALID;
-                } catch (CertificateNotYetValidException e) {
-                	iValidityState = ValidState.NOT_YET_VALID;
+			try {
+				try {
+					cert.checkValidity();
+					iValidityState = ValidState.VALID;
+				} catch (CertificateNotYetValidException e) {
+					iValidityState = ValidState.NOT_YET_VALID;
 				}
-            } catch(CertificateExpiredException c) {
-            	iValidityState = ValidState.EXPIRED;
-            }
+			} catch(CertificateExpiredException c) {
+				iValidityState = ValidState.EXPIRED;
+			}
 	
 			// Gather non-critical OIDs
-	    	Set<String> oids = cert.getNonCriticalExtensionOIDs();
+			Set<String> oids = cert.getNonCriticalExtensionOIDs();
 			if (oids != null) {
-                assignOIDs(nonCritOidMap,oids);
-            }
+				assignOIDs(nonCritOidMap,oids);
+			}
 
 			// Gather critical OIDs
-	    	oids = cert.getCriticalExtensionOIDs();
+			oids = cert.getCriticalExtensionOIDs();
 			if (oids != null) {
-                assignOIDs(critOidMap,oids);
-            }
+				assignOIDs(critOidMap,oids);
+			}
 
 			// Self-signed or not.
-	    	bSelfSignedCertificate = CipherSuiteUtil.isSelfSignedCertificate(cert);
+			bSelfSignedCertificate = CipherSuiteUtil.isSelfSignedCertificate(cert);
 			
-	        // At this point we have printed all certs returned by the server
-	        // (via getServerCertificateChain()).  Note the server does NOT
+			// At this point we have printed all certs returned by the server
+			// (via getServerCertificateChain()).  Note the server does NOT
 			// return the root CA cert to us.  However, we can infer the
 			// root by checking IssuerDN of the last Intermediate CA and
 			// the AuthorityKeyIdentifier (if present).	         		
-	    	bJavaRootCertificate = CipherSuiteUtil.isJavaRootCertificateDN(cert.getIssuerDN().getName());			
-	    	
-	    	// Initialize online only activities.  Easy to override in child.
-	    	onlineInitializationOnly();
+			bJavaRootCertificate = CipherSuiteUtil.isJavaRootCertificateDN(cert.getIssuerDN().getName());
+
+			// Initialize online only activities.  Easy to override in child.
+			onlineInitializationOnly();
 		} catch( Exception e ) {
 			throw new DVException(e);
 		}
 	}
 
-    /**
-     * Convience method to allow initialization of some features we don't want to
-     * execute in offline version.  Allows subclasses to easily override and
-     * block execution of these features.
-     * @throws DVException Thrown on problems.
-     */
+	/**
+	 * Convience method to allow initialization of some features we don't want to
+	 * execute in offline version.  Allows subclasses to easily override and
+	 * block execution of these features.
+	 * @throws DVException Thrown on problems.
+	 */
 	void onlineInitializationOnly() throws DVException{
-    	// Assign cert chain
-    	assignCertificateChain();
+		// Assign cert chain
+		assignCertificateChain();
 		
-    	// Assign the trust state, trusted, untrusted, unknown to the cert
-    	assignTrustState();
+		// Assign the trust state, trusted, untrusted, unknown to the cert
+		assignTrustState();
 	}
 
 	/* (non-Javadoc)
@@ -236,8 +236,8 @@ class DVX509Certificate implements IDVX509Certificate {
 	 */
 	public String getNonCritPropertyValue(String key) {
 		if( key==null || !nonCritOidMap.containsKey(key) ) {
-		    return null;
-        }
+			return null;
+		}
 		return nonCritOidMap.get(key);
 	}
 	
@@ -253,8 +253,8 @@ class DVX509Certificate implements IDVX509Certificate {
 	 */
 	public String getCritPropertyValue(String key) {
 		if( key==null || !critOidMap.containsKey(key) ) {
-		    return null;
-        }
+			return null;
+		}
 		return critOidMap.get(key);
 	}
 	
@@ -277,8 +277,8 @@ class DVX509Certificate implements IDVX509Certificate {
 	 */
 	public synchronized List<DVX509Certificate> getCertificateChain() throws DVException {
 		if( dvChain != null ) {
-		    return dvChain;
-        }
+			return dvChain;
+		}
 		List<DVX509Certificate> list = new ArrayList<DVX509Certificate>();
 		for (X509Certificate lcert : chain ) {
 			list.add(new DVX509Certificate(eng, lcert));
@@ -338,7 +338,7 @@ class DVX509Certificate implements IDVX509Certificate {
 	 * could be eliminated. Need to look into this more.  All this is only a best effort to
 	 * establish the trust relationship while offline (e.g., --serverurl not specified).
 	 */
-    private void assignTrustState() throws DVException {
+	private void assignTrustState() throws DVException {
 		try {
 			//todo should look at a differnt way to do this later
 			boolean bTrusted = CipherSuiteUtil.checkTrustedCertificate( chain, eng.getDVSession().getURL() );
@@ -459,8 +459,8 @@ class DVX509Certificate implements IDVX509Certificate {
 		for (String key : critOidMap.keySet()) {
 			String value = critOidMap.get(key);
 			if(!fi) {
-			    buff.append(", ");
-            }
+				buff.append(", ");
+			}
 			buff.append(key);
 			buff.append('=');
 			buff.append(value);
@@ -528,17 +528,17 @@ class DVX509Certificate implements IDVX509Certificate {
 				for(String key : nonCritOidMap.keySet()) {
 					if( c.isContainsNonCritPropertyKey(key) ) {
 						o13 = false;
-                        break;
+						break;
 					}
 				}
 				
 				o14 = true;
 				for(String key : critOidMap.keySet()) {
-                    if (c.isContainsCritPropertyKey(key)) {
-                        o14 = false;
-                        break;
-                    }
-                }
+					if (c.isContainsCritPropertyKey(key)) {
+						o14 = false;
+						break;
+					}
+				}
 				
 				o15 = certificateSerialNumber.equals(c.getCertificateSerialNumber());
 			}

@@ -32,12 +32,12 @@ public class StartUI {
 	// Must execute before logback initializes
 	static {
 		
-	    System.setProperty("dv_user_directory", FileUtils.getWorkingDirectory());
-	    System.setProperty("dv_user_level", "INFO");
-	    
+		System.setProperty("dv_user_directory", FileUtils.getWorkingDirectory());
+		System.setProperty("dv_user_level", "INFO");
+
 	}	
 	
-    private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.bin.StartUI");
+	private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.bin.StartUI");
 	
 	/**
 	 * Main entry point
@@ -54,51 +54,53 @@ public class StartUI {
 	 */
 	private void init(String[] args) {
 		
-	    // Pass deepviolet report directory to logback to write log file
+		// Pass deepviolet report directory to logback to write log file
 		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-	    ContextInitializer ci = new ContextInitializer(lc);
-	    lc.reset();
-	    try {
-	      ci.autoConfig(); 
-	    } catch (JoranException e) {
-	      e.printStackTrace();
-	    }
-	    //StatusPrinter.print(lc);
+		ContextInitializer ci = new ContextInitializer(lc);
+		lc.reset();
+		try {
+		  ci.autoConfig();
+		} catch (JoranException e) {
+		  e.printStackTrace();
+		}
+		//StatusPrinter.print(lc);
 		
 		logger.info("Starting UI via dvUI");
 		
 		// Create ~/DeepViolet/ working directory on OS
 		FileUtils.createWorkingDirectory();
 		
-	    SwingUtilities.invokeLater(new Runnable() {
-	       public void run() {
-	    	    try {
+		SwingUtilities.invokeLater(new Runnable() {
+		   public void run() {
+				try {
 					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 					logger.debug( "Look and feel assigned.  Class="+UIManager.getSystemLookAndFeelClassName() );
 				} catch (Exception e) {
 					logger.error("Error setting lookandfeel, msg="+e.getMessage());
 				}	    	   
-	    	    
-	    	    try {
-	    	        Class util = Class.forName("com.apple.eawt.Application");
-	    	        Method getApplication = util.getMethod("getApplication", new Class[0]);
-	    	        Object application = getApplication.invoke(util);
-	    	        Class params[] = new Class[1];
-	    	        params[0] = Image.class;
-	    	        Method setDockIconImage = util.getMethod("setDockIconImage", params);
-	    	        URL url = this.getClass().getClassLoader().getResource("dv-raw.png");
-	    	        Image image = Toolkit.getDefaultToolkit().getImage(url);
-	    	        setDockIconImage.invoke(application, image);
-					logger.debug( "Dock icon assigned, url="+url.toString() );
-	    	    } catch (Exception e) {
+
+				try {
+					Class util = Class.forName("com.apple.eawt.Application");
+					Method getApplication = util.getMethod("getApplication");
+					Object application = getApplication.invoke(util);
+					Class params[] = new Class[1];
+					params[0] = Image.class;
+					Method setDockIconImage = util.getMethod("setDockIconImage", params);
+					URL url = this.getClass().getClassLoader().getResource("dv-raw.png");
+					Image image = Toolkit.getDefaultToolkit().getImage(url);
+					setDockIconImage.invoke(application, image);
+					if (url != null) {
+						logger.debug( "Dock icon assigned, url="+url.toString() );
+					}
+				} catch (Exception e) {
 					logger.error("Error setting dockicon image, msg="+e.getMessage());
-	    	    } 
-	    	    
-	    		MainFrm main = new MainFrm();
-	    		main.initComponents();
-	    		main.setVisible(true);
-	      }
-	    });
+				}
+
+				MainFrm main = new MainFrm();
+				main.initComponents();
+				main.setVisible(true);
+		  }
+		});
 		
 	}
 	

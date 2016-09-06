@@ -19,16 +19,16 @@ public interface IDVX509Certificate {
 	String UNSUPPORTED_OID = "<UNSUPPORTED>";
 
 	enum TrustState {
-	    TRUSTED,
-        UNKNOWN,
-        UNTRUSTED
-    }
+		TRUSTED,
+		UNKNOWN,
+		UNTRUSTED
+	}
 
-    enum ValidState {
-        EXPIRED,
-        VALID,
-        NOT_YET_VALID
-    }
+	enum ValidState {
+		EXPIRED,
+		VALID,
+		NOT_YET_VALID
+	}
 
 
 	/**
@@ -100,11 +100,11 @@ public interface IDVX509Certificate {
 	
 	/**
 	 * Trust state of the certificte.  
-     * @return Supported states, {@link TrustState#UNTRUSTED}, certificate is not be trusted.
-     * {@link TrustState#UNKNOWN}, the trust state of the certificate cannot be determined.
-     * For example, if a certificate is being examined and the owning host cannot be
-     * determined or contacted. {@link TrustState#TRUSTED}, certificate has past trust
-     * certification process.
+	 * @return Supported states, {@link TrustState#UNTRUSTED}, certificate is not be trusted.
+	 * {@link TrustState#UNKNOWN}, the trust state of the certificate cannot be determined.
+	 * For example, if a certificate is being examined and the owning host cannot be
+	 * determined or contacted. {@link TrustState#TRUSTED}, certificate has past trust
+	 * certification process.
 	 */
 	TrustState getTrustState();
 	

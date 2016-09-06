@@ -27,8 +27,8 @@ public interface IDVOnEng {
 	IDVSession getDVSession();
 	
 	/**
-     * Return online print engine instance for target.
-     * host when IDVOnEng was created.
+	 * Return online print engine instance for target.
+	 * host when IDVOnEng was created.
 	 * @return Online print engine.
 	 * @see <a href="DVFactory.html#initializeSession(URL)">DVFactory.initializeSession(URL)</a>
 	 * @throws DVException Thrown on problems
@@ -36,9 +36,9 @@ public interface IDVOnEng {
 	IDVOnPrint getDVOnPrint() throws DVException;
 	
 	/**
-     * Return online print engine instance for target
-     * host when IDVOnEng was created.
-     * @param con Buffer to write reports.
+	 * Return online print engine instance for target
+	 * host when IDVOnEng was created.
+	 * @param con Buffer to write reports.
 	 * @return Online print engine.
 	 * @see <a href="DVFactory.html#initializeSession(URL)">DVFactory.initializeSession(URL)</a>
 	 * @throws DVException Thrown on problems

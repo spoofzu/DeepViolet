@@ -36,9 +36,9 @@ public class StartCMD {
 	// Must execute before logback initializes
 	static {
 		
-	    System.setProperty("dv_user_directory", FileUtils.getWorkingDirectory());
-	    System.setProperty("dv_user_level", "INFO");
-	    
+		System.setProperty("dv_user_directory", FileUtils.getWorkingDirectory());
+		System.setProperty("dv_user_level", "INFO");
+
 	}
 	
 	public static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.bin.StartCMD");
@@ -57,30 +57,30 @@ public class StartCMD {
 	 */
 	private void init(String[] args) {
 		
-	    // Pass deepviolet report directory to logback to write log file
+		// Pass deepviolet report directory to logback to write log file
 		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-	    ContextInitializer ci = new ContextInitializer(lc);
-	    lc.reset();
-	    try {
-	      ci.autoConfig(); 
-	    } catch (JoranException e) {
-	      e.printStackTrace();
-	    }
-	    //StatusPrinter.print(lc);
-	    
-	    logger.info("Starting headless via dvCMD");
-	    
-	    // Print diagnostics and system state information
+		ContextInitializer ci = new ContextInitializer(lc);
+		lc.reset();
+		try {
+		  ci.autoConfig();
+		} catch (JoranException e) {
+		  e.printStackTrace();
+		}
+		//StatusPrinter.print(lc);
+
+		logger.info("Starting headless via dvCMD");
+
+		// Print diagnostics and system state information
 //		IntervalLoggerController wd = SecurityLoggingFactory.getControllerInstance();
 //		wd.start();
 		
 		// Create ~/DeepViolet/ working directory on OS
-	    FileUtils.createWorkingDirectory();
+		FileUtils.createWorkingDirectory();
 		
 		try {
 			
 			//TODO: Java8 java -Djdk.tls.client.protocols="TLSv1,TLSv1.1,TLSv1.2"  enable/disable protocols to test
-            //  Java7 -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2
+			//  Java7 -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2
 			// proxy support
 			// -Djava.net.useSystemProxies=true
 			//  -Dhttp.proxyHost=proxy.example.com -Dhttp.proxyPort=8080
@@ -138,32 +138,32 @@ public class StartCMD {
 			if( cmdline.hasOption("d") ) {
 				System.setProperty("javax.net.debug", "all");
 			} else {
-				if(System.getProperties().contains("javax.net.debug"));
+				if(System.getProperties().contains("javax.net.debug")) {
 					System.getProperties().remove("javax.net.debug");
+				}
 			}
 			
 			// Process debug option
 			if( cmdline.hasOption("d2") ) {
-			    System.setProperty("dv_user_level", "DEBUG");
+				System.setProperty("dv_user_level", "DEBUG");
 			}
 			
 		   // print help options
 		   if( cmdline.hasOption("h") ) {
 			   // Generate help options
-			   
-			   StringBuffer hm = new StringBuffer();
-			   hm.append( "java -jar dvCMD.jar -serverurl <host|ip> [-wc <file> | -rc <file>] [-h -s{t|h|r|c|i|s|n}]"+EOL );
-			   hm.append( "Ex: dvCMD.jar -serverurl https://www.host.com/ -sections ts"+EOL );
-			   hm.append( "-d SSL/TLS connection debugging"+EOL );
-			   hm.append( "-d2 Enable logback DEBUG level logging"+EOL );
-			   hm.append( "With -s option, sections are the following,"+EOL);
-			   hm.append( "t=header section, h=host section, r=http response section,"+EOL);
-			   hm.append( "c=connection characteristics section, i=ciphersuite section,"+EOL);
-			   hm.append( "s=server certificate section, n=certificate chain section"+EOL);
-			   hm.append(""+EOL);
-			   
+
+			   String hm = ("java -jar dvCMD.jar -serverurl <host|ip> [-wc <file> | -rc <file>] [-h -s{t|h|r|c|i|s|n}]" + EOL) +
+					   "Ex: dvCMD.jar -serverurl https://www.host.com/ -sections ts" + EOL +
+					   "-d SSL/TLS connection debugging" + EOL +
+					   "-d2 Enable logback DEBUG level logging" + EOL +
+					   "With -s option, sections are the following," + EOL +
+					   "t=header section, h=host section, r=http response section," + EOL +
+					   "c=connection characteristics section, i=ciphersuite section," + EOL +
+					   "s=server certificate section, n=certificate chain section" + EOL +
+					   "" + EOL;
+
 			   HelpFormatter formatter = new HelpFormatter();
-			   formatter.printHelp( hm.toString(), options );
+			   formatter.printHelp(hm, options );
 			   
 			   System.exit(-1);
 		   }
@@ -184,7 +184,7 @@ public class StartCMD {
 			   
 			   // Unless we are writing a certificate to a file.
 			   // In which case we default to no sections.
-		       if( cmdline.hasOption("wc") ) {
+			   if( cmdline.hasOption("wc") ) {
 				   // Print header section
 				   st.bHeader = true; // URL not required
 				   st.bHostSection = false;
@@ -194,8 +194,8 @@ public class StartCMD {
 				   st.bServerCertficateSection = false;
 				   st.bCertChainSection = false;
 				   st.bReadCertificate = false;
-		       } else if ( cmdline.hasOption("rc") ) {
-		    	   st.bHeader = false;
+			   } else if ( cmdline.hasOption("rc") ) {
+				   st.bHeader = false;
 				   st.bHostSection = false;
 				   st.bHTTPResponseSection = false;
 				   st.bConnectionSection = false;
@@ -203,8 +203,8 @@ public class StartCMD {
 				   st.bServerCertficateSection = false; // requires URL
 				   st.bReadCertificate = true;
 				   st.bCertChainSection = false;
-		       } else {
-		    	   st.bHeader = true;
+			   } else {
+				   st.bHeader = true;
 				   st.bHostSection = true;
 				   st.bHTTPResponseSection = true;
 				   st.bConnectionSection = true;
@@ -212,7 +212,7 @@ public class StartCMD {
 				   st.bServerCertficateSection = true;
 				   st.bCertChainSection = true;
 				   st.bReadCertificate = false;
-		       }
+			   }
   
 		   // Sections are specified
 		   } else {
@@ -295,7 +295,7 @@ public class StartCMD {
 				   if( ct % 15000==0 ) { logger.info("Still busy, "+ct/1000+" seconds elapsed."); }
 			   } else {  	    	
 					// Scan done, stop timer.
-		    	    ((Timer)evt.getSource()).stop();
+					((Timer)evt.getSource()).stop();
 			   }	
 		   }
 		};

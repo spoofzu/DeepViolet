@@ -67,14 +67,14 @@ public class MainFrm extends JFrame {
 	private StyledDocument doc;
 	private JTextField txtStatus;
 	
-	JButton btnDeepScan = null;
-	JButton btnSave = null;
+	private JButton btnDeepScan = null;
+	private JButton btnSave = null;
 	
-    private volatile StringBuffer con = new StringBuffer();
+	private volatile StringBuffer con = new StringBuffer();
 	
 	private static final String STATUS_HDR = "Status: ";
 	
-	URL url = null;
+	private URL url = null;
 	
 	private static JFileChooser fc;
 	
@@ -84,7 +84,7 @@ public class MainFrm extends JFrame {
 	public MainFrm() {
 		
 		super();
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//initComponents();
 		
 	}
@@ -155,10 +155,10 @@ public class MainFrm extends JFrame {
 		pnlMain.add(btnSave,c);
 		
 		tpResults = new JTextPane();
-        Font font = new Font("Courier New", Font.PLAIN, 12);
-        tpResults.setFont(font);
-        
-	    doc = tpResults.getStyledDocument();
+		Font font = new Font("Courier New", Font.PLAIN, 12);
+		tpResults.setFont(font);
+
+		doc = tpResults.getStyledDocument();
 //
 //	    // Load the default style and add it as the "regular" text
 //	    Style def = StyleContext.getDefaultStyleContext().getStyle( StyleContext.DEFAULT_STYLE );
@@ -232,24 +232,16 @@ public class MainFrm extends JFrame {
 		
 		// Listener for Window resize
 		this.addComponentListener( new ComponentAdapter() {
-		    public void componentResized(ComponentEvent e) {
-		    	refresh();
-		    }
+			public void componentResized(ComponentEvent e) {
+				refresh();
+			}
 		});
 		
 		// Button listener to start the scan.
-		btnDeepScan.addActionListener(new ActionListener() { 
-			  public void actionPerformed(ActionEvent e) { 
-				  selectionBtnDeepScanPressed();
-			  } 
-		});
+		btnDeepScan.addActionListener(e -> selectionBtnDeepScanPressed());
 		
 		// Button listener to save the report results.
-		btnSave.addActionListener(new ActionListener() { 
-			  public void actionPerformed(ActionEvent e) { 
-				  selectionBtnSavePressed();
-			  } 
-		});
+		btnSave.addActionListener(e -> selectionBtnSavePressed());
 		
 	}
 	
@@ -266,57 +258,57 @@ public class MainFrm extends JFrame {
 
 		// Basic URL sanitization.
 		String surl = txtServer.getText() !=null ?
-				     txtServer.getText().trim():
-				     "";	     
-				     
+					 txtServer.getText().trim():
+					 "";
+
 		try {
 			url = new URL(surl);		
 		} catch (MalformedURLException e) {
 			String malformed_url = "Bad host url, err="+e.getMessage();
-	    	try {
+			try {
 				doc.remove(0,doc.getLength());
 				doc.insertString(0, malformed_url, regular);
-	    	}catch( Exception e1 ) {
-	    		logger.error(e1.getMessage(), e1);
-	    	}
+			}catch( Exception e1 ) {
+				logger.error(e1.getMessage(), e1);
+			}
 			logger.error(malformed_url);
 		}
 		
-	    if( url == null ||
-	        !url.getProtocol().toLowerCase().equals("https") ) {
-	    	String bad_url = "bad host url, url="+url;
-	    	try {
+		if( url == null ||
+			!url.getProtocol().toLowerCase().equals("https") ) {
+			String bad_url = "bad host url, url="+url;
+			try {
 				doc.remove(0,doc.getLength());
 				doc.insertString(0, bad_url, regular);
-	    	}catch( Exception e ) {
-	    		logger.error(e.getMessage(), e);
-	    	}
-        	logger.error(bad_url);
-        	setEnableControls(true);
-        	return;
-	    }
-	    
-	    try { doc.remove(0,doc.getLength()); } catch (BadLocationException e1) { e1.printStackTrace();}
-	    
+			}catch( Exception e ) {
+				logger.error(e.getMessage(), e);
+			}
+			logger.error(bad_url);
+			setEnableControls(true);
+			return;
+		}
+
+		try { doc.remove(0,doc.getLength()); } catch (BadLocationException e1) { e1.printStackTrace();}
+
 	   // Background SSL scanning thread
-	   DeepScanTask st = null;
+	   DeepScanTask st;
 	   try {
 		   st = new DeepScanTask(url);
 	   } catch (Exception e) {
-		    String msg = "";
-		    if( url.getHost().equals(e.getMessage())) {
-		    	msg = "Host not found or bad URL formatting.  url="+surl;
-		    } else {
-		    	msg = "Problem initializing host.  err="+e.getMessage();
-		    }
+			String msg;
+			if( url.getHost().equals(e.getMessage())) {
+				msg = "Host not found or bad URL formatting.  url="+surl;
+			} else {
+				msg = "Problem initializing host.  err="+e.getMessage();
+			}
 			logger.error( msg );
-	    	try {
+			try {
 				doc.remove(0,doc.getLength());
 				doc.insertString(0, msg, regular);
-	    	}catch( Exception e1 ) {
-	    		logger.error(e1.getMessage(), e);
-	    	}
-        	setEnableControls(true);
+			}catch( Exception e1 ) {
+				logger.error(e1.getMessage(), e);
+			}
+			setEnableControls(true);
 			return;
 	   } 
 	   st.start();
@@ -350,7 +342,7 @@ public class MainFrm extends JFrame {
 						e.printStackTrace();
 					}
 			   } else {
-		    		// Update display before we exit timer.
+					// Update display before we exit timer.
 				   long f1 = System.currentTimeMillis();
 					try { 
 					   doc.remove(0,doc.getLength());
@@ -359,11 +351,11 @@ public class MainFrm extends JFrame {
 						e.printStackTrace();
 					}
 					// Scan done, stop timer.
-		    	    ((Timer)evt.getSource()).stop();
-		    	    updateWorkStatus("Ready, "+(f1-s1)+"(ms)");  	    	
-		    		setEnableControls(true);
+					((Timer)evt.getSource()).stop();
+					updateWorkStatus("Ready, "+(f1-s1)+"(ms)");
+					setEnableControls(true);
 			   }	
-		      }
+			  }
 		  };
 		  new Timer(delay, taskPerformer).start();
 		
@@ -406,39 +398,39 @@ public class MainFrm extends JFrame {
 		int returnVal = fc.showSaveDialog(this);
 	
 
-        File selectedfile = null;
+		File selectedfile;
 		
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			
 			selectedfile = fc.getSelectedFile().getAbsoluteFile();
 
-            logger.info("Saving report results to file.  Name=" + selectedfile.getName() );
-            
-    		PrintWriter p = null;
-    		try {
-    			
-    			selectedfile.createNewFile();
-    				
-    			p = new PrintWriter(selectedfile);
-    				
-    			p.println(tpResults.getText().trim());
-    			
-    			
-    		} catch (FileNotFoundException e) {
-    			logger.error( "Unable save scan results.",e);
-    		} catch (IOException e) {
-    			logger.debug("Can't create new file.  File="+selectedfile.getAbsolutePath().toString());
-    		} finally {
-    			
-    			if (p!= null) {
-    				p.flush();
-    				p.close();
-    			}
-    		}
+			logger.info("Saving report results to file.  Name=" + selectedfile.getName() );
+
+			PrintWriter p = null;
+			try {
+
+				selectedfile.createNewFile();
+
+				p = new PrintWriter(selectedfile);
+
+				p.println(tpResults.getText().trim());
+
+
+			} catch (FileNotFoundException e) {
+				logger.error( "Unable save scan results.",e);
+			} catch (IOException e) {
+				logger.debug("Can't create new file.  File="+ selectedfile.getAbsolutePath());
+			} finally {
+
+				if (p!= null) {
+					p.flush();
+					p.close();
+				}
+			}
 
 		} else {
-            logger.debug( "Result save cancelled by user.");
-        }
+			logger.debug( "Result save cancelled by user.");
+		}
 		
 		setEnableControls(true);
 	}
@@ -448,12 +440,7 @@ public class MainFrm extends JFrame {
 	 * @param phase
 	 */
 	private void updateWorkStatus( String phase ) {
-		
-		StringBuffer buff = new StringBuffer();
-		
-		buff.append( STATUS_HDR );
-		buff.append( phase );
-		txtStatus.setText(buff.toString());
+		txtStatus.setText(STATUS_HDR + phase);
 	}
 	
 	/**
@@ -468,6 +455,7 @@ public class MainFrm extends JFrame {
 	/**
 	 * Refresh or update the UI.
 	 */
+	@SuppressWarnings("WeakerAccess")
 	public void refresh() {
 	
 			invalidate();

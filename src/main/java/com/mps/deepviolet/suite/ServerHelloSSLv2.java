@@ -17,9 +17,7 @@ public class ServerHelloSSLv2 {
 	String serverCertName;
 	String serverCertHash;
 
-	ServerHelloSSLv2(InputStream in)
-		throws IOException
-	{
+	ServerHelloSSLv2(InputStream in) throws IOException	{
 		// Record length
 		byte[] buf = new byte[2];
 		CipherSuiteUtil.readFully(in, buf);
@@ -29,14 +27,12 @@ public class ServerHelloSSLv2 {
 		}
 		len &= 0x7FFF;
 		if (len < 11) {
-			throw new IOException(
-				"not a SSLv2 server hello");
+			throw new IOException("not a SSLv2 server hello");
 		}
 		buf = new byte[11];
 		CipherSuiteUtil.readFully(in, buf);
 		if (buf[0] != 0x04) {
-			throw new IOException(
-				"not a SSLv2 server hello");
+			throw new IOException("not a SSLv2 server hello");
 		}
 		int certLen = CipherSuiteUtil.dec16be(buf, 5);
 		int csLen = CipherSuiteUtil.dec16be(buf, 7);
@@ -46,8 +42,7 @@ public class ServerHelloSSLv2 {
 				"not a SSLv2 server hello");
 		}
 		if (csLen == 0 || csLen % 3 != 0) {
-			throw new IOException(
-				"not a SSLv2 server hello");
+			throw new IOException("not a SSLv2 server hello");
 		}
 		byte[] cert = new byte[certLen];
 		CipherSuiteUtil.readFully(in, cert);
