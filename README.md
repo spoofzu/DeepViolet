@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/spoofzu/DeepViolet.svg?branch=master)](https://travis-ci.org/spoofzu/DeepViolet)
+[![Black Hat Arsenal](https://www.toolswatch.org/badges/arsenal/2016.svg)](http://www.blackhat.com/eu-16/arsenal.html#milton-smith)
 <p/>
 
 <h1>OWASP DeepViolet TLS/SSL API Project and Tools</h1><br/>
