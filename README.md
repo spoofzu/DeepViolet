@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/spoofzu/DeepViolet.svg?branch=master)](https://travis-ci.org/spoofzu/DeepViolet)
 <p/>
 
-<h1>OWASP DeepViolet, TLS/SSL Introspection Tool</h1><br/>
+<h1>OWASP DeepViolet TLS/SSL API Project and Tools</h1><br/>
 ==========
 <p/>
 [OWASP Project Page](https://www.owasp.org/index.php/OWASP_DeepViolet_TLS/SSL_Scanner) | [API JavaDocs](https://spoofzu.github.io/DeepViolet/) | [Reference Screenshots](https://github.com/spoofzu/DeepViolet/wiki/Running-Reference-Tools)
