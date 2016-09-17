@@ -1,9 +1,19 @@
 package com.mps.deepviolet.util;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mps.deepviolet.suite.CipherSuiteUtil;
 
 public class FileUtils {
 
@@ -82,6 +92,32 @@ public class FileUtils {
 		}
 		
 		
+	}
+	
+	public static final String getJsonResourceAsString( String name ) {
+		
+		//
+        //URL ciphermap_url = CipherSuiteUtil.class.getClassLoader().getResource("ciphermap.json");
+		
+		BufferedReader br = null;
+		StringBuffer buff = new StringBuffer(4000);
+		try {
+			String sCurrentLine;
+			InputStream in = FileUtils.class.getClassLoader().getResourceAsStream(name);
+			br = new BufferedReader(new InputStreamReader(in));
+			while ((sCurrentLine = br.readLine()) != null) {
+				buff.append( sCurrentLine);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (br != null)br.close();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+		return buff.toString();
 	}
 	
 }

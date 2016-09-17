@@ -7,10 +7,10 @@ package com.mps.deepviolet.api;
 public interface IDVCipherSuite {
 
 	/**
-	 * IANA cipher suite name.
+	 * Cipher suite name.
 	 * @return Cipher name
 	 */
-	String getIANAName();
+	String getSuiteName();
 	
 	/**
 	 * Evaluation of cipher suite strength
