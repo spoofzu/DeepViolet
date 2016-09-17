@@ -28,7 +28,7 @@ public class PrintServerCiphersuites {
 				// protocol.
 			}else{
 				StringBuffer buff = new StringBuffer();
-				buff.append(cipher.getIANAName());
+				buff.append(cipher.getSuiteName());
 				buff.append('(');
 				buff.append(cipher.getStrengthEvaluation());
 				buff.append(',');

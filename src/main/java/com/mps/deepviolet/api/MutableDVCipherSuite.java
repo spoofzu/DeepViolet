@@ -13,7 +13,7 @@ class MutableDVCipherSuite implements IDVCipherSuite {
 		this.protocol = protocol;
 	}
 	
-	public String getIANAName() {
+	public String getSuiteName() {
 		return name;
 	}
 	

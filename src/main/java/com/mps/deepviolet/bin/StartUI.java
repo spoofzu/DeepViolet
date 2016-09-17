@@ -80,16 +80,20 @@ public class StartUI {
 				}	    	   
 	    	    
 	    	    try {
-	    	        Class util = Class.forName("com.apple.eawt.Application");
-	    	        Method getApplication = util.getMethod("getApplication", new Class[0]);
-	    	        Object application = getApplication.invoke(util);
-	    	        Class params[] = new Class[1];
-	    	        params[0] = Image.class;
-	    	        Method setDockIconImage = util.getMethod("setDockIconImage", params);
-	    	        URL url = this.getClass().getClassLoader().getResource("dv-raw.png");
-	    	        Image image = Toolkit.getDefaultToolkit().getImage(url);
-	    	        setDockIconImage.invoke(application, image);
-					logger.debug( "Dock icon assigned, url="+url.toString() );
+	    	    	// Add a dock icon for OS X
+	    	    	String os_type = System.getProperty("os.name");
+	    	    	if( os_type != null && os_type.toUpperCase().indexOf("MAC")>-1) {
+		    	        Class util = Class.forName("com.apple.eawt.Application");
+		    	        Method getApplication = util.getMethod("getApplication", new Class[0]);
+		    	        Object application = getApplication.invoke(util);
+		    	        Class params[] = new Class[1];
+		    	        params[0] = Image.class;
+		    	        Method setDockIconImage = util.getMethod("setDockIconImage", params);
+		    	        URL url = this.getClass().getClassLoader().getResource("deepviolet-logo.png");
+		    	        Image image = Toolkit.getDefaultToolkit().getImage(url);
+		    	        setDockIconImage.invoke(application, image);
+						logger.debug( "Dock icon assigned, url="+url.toString() );
+	    	    	}
 	    	    } catch (Exception e) {
 					logger.error("Error setting dockicon image, msg="+e.getMessage());
 	    	    } 

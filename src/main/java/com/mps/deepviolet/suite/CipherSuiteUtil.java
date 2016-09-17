@@ -24,6 +24,7 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Formatter;
 import java.util.HashMap;
@@ -62,6 +63,10 @@ import org.bouncycastle.asn1.DLSequence;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.JsonPath;
+import com.mps.deepviolet.util.FileUtils;
 
 //import sun.security.provider.certpath.OCSP;
 //import sun.security.provider.certpath.OCSP.RevocationStatus;
@@ -142,373 +147,10 @@ public class CipherSuiteUtil {
 			new TreeMap<Integer, CipherSuite>();
 	
 	static {
-		/*
-		 * SSLv2 cipher suites.
-		 */
-		S8(0x010080, "RC4_128_WITH_MD5"               );
-		S4(0x020080, "RC4_128_EXPORT40_WITH_MD5"      );
-		B8(0x030080, "RC2_128_CBC_WITH_MD5"           );
-		B4(0x040080, "RC2_128_CBC_EXPORT40_WITH_MD5"  );
-		B8(0x050080, "IDEA_128_CBC_WITH_MD5"          );
-		B5(0x060040, "DES_64_CBC_WITH_MD5"            );
-		B8(0x0700C0, "DES_192_EDE3_CBC_WITH_MD5"      );
 
-		/*
-		 * Original suites (SSLv3, TLS 1.0).
-		 */
-		N(0x0000, "NULL_WITH_NULL_NULL"                );
-		N(0x0001, "RSA_WITH_NULL_MD5"                  );
-		N(0x0002, "RSA_WITH_NULL_SHA"                  );
-		S4(0x0003, "RSA_EXPORT_WITH_RC4_40_MD5"        );
-		S8(0x0004, "RSA_WITH_RC4_128_MD5"              );
-		S8(0x0005, "RSA_WITH_RC4_128_SHA"              );
-		B4(0x0006, "RSA_EXPORT_WITH_RC2_CBC_40_MD5"    );
-		B8(0x0007, "RSA_WITH_IDEA_CBC_SHA"             );
-		B4(0x0008, "RSA_EXPORT_WITH_DES40_CBC_SHA"     );
-		B5(0x0009, "RSA_WITH_DES_CBC_SHA"              );
-		B8(0x000A, "RSA_WITH_3DES_EDE_CBC_SHA"         );
-		B4(0x000B, "DH_DSS_EXPORT_WITH_DES40_CBC_SHA"  );
-		B5(0x000C, "DH_DSS_WITH_DES_CBC_SHA"           );
-		B8(0x000D, "DH_DSS_WITH_3DES_EDE_CBC_SHA"      );
-		B4(0x000E, "DH_RSA_EXPORT_WITH_DES40_CBC_SHA"  );
-		B5(0x000F, "DH_RSA_WITH_DES_CBC_SHA"           );
-		B8(0x0010, "DH_RSA_WITH_3DES_EDE_CBC_SHA"      );
-		B4(0x0011, "DHE_DSS_EXPORT_WITH_DES40_CBC_SHA" );
-		B5(0x0012, "DHE_DSS_WITH_DES_CBC_SHA"          );
-		B8(0x0013, "DHE_DSS_WITH_3DES_EDE_CBC_SHA"     );
-		B4(0x0014, "DHE_RSA_EXPORT_WITH_DES40_CBC_SHA" );
-		B5(0x0015, "DHE_RSA_WITH_DES_CBC_SHA"          );
-		B8(0x0016, "DHE_RSA_WITH_3DES_EDE_CBC_SHA"     );
-		S4(0x0017, "DH_anon_EXPORT_WITH_RC4_40_MD5"    );
-		S8(0x0018, "DH_anon_WITH_RC4_128_MD5"          );
-		B4(0x0019, "DH_anon_EXPORT_WITH_DES40_CBC_SHA" );
-		B5(0x001A, "DH_anon_WITH_DES_CBC_SHA"          );
-		B8(0x001B, "DH_anon_WITH_3DES_EDE_CBC_SHA"     );
-
-		/*
-		 * FORTEZZA suites (SSLv3 only; see RFC 6101).
-		 */
-		N(0x001C, "FORTEZZA_KEA_WITH_NULL_SHA"          );
-		B8(0x001D, "FORTEZZA_KEA_WITH_FORTEZZA_CBC_SHA" );
-
-		/* This one is deactivated since it conflicts with
-		   one of the Kerberos cipher suites.
-		S8(0x001E, "FORTEZZA_KEA_WITH_RC4_128_SHA"      );
-		*/
-
-		/*
-		 * Kerberos cipher suites (RFC 2712).
-		 */
-		B5(0x001E, "KRB5_WITH_DES_CBC_SHA"             );
-		B8(0x001F, "KRB5_WITH_3DES_EDE_CBC_SHA"        );
-		S8(0x0020, "KRB5_WITH_RC4_128_SHA"             );
-		B8(0x0021, "KRB5_WITH_IDEA_CBC_SHA"            );
-		B5(0x0022, "KRB5_WITH_DES_CBC_MD5"             );
-		B8(0x0023, "KRB5_WITH_3DES_EDE_CBC_MD5"        );
-		S8(0x0024, "KRB5_WITH_RC4_128_MD5"             );
-		B8(0x0025, "KRB5_WITH_IDEA_CBC_MD5"            );
-		B4(0x0026, "KRB5_EXPORT_WITH_DES_CBC_40_SHA"   );
-		B4(0x0027, "KRB5_EXPORT_WITH_RC2_CBC_40_SHA"   );
-		S4(0x0028, "KRB5_EXPORT_WITH_RC4_40_SHA"       );
-		B4(0x0029, "KRB5_EXPORT_WITH_DES_CBC_40_MD5"   );
-		B4(0x002A, "KRB5_EXPORT_WITH_RC2_CBC_40_MD5"   );
-		S4(0x002B, "KRB5_EXPORT_WITH_RC4_40_MD5"       );
-
-		/*
-		 * Pre-shared key, no encryption cipher suites (RFC 4785).
-		 */
-		N(0x002C, "PSK_WITH_NULL_SHA"                  );
-		N(0x002D, "DHE_PSK_WITH_NULL_SHA"              );
-		N(0x002E, "RSA_PSK_WITH_NULL_SHA"              );
-
-		/*
-		 * AES-based suites (TLS 1.1).
-		 */
-		B8(0x002F, "RSA_WITH_AES_128_CBC_SHA"          );
-		B8(0x0030, "DH_DSS_WITH_AES_128_CBC_SHA"       );
-		B8(0x0031, "DH_RSA_WITH_AES_128_CBC_SHA"       );
-		B8(0x0032, "DHE_DSS_WITH_AES_128_CBC_SHA"      );
-		B8(0x0033, "DHE_RSA_WITH_AES_128_CBC_SHA"      );
-		B8(0x0034, "DH_anon_WITH_AES_128_CBC_SHA"      );
-		B8(0x0035, "RSA_WITH_AES_256_CBC_SHA"          );
-		B8(0x0036, "DH_DSS_WITH_AES_256_CBC_SHA"       );
-		B8(0x0037, "DH_RSA_WITH_AES_256_CBC_SHA"       );
-		B8(0x0038, "DHE_DSS_WITH_AES_256_CBC_SHA"      );
-		B8(0x0039, "DHE_RSA_WITH_AES_256_CBC_SHA"      );
-		B8(0x003A, "DH_anon_WITH_AES_256_CBC_SHA"      );
-
-		/*
-		 * Suites with SHA-256 (TLS 1.2).
-		 */
-		N(0x003B, "RSA_WITH_NULL_SHA256"               );
-		B8(0x003C, "RSA_WITH_AES_128_CBC_SHA256"       );
-		B8(0x003D, "RSA_WITH_AES_256_CBC_SHA256"       );
-		B8(0x003E, "DH_DSS_WITH_AES_128_CBC_SHA256"    );
-		B8(0x003F, "DH_RSA_WITH_AES_128_CBC_SHA256"    );
-		B8(0x0040, "DHE_DSS_WITH_AES_128_CBC_SHA256"   );
-		B8(0x0067, "DHE_RSA_WITH_AES_128_CBC_SHA256"   );
-		B8(0x0068, "DH_DSS_WITH_AES_256_CBC_SHA256"    );
-		B8(0x0069, "DH_RSA_WITH_AES_256_CBC_SHA256"    );
-		B8(0x006A, "DHE_DSS_WITH_AES_256_CBC_SHA256"   );
-		B8(0x006B, "DHE_RSA_WITH_AES_256_CBC_SHA256"   );
-		B8(0x006C, "DH_anon_WITH_AES_128_CBC_SHA256"   );
-		B8(0x006D, "DH_anon_WITH_AES_256_CBC_SHA256"   );
-
-		/*
-		 * Camellia cipher suites (RFC 5932).
-		 */
-		B8(0x0041, "RSA_WITH_CAMELLIA_128_CBC_SHA"     );
-		B8(0x0042, "DH_DSS_WITH_CAMELLIA_128_CBC_SHA"  );
-		B8(0x0043, "DH_RSA_WITH_CAMELLIA_128_CBC_SHA"  );
-		B8(0x0044, "DHE_DSS_WITH_CAMELLIA_128_CBC_SHA" );
-		B8(0x0045, "DHE_RSA_WITH_CAMELLIA_128_CBC_SHA" );
-		B8(0x0046, "DH_anon_WITH_CAMELLIA_128_CBC_SHA" );
-		B8(0x0084, "RSA_WITH_CAMELLIA_256_CBC_SHA"     );
-		B8(0x0085, "DH_DSS_WITH_CAMELLIA_256_CBC_SHA"  );
-		B8(0x0086, "DH_RSA_WITH_CAMELLIA_256_CBC_SHA"  );
-		B8(0x0087, "DHE_DSS_WITH_CAMELLIA_256_CBC_SHA" );
-		B8(0x0088, "DHE_RSA_WITH_CAMELLIA_256_CBC_SHA" );
-		B8(0x0089, "DH_anon_WITH_CAMELLIA_256_CBC_SHA" );
-
-		/*
-		 * Unsorted (yet), from the IANA TLS registry:
-		 * http://www.iana.org/assignments/tls-parameters/
-		 */
-		S8(0x008A, "TLS_PSK_WITH_RC4_128_SHA"                        );
-		B8(0x008B, "TLS_PSK_WITH_3DES_EDE_CBC_SHA"                   );
-		B8(0x008C, "TLS_PSK_WITH_AES_128_CBC_SHA"                    );
-		B8(0x008D, "TLS_PSK_WITH_AES_256_CBC_SHA"                    );
-		S8(0x008E, "TLS_DHE_PSK_WITH_RC4_128_SHA"                    );
-		B8(0x008F, "TLS_DHE_PSK_WITH_3DES_EDE_CBC_SHA"               );
-		B8(0x0090, "TLS_DHE_PSK_WITH_AES_128_CBC_SHA"                );
-		B8(0x0091, "TLS_DHE_PSK_WITH_AES_256_CBC_SHA"                );
-		S8(0x0092, "TLS_RSA_PSK_WITH_RC4_128_SHA"                    );
-		B8(0x0093, "TLS_RSA_PSK_WITH_3DES_EDE_CBC_SHA"               );
-		B8(0x0094, "TLS_RSA_PSK_WITH_AES_128_CBC_SHA"                );
-		B8(0x0095, "TLS_RSA_PSK_WITH_AES_256_CBC_SHA"                );
-		B8(0x0096, "TLS_RSA_WITH_SEED_CBC_SHA"                       );
-		B8(0x0097, "TLS_DH_DSS_WITH_SEED_CBC_SHA"                    );
-		B8(0x0098, "TLS_DH_RSA_WITH_SEED_CBC_SHA"                    );
-		B8(0x0099, "TLS_DHE_DSS_WITH_SEED_CBC_SHA"                   );
-		B8(0x009A, "TLS_DHE_RSA_WITH_SEED_CBC_SHA"                   );
-		B8(0x009B, "TLS_DH_anon_WITH_SEED_CBC_SHA"                   );
-		S8(0x009C, "TLS_RSA_WITH_AES_128_GCM_SHA256"                 );
-		S8(0x009D, "TLS_RSA_WITH_AES_256_GCM_SHA384"                 );
-		S8(0x009E, "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256"             );
-		S8(0x009F, "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384"             );
-		S8(0x00A0, "TLS_DH_RSA_WITH_AES_128_GCM_SHA256"              );
-		S8(0x00A1, "TLS_DH_RSA_WITH_AES_256_GCM_SHA384"              );
-		S8(0x00A2, "TLS_DHE_DSS_WITH_AES_128_GCM_SHA256"             );
-		S8(0x00A3, "TLS_DHE_DSS_WITH_AES_256_GCM_SHA384"             );
-		S8(0x00A4, "TLS_DH_DSS_WITH_AES_128_GCM_SHA256"              );
-		S8(0x00A5, "TLS_DH_DSS_WITH_AES_256_GCM_SHA384"              );
-		S8(0x00A6, "TLS_DH_anon_WITH_AES_128_GCM_SHA256"             );
-		S8(0x00A7, "TLS_DH_anon_WITH_AES_256_GCM_SHA384"             );
-		S8(0x00A8, "TLS_PSK_WITH_AES_128_GCM_SHA256"                 );
-		S8(0x00A9, "TLS_PSK_WITH_AES_256_GCM_SHA384"                 );
-		S8(0x00AA, "TLS_DHE_PSK_WITH_AES_128_GCM_SHA256"             );
-		S8(0x00AB, "TLS_DHE_PSK_WITH_AES_256_GCM_SHA384"             );
-		S8(0x00AC, "TLS_RSA_PSK_WITH_AES_128_GCM_SHA256"             );
-		S8(0x00AD, "TLS_RSA_PSK_WITH_AES_256_GCM_SHA384"             );
-		B8(0x00AE, "TLS_PSK_WITH_AES_128_CBC_SHA256"                 );
-		B8(0x00AF, "TLS_PSK_WITH_AES_256_CBC_SHA384"                 );
-		N(0x00B0, "TLS_PSK_WITH_NULL_SHA256"                         );
-		N(0x00B1, "TLS_PSK_WITH_NULL_SHA384"                         );
-		B8(0x00B2, "TLS_DHE_PSK_WITH_AES_128_CBC_SHA256"             );
-		B8(0x00B3, "TLS_DHE_PSK_WITH_AES_256_CBC_SHA384"             );
-		N(0x00B4, "TLS_DHE_PSK_WITH_NULL_SHA256"                     );
-		N(0x00B5, "TLS_DHE_PSK_WITH_NULL_SHA384"                     );
-		B8(0x00B6, "TLS_RSA_PSK_WITH_AES_128_CBC_SHA256"             );
-		B8(0x00B7, "TLS_RSA_PSK_WITH_AES_256_CBC_SHA384"             );
-		N(0x00B8, "TLS_RSA_PSK_WITH_NULL_SHA256"                     );
-		N(0x00B9, "TLS_RSA_PSK_WITH_NULL_SHA384"                     );
-		B8(0x00BA, "TLS_RSA_WITH_CAMELLIA_128_CBC_SHA256"            );
-		B8(0x00BB, "TLS_DH_DSS_WITH_CAMELLIA_128_CBC_SHA256"         );
-		B8(0x00BC, "TLS_DH_RSA_WITH_CAMELLIA_128_CBC_SHA256"         );
-		B8(0x00BD, "TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA256"        );
-		B8(0x00BE, "TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA256"        );
-		B8(0x00BF, "TLS_DH_anon_WITH_CAMELLIA_128_CBC_SHA256"        );
-		B8(0x00C0, "TLS_RSA_WITH_CAMELLIA_256_CBC_SHA256"            );
-		B8(0x00C1, "TLS_DH_DSS_WITH_CAMELLIA_256_CBC_SHA256"         );
-		B8(0x00C2, "TLS_DH_RSA_WITH_CAMELLIA_256_CBC_SHA256"         );
-		B8(0x00C3, "TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA256"        );
-		B8(0x00C4, "TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA256"        );
-		B8(0x00C5, "TLS_DH_anon_WITH_CAMELLIA_256_CBC_SHA256"        );
-		/* This one is a fake cipher suite which marks a
-		   renegotiation.
-		N(0x00FF, "TLS_EMPTY_RENEGOTIATION_INFO_SCSV"                );
-		*/
-		N(0xC001, "TLS_ECDH_ECDSA_WITH_NULL_SHA"                     );
-		S8(0xC002, "TLS_ECDH_ECDSA_WITH_RC4_128_SHA"                 );
-		B8(0xC003, "TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA"            );
-		B8(0xC004, "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA"             );
-		B8(0xC005, "TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA"             );
-		N(0xC006, "TLS_ECDHE_ECDSA_WITH_NULL_SHA"                    );
-		S8(0xC007, "TLS_ECDHE_ECDSA_WITH_RC4_128_SHA"                );
-		B8(0xC008, "TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA"           );
-		B8(0xC009, "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA"            );
-		B8(0xC00A, "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA"            );
-		N(0xC00B, "TLS_ECDH_RSA_WITH_NULL_SHA"                       );
-		S8(0xC00C, "TLS_ECDH_RSA_WITH_RC4_128_SHA"                   );
-		B8(0xC00D, "TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA"              );
-		B8(0xC00E, "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA"               );
-		B8(0xC00F, "TLS_ECDH_RSA_WITH_AES_256_CBC_SHA"               );
-		N(0xC010, "TLS_ECDHE_RSA_WITH_NULL_SHA"                      );
-		S8(0xC011, "TLS_ECDHE_RSA_WITH_RC4_128_SHA"                  );
-		B8(0xC012, "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA"             );
-		B8(0xC013, "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"              );
-		B8(0xC014, "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA"              );
-		N(0xC015, "TLS_ECDH_anon_WITH_NULL_SHA"                     );
-		S8(0xC016, "TLS_ECDH_anon_WITH_RC4_128_SHA"                  );
-		B8(0xC017, "TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA"             );
-		B8(0xC018, "TLS_ECDH_anon_WITH_AES_128_CBC_SHA"              );
-		B8(0xC019, "TLS_ECDH_anon_WITH_AES_256_CBC_SHA"              );
-		B8(0xC01A, "TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA"               );
-		B8(0xC01B, "TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA"           );
-		B8(0xC01C, "TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA"           );
-		B8(0xC01D, "TLS_SRP_SHA_WITH_AES_128_CBC_SHA"                );
-		B8(0xC01E, "TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA"            );
-		B8(0xC01F, "TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA"            );
-		B8(0xC020, "TLS_SRP_SHA_WITH_AES_256_CBC_SHA"                );
-		B8(0xC021, "TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA"            );
-		B8(0xC022, "TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA"            );
-		B8(0xC023, "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256"         );
-		B8(0xC024, "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"         );
-		B8(0xC025, "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256"          );
-		B8(0xC026, "TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384"          );
-		B8(0xC027, "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256"           );
-		B8(0xC028, "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"           );
-		B8(0xC029, "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256"            );
-		B8(0xC02A, "TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384"            );
-		S8(0xC02B, "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"         );
-		S8(0xC02C, "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"         );
-		S8(0xC02D, "TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256"          );
-		S8(0xC02E, "TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384"          );
-		S8(0xC02F, "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"           );
-		S8(0xC030, "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"           );
-		S8(0xC031, "TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256"            );
-		S8(0xC032, "TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384"            );
-		S8(0xC033, "TLS_ECDHE_PSK_WITH_RC4_128_SHA"                  );
-		B8(0xC034, "TLS_ECDHE_PSK_WITH_3DES_EDE_CBC_SHA"             );
-		B8(0xC035, "TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA"              );
-		B8(0xC036, "TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA"              );
-		B8(0xC037, "TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256"           );
-		B8(0xC038, "TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA384"           );
-		N(0xC039, "TLS_ECDHE_PSK_WITH_NULL_SHA"                      );
-		N(0xC03A, "TLS_ECDHE_PSK_WITH_NULL_SHA256"                   );
-		N(0xC03B, "TLS_ECDHE_PSK_WITH_NULL_SHA384"                   );
-		B8(0xC03C, "TLS_RSA_WITH_ARIA_128_CBC_SHA256"                );
-		B8(0xC03D, "TLS_RSA_WITH_ARIA_256_CBC_SHA384"                );
-		B8(0xC03E, "TLS_DH_DSS_WITH_ARIA_128_CBC_SHA256"             );
-		B8(0xC03F, "TLS_DH_DSS_WITH_ARIA_256_CBC_SHA384"             );
-		B8(0xC040, "TLS_DH_RSA_WITH_ARIA_128_CBC_SHA256"             );
-		B8(0xC041, "TLS_DH_RSA_WITH_ARIA_256_CBC_SHA384"             );
-		B8(0xC042, "TLS_DHE_DSS_WITH_ARIA_128_CBC_SHA256"            );
-		B8(0xC043, "TLS_DHE_DSS_WITH_ARIA_256_CBC_SHA384"            );
-		B8(0xC044, "TLS_DHE_RSA_WITH_ARIA_128_CBC_SHA256"            );
-		B8(0xC045, "TLS_DHE_RSA_WITH_ARIA_256_CBC_SHA384"            );
-		B8(0xC046, "TLS_DH_anon_WITH_ARIA_128_CBC_SHA256"            );
-		B8(0xC047, "TLS_DH_anon_WITH_ARIA_256_CBC_SHA384"            );
-		B8(0xC048, "TLS_ECDHE_ECDSA_WITH_ARIA_128_CBC_SHA256"        );
-		B8(0xC049, "TLS_ECDHE_ECDSA_WITH_ARIA_256_CBC_SHA384"        );
-		B8(0xC04A, "TLS_ECDH_ECDSA_WITH_ARIA_128_CBC_SHA256"         );
-		B8(0xC04B, "TLS_ECDH_ECDSA_WITH_ARIA_256_CBC_SHA384"         );
-		B8(0xC04C, "TLS_ECDHE_RSA_WITH_ARIA_128_CBC_SHA256"          );
-		B8(0xC04D, "TLS_ECDHE_RSA_WITH_ARIA_256_CBC_SHA384"          );
-		B8(0xC04E, "TLS_ECDH_RSA_WITH_ARIA_128_CBC_SHA256"           );
-		B8(0xC04F, "TLS_ECDH_RSA_WITH_ARIA_256_CBC_SHA384"           );
-		S8(0xC050, "TLS_RSA_WITH_ARIA_128_GCM_SHA256"                );
-		S8(0xC051, "TLS_RSA_WITH_ARIA_256_GCM_SHA384"                );
-		S8(0xC052, "TLS_DHE_RSA_WITH_ARIA_128_GCM_SHA256"            );
-		S8(0xC053, "TLS_DHE_RSA_WITH_ARIA_256_GCM_SHA384"            );
-		S8(0xC054, "TLS_DH_RSA_WITH_ARIA_128_GCM_SHA256"             );
-		S8(0xC055, "TLS_DH_RSA_WITH_ARIA_256_GCM_SHA384"             );
-		S8(0xC056, "TLS_DHE_DSS_WITH_ARIA_128_GCM_SHA256"            );
-		S8(0xC057, "TLS_DHE_DSS_WITH_ARIA_256_GCM_SHA384"            );
-		S8(0xC058, "TLS_DH_DSS_WITH_ARIA_128_GCM_SHA256"             );
-		S8(0xC059, "TLS_DH_DSS_WITH_ARIA_256_GCM_SHA384"             );
-		S8(0xC05A, "TLS_DH_anon_WITH_ARIA_128_GCM_SHA256"            );
-		S8(0xC05B, "TLS_DH_anon_WITH_ARIA_256_GCM_SHA384"            );
-		S8(0xC05C, "TLS_ECDHE_ECDSA_WITH_ARIA_128_GCM_SHA256"        );
-		S8(0xC05D, "TLS_ECDHE_ECDSA_WITH_ARIA_256_GCM_SHA384"        );
-		S8(0xC05E, "TLS_ECDH_ECDSA_WITH_ARIA_128_GCM_SHA256"         );
-		S8(0xC05F, "TLS_ECDH_ECDSA_WITH_ARIA_256_GCM_SHA384"         );
-		S8(0xC060, "TLS_ECDHE_RSA_WITH_ARIA_128_GCM_SHA256"          );
-		S8(0xC061, "TLS_ECDHE_RSA_WITH_ARIA_256_GCM_SHA384"          );
-		S8(0xC062, "TLS_ECDH_RSA_WITH_ARIA_128_GCM_SHA256"           );
-		S8(0xC063, "TLS_ECDH_RSA_WITH_ARIA_256_GCM_SHA384"           );
-		B8(0xC064, "TLS_PSK_WITH_ARIA_128_CBC_SHA256"                );
-		B8(0xC065, "TLS_PSK_WITH_ARIA_256_CBC_SHA384"                );
-		B8(0xC066, "TLS_DHE_PSK_WITH_ARIA_128_CBC_SHA256"            );
-		B8(0xC067, "TLS_DHE_PSK_WITH_ARIA_256_CBC_SHA384"            );
-		B8(0xC068, "TLS_RSA_PSK_WITH_ARIA_128_CBC_SHA256"            );
-		B8(0xC069, "TLS_RSA_PSK_WITH_ARIA_256_CBC_SHA384"            );
-		S8(0xC06A, "TLS_PSK_WITH_ARIA_128_GCM_SHA256"                );
-		S8(0xC06B, "TLS_PSK_WITH_ARIA_256_GCM_SHA384"                );
-		S8(0xC06C, "TLS_DHE_PSK_WITH_ARIA_128_GCM_SHA256"            );
-		S8(0xC06D, "TLS_DHE_PSK_WITH_ARIA_256_GCM_SHA384"            );
-		S8(0xC06E, "TLS_RSA_PSK_WITH_ARIA_128_GCM_SHA256"            );
-		S8(0xC06F, "TLS_RSA_PSK_WITH_ARIA_256_GCM_SHA384"            );
-		B8(0xC070, "TLS_ECDHE_PSK_WITH_ARIA_128_CBC_SHA256"          );
-		B8(0xC071, "TLS_ECDHE_PSK_WITH_ARIA_256_CBC_SHA384"          );
-		B8(0xC072, "TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_CBC_SHA256"    );
-		B8(0xC073, "TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_CBC_SHA384"    );
-		B8(0xC074, "TLS_ECDH_ECDSA_WITH_CAMELLIA_128_CBC_SHA256"     );
-		B8(0xC075, "TLS_ECDH_ECDSA_WITH_CAMELLIA_256_CBC_SHA384"     );
-		B8(0xC076, "TLS_ECDHE_RSA_WITH_CAMELLIA_128_CBC_SHA256"      );
-		B8(0xC077, "TLS_ECDHE_RSA_WITH_CAMELLIA_256_CBC_SHA384"      );
-		B8(0xC078, "TLS_ECDH_RSA_WITH_CAMELLIA_128_CBC_SHA256"       );
-		B8(0xC079, "TLS_ECDH_RSA_WITH_CAMELLIA_256_CBC_SHA384"       );
-		S8(0xC07A, "TLS_RSA_WITH_CAMELLIA_128_GCM_SHA256"            );
-		S8(0xC07B, "TLS_RSA_WITH_CAMELLIA_256_GCM_SHA384"            );
-		S8(0xC07C, "TLS_DHE_RSA_WITH_CAMELLIA_128_GCM_SHA256"        );
-		S8(0xC07D, "TLS_DHE_RSA_WITH_CAMELLIA_256_GCM_SHA384"        );
-		S8(0xC07E, "TLS_DH_RSA_WITH_CAMELLIA_128_GCM_SHA256"         );
-		S8(0xC07F, "TLS_DH_RSA_WITH_CAMELLIA_256_GCM_SHA384"         );
-		S8(0xC080, "TLS_DHE_DSS_WITH_CAMELLIA_128_GCM_SHA256"        );
-		S8(0xC081, "TLS_DHE_DSS_WITH_CAMELLIA_256_GCM_SHA384"        );
-		S8(0xC082, "TLS_DH_DSS_WITH_CAMELLIA_128_GCM_SHA256"         );
-		S8(0xC083, "TLS_DH_DSS_WITH_CAMELLIA_256_GCM_SHA384"         );
-		S8(0xC084, "TLS_DH_anon_WITH_CAMELLIA_128_GCM_SHA256"        );
-		S8(0xC085, "TLS_DH_anon_WITH_CAMELLIA_256_GCM_SHA384"        );
-		S8(0xC086, "TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_GCM_SHA256"    );
-		S8(0xC087, "TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384"    );
-		S8(0xC088, "TLS_ECDH_ECDSA_WITH_CAMELLIA_128_GCM_SHA256"     );
-		S8(0xC089, "TLS_ECDH_ECDSA_WITH_CAMELLIA_256_GCM_SHA384"     );
-		S8(0xC08A, "TLS_ECDHE_RSA_WITH_CAMELLIA_128_GCM_SHA256"      );
-		S8(0xC08B, "TLS_ECDHE_RSA_WITH_CAMELLIA_256_GCM_SHA384"      );
-		S8(0xC08C, "TLS_ECDH_RSA_WITH_CAMELLIA_128_GCM_SHA256"       );
-		S8(0xC08D, "TLS_ECDH_RSA_WITH_CAMELLIA_256_GCM_SHA384"       );
-		S8(0xC08E, "TLS_PSK_WITH_CAMELLIA_128_GCM_SHA256"            );
-		S8(0xC08F, "TLS_PSK_WITH_CAMELLIA_256_GCM_SHA384"            );
-		S8(0xC090, "TLS_DHE_PSK_WITH_CAMELLIA_128_GCM_SHA256"        );
-		S8(0xC091, "TLS_DHE_PSK_WITH_CAMELLIA_256_GCM_SHA384"        );
-		S8(0xC092, "TLS_RSA_PSK_WITH_CAMELLIA_128_GCM_SHA256"        );
-		S8(0xC093, "TLS_RSA_PSK_WITH_CAMELLIA_256_GCM_SHA384"        );
-		B8(0xC094, "TLS_PSK_WITH_CAMELLIA_128_CBC_SHA256"            );
-		B8(0xC095, "TLS_PSK_WITH_CAMELLIA_256_CBC_SHA384"            );
-		B8(0xC096, "TLS_DHE_PSK_WITH_CAMELLIA_128_CBC_SHA256"        );
-		B8(0xC097, "TLS_DHE_PSK_WITH_CAMELLIA_256_CBC_SHA384"        );
-		B8(0xC098, "TLS_RSA_PSK_WITH_CAMELLIA_128_CBC_SHA256"        );
-		B8(0xC099, "TLS_RSA_PSK_WITH_CAMELLIA_256_CBC_SHA384"        );
-		B8(0xC09A, "TLS_ECDHE_PSK_WITH_CAMELLIA_128_CBC_SHA256"      );
-		B8(0xC09B, "TLS_ECDHE_PSK_WITH_CAMELLIA_256_CBC_SHA384"      );
-		S8(0xC09C, "TLS_RSA_WITH_AES_128_CCM"                        );
-		S8(0xC09D, "TLS_RSA_WITH_AES_256_CCM"                        );
-		S8(0xC09E, "TLS_DHE_RSA_WITH_AES_128_CCM"                    );
-		S8(0xC09F, "TLS_DHE_RSA_WITH_AES_256_CCM"                    );
-		S8(0xC0A0, "TLS_RSA_WITH_AES_128_CCM_8"                      );
-		S8(0xC0A1, "TLS_RSA_WITH_AES_256_CCM_8"                      );
-		S8(0xC0A2, "TLS_DHE_RSA_WITH_AES_128_CCM_8"                  );
-		S8(0xC0A3, "TLS_DHE_RSA_WITH_AES_256_CCM_8"                  );
-		S8(0xC0A4, "TLS_PSK_WITH_AES_128_CCM"                        );
-		S8(0xC0A5, "TLS_PSK_WITH_AES_256_CCM"                        );
-		S8(0xC0A6, "TLS_DHE_PSK_WITH_AES_128_CCM"                    );
-		S8(0xC0A7, "TLS_DHE_PSK_WITH_AES_256_CCM"                    );
-		S8(0xC0A8, "TLS_PSK_WITH_AES_128_CCM_8"                      );
-		S8(0xC0A9, "TLS_PSK_WITH_AES_256_CCM_8"                      );
-		S8(0xC0AA, "TLS_PSK_DHE_WITH_AES_128_CCM_8"                  );
-		S8(0xC0AB, "TLS_PSK_DHE_WITH_AES_256_CCM_8"                  );
+		// Generate cipher map dynamically based upon Mozilla json data.
+		initCipherMap();
+        
 	}
 	
 	
@@ -549,7 +191,7 @@ public class CipherSuiteUtil {
 		
 	}
 		
-	//todo this needs to go bye bye.  bad idea.  I'm thinking a better way to do this is eventually
+	// TODO This needs to go bye bye, abad idea.  I'm thinking a better way to do this is eventually
 	// get to a MVC type architecture.  This would better address the ways deepviolet can be used
 	public static synchronized ServerMetadata getServerMetadataInstance( URL url ) throws Exception {
 		
@@ -665,19 +307,19 @@ public class CipherSuiteUtil {
 		
 		
 		// Iterate over supported ciphersuites.
-		int agMaxStrength = STRONG;
-		int agMinStrength = STRONG;
-		boolean vulnBEAST = false;
-		for (int v : sv) {
-			Set<Integer> vsc = suppCS.get(v);
-			agMaxStrength = Math.min(
-				maxStrength(vsc), agMaxStrength);
-			agMinStrength = Math.min(
-				minStrength(vsc), agMinStrength);
-			if (!vulnBEAST) {
-				vulnBEAST = testBEAST(isa, v, vsc);
-			}
-		}
+//		int agMaxStrength = STRONG;
+//		int agMinStrength = STRONG;
+//		boolean vulnBEAST = false;
+//		for (int v : sv) {
+//			Set<Integer> vsc = suppCS.get(v);
+//			agMaxStrength = Math.min(
+//				maxStrength(vsc), agMaxStrength);
+//			agMinStrength = Math.min(
+//				minStrength(vsc), agMinStrength);
+//			if (!vulnBEAST) {
+//				vulnBEAST = testBEAST(isa, v, vsc);
+//			}
+//		}
 		
 //TODO: NEEDS TO BE CHECKED AND TESTED.  COMMENT OUT AT YOUR OWN RISK.
 //		hostdata.setScalarValue("analysis","MINIMAL_ENCRYPTION_STRENGTH", strengthString(agMinStrength));
@@ -691,6 +333,80 @@ public class CipherSuiteUtil {
 	}
 	
 	
+	private static void initCipherMap() {
+		
+		    String ciphermap = FileUtils.getJsonResourceAsString("ciphermap.json");
+		    Object document = Configuration.defaultConfiguration().jsonProvider().parse(ciphermap);
+		    List<?> ciphermetalist = JsonPath.read(document, "$[?(@.*)]");
+		  
+		    // Note (milton):  A point to consider about the Mozilla json evaluation data and a source
+		    // of confusion for me is that all ciphers listed in modern are also listed in
+		    // intermediate.  All ciphers in intermediate are also listed in old.  To separate
+		    // the evals out properly for DV purposes we add ciphers to a map in the following
+		    // order, modern, intermediate, and then old.  Further once we set the cipher
+		    // evaluation we don't allow the evaluation to be reassigned to a lower level.
+		    HashMap<String, Integer> strengtheval = new HashMap<String, Integer>();
+		    String cipherevaluation = FileUtils.getJsonResourceAsString("server-side-tls-conf-4.0.json");
+		    Object d2 = Configuration.defaultConfiguration().jsonProvider().parse(cipherevaluation);
+		    List<String> mc1 = JsonPath.read(d2, "$.configurations.modern.ciphersuites.*");
+		    for( String ciph: mc1) {
+		    	strengtheval.put(ciph, new Integer(STRONG));
+		    }
+		    //TODO note this does not return just intermediate.ciphersuites.* need to fix
+		    Object d3 = Configuration.defaultConfiguration().jsonProvider().parse(cipherevaluation);
+		    List<String> mc2 = JsonPath.read(d3, "$.configurations.intermediate.ciphersuites.*");
+		    for( String ciph: mc2) {
+		    	if( !strengtheval.containsKey(ciph) ){ // don't remove, see note.
+		    		strengtheval.put(ciph,new Integer(MEDIUM));
+		    	}
+		    }
+		    //TODO note this does not return just intermediate.ciphersuites.* need to fix
+		    Object d4 = Configuration.defaultConfiguration().jsonProvider().parse(cipherevaluation);
+		    List<String> mc3 = JsonPath.read(d4, "$.configurations.old.ciphersuites.*");
+		    for( String ciph: mc3) {
+		    	if( !strengtheval.containsKey(ciph) ){ // don't remove, see note.
+		    		strengtheval.put(ciph,new Integer(WEAK));
+		    	}
+		    }
+		    
+		    Iterator<?> i = ciphermetalist.iterator();
+		    while( i.hasNext() ) {
+		    	Map<?, ?> ci = (Map<?, ?>)i.next();
+		    	//System.out.println("ci="+ci.getClass().getName());
+		    	Iterator<?> keys = ci.keySet().iterator();
+		    	while ( keys.hasNext() ) {
+		    		Object obj = keys.next();
+			    	//System.out.println("obj="+obj.getClass().getName()+" val="+obj.toString());
+			    	Map<?, ?> ch1 = (Map<?, ?>)ci.get(obj.toString());
+			    	//System.out.println("ch1="+ch1.getClass().getName()+" val="+ch1.toString());
+			    	
+			    	List<String> ciphercode = Arrays.asList(obj.toString().split(","));
+		        	String ho = ciphercode.get(0);
+		        	List<String> lo = Arrays.asList(ciphercode.get(1).split("x"));
+		        	String sho = ho;
+		        	String slo = lo.get(1).replaceFirst("^0+(?!$)", "");
+		        	sho = ( sho.equals("0") ) ? "" : sho;
+		        	Integer cc1 = Integer.decode(sho+slo);
+		        	
+		        	Iterator<?> cns = ch1.values().iterator();
+		        	int istrengtheval = -1; //unknown strength
+		        	while( cns.hasNext() ) {
+		        		String key = (String)cns.next();
+		        		if( strengtheval.containsKey(key) ) {
+		        			istrengtheval = ((Integer)strengtheval.get(key)).intValue();
+		        			break;
+		        		}
+		        	}
+		        	logger.debug("Cached Mozilla ciphers, "+obj.toString()+" "+ch1.toString()+" strengtheval="+istrengtheval);
+			    	makeCS(cc1.intValue(),ch1, istrengtheval);
+			    	
+		    	}
+		    }
+
+		
+	}
+
+
 	static String versionString(int version) {
 		if (version == 0x0200) {
 			return "SSLv2";
@@ -704,35 +420,68 @@ public class CipherSuiteUtil {
 	}
 	
 	/*
-	 * Get cipher suites supported by the server. This is done by
+	 * Enumerate server cipher suites. This is accomplished by
 	 * repeatedly contacting the server, each time removing from our
-	 * list of supported suites the suite which the server just
-	 * selected. We keep on until the server can no longer respond
-	 * to us with a ServerHello.
+	 * list of supported suites returned by the server.  The cipher
+	 * suites remaining at the end of this operation are unsupported
+	 * by the server.
 	 */
 	static Set<Integer> supportedSuites(InetSocketAddress isa, int version,
 		Set<String> serverCertID)
 	{
-		Set<Integer> cs = new TreeSet<Integer>(CIPHER_SUITES.keySet());
+	
+		// Notes: the problem with using the past approach, CIPHER_SUITES.keySet(),
+		// is that some servers use ciphers outside those included with the
+		// Mozilla cipher mapings.  As a result DV was missing some ciphers.
+		// The new approach is more comprensive but takes longer.
+		//Set<Integer> cs = new TreeSet<Integer>(CIPHER_SUITES.keySet());
+		
 		Set<Integer> rs = new TreeSet<Integer>();
-		for (;;) {
-			ServerHello sh = connect(isa, version, cs);
-			if (sh == null) {
-				break;
+	
+		int BLK_SIZE = 6000;
+		int CIPHERMAPSZ = 0xFFFF;
+		int i2=0; int i3=1;
+		Set<Integer> scanblk = null;
+		for ( int i=1; i<CIPHERMAPSZ; i+=BLK_SIZE ) {
+
+			scanblk = new TreeSet<Integer>(); 
+			while( i2< BLK_SIZE*i3 ) {
+				scanblk.add(i2);
+				i2++;
 			}
-			if (!cs.contains(sh.cipherSuite)) {
-				logger.error("[ERR: server wants to use"
-					+ " cipher suite 0x%04X which client"
-					+ " did not announce]", sh.cipherSuite);
-				break;
+			i3++;
+			
+//			// Take it easy on server, delay between a little between block checks
+//			try {
+//				Thread.currentThread().sleep((int)(Math.random()*750));
+//			} catch (InterruptedException e) {}
+			
+			for (;;) {
+				//TODO could make this multi-threaded to speed up scanning. 
+				//  although need to be kind to servers.  Don't want too
+				// many connections and create performance problems.
+				ServerHello sh = connect(isa, version, scanblk);
+				if (sh == null) {
+					break;
+				}
+				if (!scanblk.contains(sh.cipherSuite)) {
+					//TODO need a better way to communicate this in the future
+					String ciphersuite = Integer.toHexString(sh.cipherSuite);
+					logger.error("Error: server wants to use"
+						+ " cipher suite "+ciphersuite+" which client"
+						+ " did not announce.");
+					break;
+				}
+				scanblk.remove(sh.cipherSuite);
+				rs.add(sh.cipherSuite);
+				if (sh.serverCertName != null) {
+					serverCertID.add(sh.serverCertHash
+						+ ": " + sh.serverCertName);
+				}
 			}
-			cs.remove(sh.cipherSuite);
-			rs.add(sh.cipherSuite);
-			if (sh.serverCertName != null) {
-				serverCertID.add(sh.serverCertHash
-					+ ": " + sh.serverCertName);
-			}
+		
 		}
+		
 		return rs;
 	}
 
@@ -800,31 +549,40 @@ public class CipherSuiteUtil {
 		String weak = "WEAK";
 		String medium = "MEDIUM";
 		String strong = "STRONG";
+		String unknown = "UNKNOWN";
 		
-		String result = clear;
+		String result = unknown;
 		
 		if (protocol.contains("_NULL_") ) {
 			
 			result = clear;
-			
-		} else if ( protocol.contains("DES40") ||
-				    protocol.contains("_40_") ||
-				    protocol.contains("_EXPORT40_") ) {
-		
-			result = weak;
-		
-		} else if ( protocol.contains("_DES_") ||
-			    protocol.contains("_DES64_") ||
-			    protocol.contains("_DES192_") ) {
-	
-		result = medium;
 		
 		} else {
 			
-			result = strong;
+			Collection suites = CIPHER_SUITES.values();
+			CipherSuite c = null;
+			Iterator i = suites.iterator();
+			while( i.hasNext() ) {
+				c = (CipherSuite)i.next();
+				if ( c.names.containsValue(protocol) ) {
+					switch ( c.strength ) {
+					case STRONG:
+						result = strong;
+						break;
+					case MEDIUM:
+						result = medium;
+						break;
+					case WEAK:
+						result = weak;
+						break;
+					}
+				}
+
+			}
+			
 		}
-	
-	    return result;
+	    
+		return result;
 		
 	}
 	
@@ -1002,7 +760,7 @@ public class CipherSuiteUtil {
 			result.add(ta.getTrustedCert());
 		}
 		
-		return (X509Certificate[])result.toArray(new X509Certificate[0]);
+		return result.toArray(new X509Certificate[0]);
 
 	}
 
@@ -1858,14 +1616,15 @@ public class CipherSuiteUtil {
 		}
 	}
 
+
+	
 	static final String cipherSuiteString(int suite)
 	{
 		CipherSuite cs = CIPHER_SUITES.get(suite);
 		if (cs == null) {
-			return String.format("UNKNOWN_SUITE:%04X", cs);
-		} else {
-			return cs.name;
+			return String.format("UNKNOWN_SUITE:%04X", suite);
 		}
+		return (String)cs.names.get("IANA"); // user needs to choose which cipher name to return. 
 	}
 
 	static final String cipherSuiteStringV2(int suite)
@@ -1874,75 +1633,79 @@ public class CipherSuiteUtil {
 		if (cs == null) {
 			return String.format("UNKNOWN_SUITE:%02X,%02X,%02X",
 				suite >> 16, (suite >> 8) & 0xFF, suite & 0XFF);
-		} else {
-			return cs.name ;
 		}
+		return (String)cs.names.get("IANA"); // user needs to choose which cipher name to return. 
 	}
 
-	private static final void makeCS(int suite, String name,
-		boolean isCBC, int strength)
+	//*****************************************************************
+	//*****************************************************************
+	//todo need to fix this asap
+	//*****************************************************************
+	//*****************************************************************
+	
+	private static final void makeCS(int suite, Map names, int strength)
 	{
 		CipherSuite cs = new CipherSuite();
 		cs.suite = suite;
-		cs.name = name;
-		cs.isCBC = isCBC;
+		cs.names = names;
+//		cs.isCBC = isCBC;
 		cs.strength = strength;
 		CIPHER_SUITES.put(suite, cs);
 
-		/*
-		 * Consistency test: the strength and CBC status can normally
-		 * be inferred from the name itself.
-		 */
-		boolean inferredCBC = name.contains("_CBC_");
-		int inferredStrength;
-		if (name.contains("_NULL_")) {
-			inferredStrength = CLEAR;
-		} else if (name.contains("DES40") || name.contains("_40_")
-			|| name.contains("EXPORT40"))
-		{
-			inferredStrength = WEAK;
-		} else if ((name.contains("_DES_") || name.contains("DES_64"))
-			&& !name.contains("DES_192"))
-		{
-			inferredStrength = MEDIUM;
-		} else {
-			inferredStrength = STRONG;
-		}
-		if (inferredStrength != strength || inferredCBC != isCBC) {
-			throw new RuntimeException(
-				"wrong classification: " + name);
-		}
+//		/*
+//		 * Consistency test: the strength and CBC status can normally
+//		 * be inferred from the name itself.
+//		 */
+//		boolean inferredCBC = name.contains("_CBC_");
+//		int inferredStrength;
+//		if (name.contains("_NULL_")) {
+//			inferredStrength = CLEAR;
+//		} else if (name.contains("DES40") || name.contains("_40_")
+//			|| name.contains("EXPORT40"))
+//		{
+//			inferredStrength = WEAK;
+//		} else if ((name.contains("_DES_") || name.contains("DES_64"))
+//			&& !name.contains("DES_192"))
+//		{
+//			inferredStrength = MEDIUM;
+//		} else {
+//			inferredStrength = STRONG;
+//		}
+//		if (inferredStrength != strength || inferredCBC != isCBC) {
+//			throw new RuntimeException(
+//				"wrong classification: " + name);
+//		}
 	}
 
-	private static final void N(int suite, String name)
-	{
-		makeCS(suite, name, false, CLEAR);
-	}
-
-	private static final void S4(int suite, String name)
-	{
-		makeCS(suite, name, false, WEAK);
-	}
-
-	private static final void S8(int suite, String name)
-	{
-		makeCS(suite, name, false, STRONG);
-	}
-
-	private static final void B4(int suite, String name)
-	{
-		makeCS(suite, name, true, WEAK);
-	}
-
-	private static final void B5(int suite, String name)
-	{
-		makeCS(suite, name, true, MEDIUM);
-	}
-
-	private static final void B8(int suite, String name)
-	{
-		makeCS(suite, name, true, STRONG);
-	}
+//	private static final void N(int suite, String name)
+//	{
+//		makeCS(suite, name, false, CLEAR);
+//	}
+//
+//	private static final void S4(int suite, String name)
+//	{
+//		makeCS(suite, name, false, WEAK);
+//	}
+//
+//	private static final void S8(int suite, String name)
+//	{
+//		makeCS(suite, name, false, STRONG);
+//	}
+//
+//	private static final void B4(int suite, String name)
+//	{
+//		makeCS(suite, name, true, WEAK);
+//	}
+//
+//	private static final void B5(int suite, String name)
+//	{
+//		makeCS(suite, name, true, MEDIUM);
+//	}
+//
+//	private static final void B8(int suite, String name)
+//	{
+//		makeCS(suite, name, true, STRONG);
+//	}
 	
 	static boolean testBEAST(InetSocketAddress isa,
 			int version, Set<Integer> supp)
@@ -1972,11 +1735,11 @@ public class CipherSuiteUtil {
 				if (cs.strength < STRONG) {
 					continue;
 				}
-				if (cs.isCBC) {
-					strongCBC.add(suite);
-				} else {
-					strongStream.add(suite);
-				}
+//				if (cs.isCBC) {
+//					strongCBC.add(suite);
+//				} else {
+//					strongStream.add(suite);
+//				}
 			}
 			if (strongCBC.size() == 0) {
 				return false;
