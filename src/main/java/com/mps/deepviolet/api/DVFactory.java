@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import com.mps.deepviolet.util.LogUtils;
+
 /**
  * Initial entry point for all DeepViolet API work.
  * <p>
@@ -43,6 +45,13 @@ import javax.net.ssl.SSLSocketFactory;
  *
  */
 public class DVFactory {
+	
+	// Initialize logging before we do anything
+	static {
+		LogUtils.logInit();
+	}
+	
+	
 	private DVFactory() {}
 
 	/**

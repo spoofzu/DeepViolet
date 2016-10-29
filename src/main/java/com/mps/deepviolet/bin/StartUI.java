@@ -21,6 +21,7 @@ import ch.qos.logback.core.util.StatusPrinter;
 
 import com.mps.deepviolet.ui.MainFrm;
 import com.mps.deepviolet.util.FileUtils;
+import com.mps.deepviolet.util.LogUtils;
 
 /**
  * Entry point to start DeepViolet and display a user interface.
@@ -29,13 +30,10 @@ import com.mps.deepviolet.util.FileUtils;
  */
 public class StartUI {
 
-	// Must execute before logback initializes
+	// Initialize logging before we do anything
 	static {
-		
-	    System.setProperty("dv_user_directory", FileUtils.getWorkingDirectory());
-	    System.setProperty("dv_user_level", "INFO");
-	    
-	}	
+		LogUtils.logInit();
+	}
 	
     private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.bin.StartUI");
 	
@@ -53,17 +51,6 @@ public class StartUI {
 	 * Initialization
 	 */
 	private void init(String[] args) {
-		
-	    // Pass deepviolet report directory to logback to write log file
-		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-	    ContextInitializer ci = new ContextInitializer(lc);
-	    lc.reset();
-	    try {
-	      ci.autoConfig(); 
-	    } catch (JoranException e) {
-	      e.printStackTrace();
-	    }
-	    //StatusPrinter.print(lc);
 		
 		logger.info("Starting UI via dvUI");
 		

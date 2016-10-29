@@ -23,6 +23,7 @@ import ch.qos.logback.core.joran.spi.JoranException;
 
 import com.mps.deepviolet.job.DeepScanTask;
 import com.mps.deepviolet.util.FileUtils;
+import com.mps.deepviolet.util.LogUtils;
 
 
 /**
@@ -33,12 +34,9 @@ import com.mps.deepviolet.util.FileUtils;
  */
 public class StartCMD {
 	
-	// Must execute before logback initializes
+	// Initialize logging before we do anything
 	static {
-		
-	    System.setProperty("dv_user_directory", FileUtils.getWorkingDirectory());
-	    System.setProperty("dv_user_level", "INFO");
-	    
+		LogUtils.logInit();
 	}
 	
 	public static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.bin.StartCMD");
@@ -56,17 +54,6 @@ public class StartCMD {
 	 * Initialization
 	 */
 	private void init(String[] args) {
-		
-	    // Pass deepviolet report directory to logback to write log file
-		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-	    ContextInitializer ci = new ContextInitializer(lc);
-	    lc.reset();
-	    try {
-	      ci.autoConfig(); 
-	    } catch (JoranException e) {
-	      e.printStackTrace();
-	    }
-	    //StatusPrinter.print(lc);
 	    
 	    logger.info("Starting headless via dvCMD");
 	    
