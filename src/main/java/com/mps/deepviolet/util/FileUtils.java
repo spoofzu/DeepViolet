@@ -6,6 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mps.deepviolet.suite.CipherMap;
+
 public class FileUtils {
 
 	/**
@@ -73,16 +78,14 @@ public class FileUtils {
 
 		if (workdir.exists()) {
 			if (!(workdir.canRead() && workdir.canWrite())) {
-				System.err
-						.println("Failed creating user report directory, reason=READ&WRITE required");
+				System.err.println("Failed creating user report directory, reason=READ&WRITE required");
 				System.exit(10);
 			}
 
 		}
 
 		if (!workdir.mkdirs()) {
-			System.err
-					.println("Can't create a working directory.  reason=File.mkdirs failed");
+			System.err.println("Can't create a working directory.  reason=File.mkdirs failed");
 			System.exit(15);
 		}
 
@@ -98,8 +101,7 @@ public class FileUtils {
 		StringBuffer buff = new StringBuffer(4000);
 		try {
 			String sCurrentLine;
-			InputStream in = FileUtils.class.getClassLoader()
-					.getResourceAsStream(name);
+			InputStream in = FileUtils.class.getClassLoader().getResourceAsStream(name);
 			br = new BufferedReader(new InputStreamReader(in));
 			while ((sCurrentLine = br.readLine()) != null) {
 				buff.append(sCurrentLine);
@@ -115,6 +117,13 @@ public class FileUtils {
 			}
 		}
 		return buff.toString();
+	}
+
+	public static CipherMap readCiphermapFromJSON(String file)
+			throws JsonParseException, JsonMappingException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		CipherMap obj = mapper.readValue(new File(file), CipherMap.class);
+		return obj;
 	}
 
 }
