@@ -26,19 +26,19 @@ public class PrintHostReport {
 		IDVOnPrint host_print_instance = eng.getDVOnPrint(con);
 
 		// Print some different sections.
-		con.append("Host information section");
+		con.append("Step 1 of 5: Host information section");
 		host_print_instance.printHostInformation();
-
-		con.append("Host HTTP response");
+		
+		con.append("Step 2 of 5: Host HTTP response");
 		host_print_instance.printHostHttpResponseHeaders();
-
-		con.append("Host supported ciphers");
+		
+		con.append("Step 3 of 5: Host supported ciphers");
 		host_print_instance.printSupportedCipherSuites();
-
-		con.append("Host connection characteristics");
+		
+		con.append("Step 4 of 5: Host connection characteristics");
 		host_print_instance.printConnectionCharacteristics();
-
-		con.append("Host certificate chain");
+		
+		con.append("Step 5 of 5: Host certificate chain");
 		host_print_instance.printServerCertificateChain();
 
 		// This message would be missed since no more sections are

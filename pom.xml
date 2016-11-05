@@ -43,13 +43,14 @@
 	<version>4.12</version>
 	<scope>test</scope>
   </dependency>
-    
+  
   <dependency>
     <groupId>org.mockito</groupId>
     <artifactId>mockito-core</artifactId>
     <version>1.10.19</version>
     <scope>test</scope>
   </dependency>
+
     <!-- 
 	<dependency>
 	    <groupId>org.owasp</groupId>
@@ -88,33 +89,60 @@
   
     <build>
     <plugins>
-      <!--  To build DeepViolet jars do, 1) maven clean, 2) maven install  -->
-      <!--  Change the mainClass to StartCMD, StartUI, or alternatively    -->
-      <!--  comment out the archive tags to get dvCMD.jar, dvUI.jar, and   -->
-      <!--  and dvAPI.jar respectively.  Not sure how to get maven to      -->
-      <!--  generate both jars at same time yet.                           -->
+  <plugin>
+    <!-- OneJar Notes: http://one-jar.sourceforge.net/.  OneJar lets us
+         build more than a single jar per project but no capability for
+         exclusions  -->
+    <groupId>com.jolira</groupId>
+    <artifactId>onejar-maven-plugin</artifactId>
+    <version>1.4.4</version>
+    <executions>
+      <execution>
+        <id>build-first</id>
+          <configuration>
+            <mainClass>com.mps.deepviolet.bin.StartUI</mainClass>
+            <attachToBuild>true</attachToBuild>
+            <classifier>onejar</classifier>
+            <filename>dvUI.jar</filename>
+          </configuration>
+          <goals>
+            <goal>one-jar</goal>
+          </goals>
+        </execution>
+      <execution>
+        <id>build-second</id>
+          <configuration>
+            <mainClass>com.mps.deepviolet.bin.StartCMD</mainClass>
+            <attachToBuild>true</attachToBuild>
+            <classifier>onejar</classifier>
+            <filename>dvCMD.jar</filename>
+          </configuration>
+          <goals>
+            <goal>one-jar</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+    <!-- We build the API jar with Maven Assembly Plugin since
+         it includes support file/class exclusions.-->
       <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-        	<!--
-        	 <archive>
-	          <manifest>
-	            <mainClass>com.mps.deepviolet.bin.StartUI</mainClass>
-	          </manifest>
-	        </archive>
-	        -->
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
-        </configuration>
+		<artifactId>maven-assembly-plugin</artifactId>
+   			 <executions>
+       			 <execution>
+            		<id>only</id>
+            		<phase>package</phase>
+		            <goals>
+		                <goal>single</goal>
+		            </goals>
+		            <configuration>
+		            	<finalName>dvAPI</finalName>
+		            	<appendAssemblyId>false</appendAssemblyId>
+		                <descriptors>
+		                    <descriptor>dvAPI-jar-assembly.xml</descriptor> 
+		                </descriptors>
+		            </configuration>
+      		  </execution>
+ 		   </executions>
       </plugin>
     </plugins>
     </build>
