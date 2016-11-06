@@ -1,4 +1,4 @@
-package com.mps.deepviolet.suite;
+package com.mps.deepviolet.suite.json;
 
 import java.util.HashMap;
 

@@ -7,8 +7,8 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mps.deepviolet.suite.CipherMap;
-import com.mps.deepviolet.suite.Classifications;
+import com.mps.deepviolet.suite.json.CipherMap;
+import com.mps.deepviolet.suite.json.Classifications;
 
 public class CipherMapTest {
 
