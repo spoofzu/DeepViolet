@@ -1,4 +1,4 @@
-package com.mps.deepviolet.suite;
+package com.mps.deepviolet.suite.json;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
