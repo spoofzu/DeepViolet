@@ -12,4 +12,4 @@ after_success:
   - echo "<settings><servers><server><id>ossrh</id><username>\${env.OSSRH_USER}</username><password>\${env.OSSRH_PASS}</password><filePermissions>664</filePermissions><directoryPermissions>775</directoryPermissions></server></servers></settings>" > ~/settings.xml
   - openssl aes-256-cbc -d -a -in pubring.gpg.enc -out pubring.gpg -pass pass:${env.ENCRYPTION_PASSWORD}
   - openssl aes-256-cbc -d -a -in secring.gpg.enc -out secring.gpg -pass pass:${env.ENCRYPTION_PASSWORD}
-  - mvn deploy -Dgpg.defaultKeyring=false -Dgpg-keyname=deepviolet -Dgpg.passphrase=${env.KEYRING_PASSPHRASE} -Dgpg.publicKeyring=pubring.gpg -Dgpg.secretKeyring=secring.gpg --settings ~/settings.xml
+  - mvn deploy -Dgpg.defaultKeyring=false -Dgpg-keyname=56D2CBF1 -Dgpg.passphrase=${env.KEYRING_PASSPHRASE} -Dgpg.publicKeyring=pubring.gpg -Dgpg.secretKeyring=secring.gpg --settings ~/settings.xml
