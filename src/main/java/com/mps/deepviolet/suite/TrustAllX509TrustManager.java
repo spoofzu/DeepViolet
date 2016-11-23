@@ -7,8 +7,9 @@ import javax.net.ssl.X509TrustManager;
 /**
  * A SSL\TLS trust manager that trusts all X509 certs.  Necessary so we can
  * receive and examine metadata for bad certificates. 
- * @author Milton
- * @see http://stackoverflow.com/questions/19723415/java-overriding-function-to-disable-ssl-certificate-check
+ * For more information see, 
+ * <a href="http://stackoverflow.com/questions/19723415/java-overriding-function-to-disable-ssl-certificate-check">Java: Overriding function to disable SSL certificate check</a>
+ * @author Milton Smith
  */
 public class TrustAllX509TrustManager implements X509TrustManager {
 

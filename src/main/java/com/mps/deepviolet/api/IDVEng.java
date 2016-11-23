@@ -7,7 +7,7 @@ package com.mps.deepviolet.api;
  * @author Milton Smith
  *
  */
-public interface IDVOnEng {
+public interface IDVEng {
 
 	/**
 	 * Return ciphersuites for the target host.
@@ -24,24 +24,24 @@ public interface IDVOnEng {
 	 */
 	IDVSession getDVSession();
 	
-	/**
-     * Return online print engine instance for target.
-     * host when IDVOnEng was created.
-	 * @return Online print engine.
-	 * @see <a href="DVFactory.html#initializeSession(URL)">DVFactory.initializeSession(URL)</a>
-	 * @throws DVException Thrown on problems
-	 */
-	IDVOnPrint getDVOnPrint() throws DVException;
-	
-	/**
-     * Return online print engine instance for target
-     * host when IDVOnEng was created.
-     * @param con Buffer to write reports.
-	 * @return Online print engine.
-	 * @see <a href="DVFactory.html#initializeSession(URL)">DVFactory.initializeSession(URL)</a>
-	 * @throws DVException Thrown on problems
-	 */
-	IDVOnPrint getDVOnPrint(StringBuffer con) throws DVException;
+//	/**
+//     * Return online print engine instance for target.
+//     * host when IDVOnEng was created.
+//	 * @return Online print engine.
+//	 * @see <a href="DVFactory.html#initializeSession(URL)">DVFactory.initializeSession(URL)</a>
+//	 * @throws DVException Thrown on problems
+//	 */
+//	IDVPrint getDVPrint() throws DVException;
+//	
+//	/**
+//     * Return online print engine instance for target
+//     * host when IDVOnEng was created.
+//     * @param con Buffer to write reports.
+//	 * @return Online print engine.
+//	 * @see <a href="DVFactory.html#initializeSession(URL)">DVFactory.initializeSession(URL)</a>
+//	 * @throws DVException Thrown on problems
+//	 */
+//	IDVPrint getDVPrint(StringBuffer con) throws DVException;
 
 	/**
 	 * Write PEM encoded X.509 certificate for the target
@@ -55,14 +55,50 @@ public interface IDVOnEng {
 	
 	/**
 	 * Retrieve a IDVX509Certificate.
-	 * @return Return IDVX509Certificate reprsenting host associated
+	 * @return Return IDVX509Certificate representing host associated
 	 * with IDVOnEng instance.
 	 * @throws DVException Thrown on problems reading certificate.
 	 */
 	IDVX509Certificate getCertificate() throws DVException;
 	
-	//todo xxxx
-	//public Iterator<IDVX509Certificate> getCertificateChain() throws DVException;
+	/**
+	 * Return the Major Version of DeepViolet.  Incremented upon significant
+	 * addition of new features.  Existing features could also break code.
+	 * Callers are urged to test upon implementing new major versions.
+	 * @return Number indicating DeepVioloet Major Version.
+	 */
+	int getDeepVioletMajorVersion();
+
+	/**
+	 * Return the Minor Version of DeepViolet.  Incremented upon significant
+	 * improvement to existing features.   Callers are urged to test upon
+	 * implementing new major versions.
+	 * @return Number indicating DeepVioloet Minor Version.
+	 */
+	int getDeepVioletMinorVersion();
+
+	/**
+	 * Return the Build Version of DeepViolet.  Incremented on bug fixes to
+	 * existing features.  It's not anticipated this any improvements will
+	 * break code.  Callers are urged to perform basic unit tests.
+	 * @return Number indicating DeepVioloet Build Version.
+	 */
+	int getDeepVioletBuildVersion();
+
+	/**
+	 * Return the DeepViolet version string.  
+	 * @return Suitable for printing in log files, displaying in About boxes, etc.
+	 */
+	String getDeepVioletStringVersion();
+	
+//	/**
+//     * Return offline print engine instance.  Useful for reporting
+//     * featurees that don't require initializing an online host.
+//     * For example, printing PEM encoded X.509 certificates.
+//	 * @return Offline print engine instance
+//	 * @throws DVException on problems.
+//	 */
+//	IDVOffPrint getDVOffPrint() throws DVException;
 	
 	
 }

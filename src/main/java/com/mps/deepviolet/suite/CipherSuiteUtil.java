@@ -73,11 +73,11 @@ import com.mps.deepviolet.util.FileUtils;
 
 /**
  * Utility class to handle cryptographic functions.  Significant contributions around
- * ciphersuite handling adapted from code examples by Thomas Pornin <pornin@bolet.org>.
+ * ciphersuite handling adapted from code examples by <a href="mailto:pornin@bolet.org">Thomas Pornin</a>.
+ * For more information see, <a href="http://tools.ietf.org/html/rfc5246">The Transport Layer Security (TLS) Protocol Version 1.2</a>,
+ * <a href="http://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml">Transport Layer Security (TLS) Parameters</a>,
+ * <a href="http://www.bolet.org/TestSSLServer/">TestSSLServer</a>
  * @author Milton Smith
- * @see http://tools.ietf.org/html/rfc5246
- * @see http://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml
- * @see http://www.bolet.org/TestSSLServer/
  */
 public class CipherSuiteUtil {
 
@@ -668,7 +668,7 @@ public class CipherSuiteUtil {
 	/**
 	 * Enable default testing for TLS certificate trust chains.
 	 * @param value true, chain will be tested.  false, chain will not be tested.
-	 * @throws Exception 
+	 * @throws Exception Thrown on error
 	 */
 	public static final void enableTLSChainTesting( boolean value ) throws Exception {
 
@@ -697,7 +697,7 @@ public class CipherSuiteUtil {
 	 * certificates with unvalidated and possibly bad trust chains.
 	 * @param url Target URL
 	 * @return X509Certificate Certificate chain
-	 * @throws Thrown on problems.
+	 * @throws Exception Thrown on problems.
 	 * @see <a href="http://stackoverflow.com/questions/19723415/java-overriding-function-to-disable-ssl-certificate-check">java-overriding-function-to-disable-ssl-certificate-check</a>
 	 */
 	public static final X509Certificate[] getServerCertificateChain(URL url) throws Exception {
@@ -731,10 +731,10 @@ public class CipherSuiteUtil {
 	}
 	
 	/**
-	 * Get a list of the Java root certificates
-	 * @return 
-	 * @throws Exception
-	 * @see http://stackoverflow.com/questions/3508050/how-can-i-get-a-list-of-trusted-root-certificates-in-java
+	 * Get a list of the Java root certificates.  
+	 * For more information, <a href="http://stackoverflow.com/questions/3508050/how-can-i-get-a-list-of-trusted-root-certificates-in-java">How can I get a list of trusted root certificates in Java?</a>
+	 * @return An array of X509Certificates root certificates from the Java trust store
+	 * @throws Exception Thrown on problems.
 	 */
 	public static final X509Certificate[] getJavaRootCertificates() throws Exception {
 		
@@ -788,7 +788,7 @@ public class CipherSuiteUtil {
 	
 	/**
 	 * Test to see if a particular IssuerDN is a root in the Java system keystore.
-	 * @param IssuerDN
+	 * @param IssuerDN Issuing authority
 	 * @return true, IssuerDN matches a Java root.  false, no matching IssuerDN found.
 	 */
 	public static final boolean isJavaRootCertificateDN(String IssuerDN) throws Exception {
@@ -924,7 +924,7 @@ public class CipherSuiteUtil {
 	   /**
 	    * Generate signer fingerprint from certificate bytes
 	    * @param der Certificate in bytes
-	    * @param String signatureAlgorithm algorithm the certificate was signed, ex: SHA256
+	    * @param signatureAlgorithm Signing algorithm for the certificate, ex: SHA256
 	    * @return String Signer fingerprint in hex.
 	    * @throws NoSuchAlgorithmException
 	    */
@@ -1004,11 +1004,12 @@ public class CipherSuiteUtil {
 	   }
 
 	/**
-	 * Convert <code>der</code> encoded data to <code>ASN1Primitive</code>. 
+	 * Convert <code>der</code> encoded data to <code>ASN1Primitive</code>.
+	 * For more information, 
+	 * (<a href="http://stackoverflow.com/questions/2409618/how-do-i-decode-a-der-encoded-string-in-java">StackOverflow: How do I decode a DER encoded string in Java?</a>) 
 	 * @param data byte[] of <code>der</code> encoded data
 	 * @return <code>ASN1Primitive</code> representation of <code>der</code> encoded data
 	 * @throws IOException
-	 * @see http://stackoverflow.com/questions/2409618/how-do-i-decode-a-der-encoded-string-in-java
 	 */
 	public static final ASN1Primitive toDERObject(byte[] data) throws IOException {
 		   
@@ -1255,12 +1256,12 @@ public class CipherSuiteUtil {
 	}
 
 	/**
-	 * Return the value of the OID associated with the X509Certificate.
+	 * Return the value of the OID associated with the X509Certificate.  For more information,
+	 * <a href="http://stackoverflow.com/questions/2409618/how-do-i-decode-a-der-encoded-string-in-java">How do I decode a DER encoded string in Java?</a>
 	 * @param X509Certificate Certificate to test.
 	 * @param oid OID to retrieve.
 	 * @return String String value for the specified OID parameter. 
 	 * @throws IOException
-	 * @see http://stackoverflow.com/questions/2409618/how-do-i-decode-a-der-encoded-string-in-java
 	 */
 	public static final String getExtensionValue(X509Certificate X509Certificate, String oid) throws IOException {
 		
@@ -1310,7 +1311,7 @@ public class CipherSuiteUtil {
 			try {
 				s.connect(isa);
 			} catch (IOException ioe) {
-				System.err.println("could not connect to "
+				logger.error("could not connect to "
 					+ isa + ": " + ioe.toString());
 				return null;
 			}
@@ -1346,7 +1347,7 @@ public class CipherSuiteUtil {
 			try {
 				s.connect(isa);
 			} catch (IOException ioe) {
-				System.err.println("could not connect to "
+				logger.error("could not connect to "
 					+ isa + ": " + ioe.toString());
 				return null;
 			}

@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 import com.mps.deepviolet.api.DVFactory;
 import com.mps.deepviolet.api.IDVCipherSuite;
-import com.mps.deepviolet.api.IDVOnEng;
+import com.mps.deepviolet.api.IDVEng;
 import com.mps.deepviolet.api.IDVSession;
 
 public class PrintServerCiphersuites {
@@ -14,19 +14,17 @@ public class PrintServerCiphersuites {
 		
 		URL url = new URL("https://github.com/");
 		IDVSession session = DVFactory.initializeSession(url);
-		IDVOnEng eng = DVFactory.getDVEng(session);
-		
+		IDVEng eng = DVFactory.getDVEng(session);
 		IDVCipherSuite[] ciphers = eng.getCipherSuites();
-		
 		HashMap<IDVCipherSuite, IDVCipherSuite> tmap = new HashMap<IDVCipherSuite, IDVCipherSuite>();
+
+		// Print out a list of ciphersuites supported by the server.
 		System.out.println("Ciphers supported by host "+url.toString());
 		for( IDVCipherSuite cipher : ciphers ) {
-			if( tmap.containsKey(cipher) ) {
-				// If cipher's in the map then skip since we already printed it.  We only want a unique
-				// list of ciphers.  API will return ciphers enumerated by handshake protocol (TLS1.0,TLS1.1,etc)
-				// Comment out the lines to see the difference.  Handy if you want to track cipher suites by
-				// protocol.
-			}else{
+			// If cipher's in the map then skip since we already printed it.  We only want a unique
+			// list of ciphers.  API will return ciphers enumerated by handshake protocol (TLS1.0,TLS1.1,etc)
+			// Handy if you need to know cipher suite support by protocol.
+			if( !tmap.containsKey(cipher) ) {
 				StringBuffer buff = new StringBuffer();
 				buff.append(cipher.getSuiteName());
 				buff.append('(');

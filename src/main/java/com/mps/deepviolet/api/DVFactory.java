@@ -22,23 +22,10 @@ import com.mps.deepviolet.util.LogUtils;
  * 
  * <pre>
  * {@code IDSession session = DVFactory.initializeSession(url);
- * IDVOnEng eng = DVFactory.getIDVOnEng(session);
+ * IDVEng eng = DVFactory.getIDVEng(session);
  * IDVCipherSuite[] ciphers = eng.getHostCipherSuites();
  * ...iterate over the ciphers, do cool stuff, makes your own custom reports or UI...}
  * </pre>
- * 
- * If you only want to print the cipher suites you can do something like this.
- * 
- * <pre>
- * {@code StringBuffer con = new StringBuffer(2500);
- * IDSession session = DVFactory.initializeSession(url);
- * IDVOnEng eng = DVFactory.getIDVOnEng(session);
- * IDVOnPrint p = getDVOnPrint(con);
- * p.printSupportedCipherSuites();
- * ...prints some raw text to the console buffer and active logger...}
- * </pre>
- * 
- * Also have a look at the code in the samples package for ideas where to begin,
  * 
  * <pre>
  * {@code com.mps.deepviolet.api.samples}
@@ -128,33 +115,33 @@ public class DVFactory {
 		return session;
 	}
 
-	/**
-	 * Retrieve an instance of IDVOffEng. Provided since there are some offline
-	 * functions that don't require an initialized host. For example, reading
-	 * PEM encoded X.509 certificates.
-	 * 
-	 * @return Engine instance for offline functions
-	 */
-	public static final synchronized IDVOffEng getDVOffEng() {
-		URL localhost = null;
-		try {
-			localhost = new URL("https://localhost/");
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
-		return new DVEng(new MutableDVSession(localhost, new IDVHost[0]));
-	}
+//	/**
+//	 * Retrieve an instance of IDVOffEng. Provided since there are some offline
+//	 * functions that don't require an initialized host. For example, reading
+//	 * PEM encoded X.509 certificates.
+//	 * 
+//	 * @return Engine instance for offline functions
+//	 */
+//	public static final synchronized getDVOffEng() {
+//		URL localhost = null;
+//		try {
+//			localhost = new URL("https://localhost/");
+//		} catch (MalformedURLException e) {
+//			e.printStackTrace();
+//		}
+//		return new DVEng(new MutableDVSession(localhost, new IDVHost[0]));
+//	}
 
 	/**
 	 * Retrieve an instance of IDVOnEng. Use this method for online functions
-	 * against an intialized host.
+	 * against an initialize host.
 	 * 
 	 * @param session
-	 *            Inialized session from previous call to initializeSession(URL)
+	 *            Initialized session from previous call to initializeSession(URL)
 	 * @return Engine instance for offline functions
 	 * @see #initializeSession(URL)
 	 */
-	public static final synchronized IDVOnEng getDVEng(IDVSession session) {
+	public static final synchronized IDVEng getDVEng(IDVSession session) {
 		return new DVEng(session);
 	}
 }
