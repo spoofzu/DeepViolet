@@ -26,7 +26,7 @@ This tool helps you understand state of X.509 certificates run on servers.  Some
 Use certificate metadata along with your own shell scripts in new and creative ways.
 <p/>
 <b>ACKNOWLEDGEMENTS</b>
-This tool impliments ideas, code, and takes inspriation from other projects and leaders like: Qualys SSL Labs and Ivan Ristić, OpenSSL, and Oracle's Java Security Team.  Many thanks for around negotiating TLS/SSL handshakes and cipher suite handling adapted from code examples by Thomas Pornin.
+This tool implements ideas, code, and takes inspiration from other projects and leaders like: Qualys SSL Labs and Ivan Ristić, OpenSSL, and Oracle's Java Security Team.  Many thanks for around negotiating TLS/SSL handshakes and cipher suite handling adapted from code examples by Thomas Pornin.
 <p/>
 
 Looking for more information?  See the [project wiki](https://github.com/spoofzu/DeepViolet/wiki) 
