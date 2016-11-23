@@ -23,7 +23,7 @@ import com.mps.deepviolet.suite.ServerMetadata;
  * Utility class to access DeepViolet SSL/TLS features from API
  * @author Milton Smith
  */
-class DVEng implements IDVOnEng, IDVOffEng {
+class DVEng implements IDVEng {
 	
 	private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.api.DVEng");
 	
@@ -32,8 +32,10 @@ class DVEng implements IDVOnEng, IDVOffEng {
 	private static final int VERSION_BUILD = 0;
 	private static final String VERSION_STRING = "V"+VERSION_MAJOR+"."+VERSION_MINOR+"."+VERSION_BUILD;
 	
+	private final String EOL = System.getProperty("line.separator");
+	
 	private IDVSession session;
-    private DVPrint dvPrint;
+//    private DVPrint dvPrint;
 	
 	/* (non-Javadoc)
 	 */
@@ -41,26 +43,26 @@ class DVEng implements IDVOnEng, IDVOffEng {
 		this.session = session;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.mps.deepviolet.api.IDVEng#getDVOffPrint()
-	 */
-	public IDVOffPrint getDVOffPrint() throws DVException {
-		return new DVOffPrint(this, new StringBuffer());
-	}
+//	/* (non-Javadoc)
+//	 * @see com.mps.deepviolet.api.IDVEng#getDVOffPrint()
+//	 */
+//	public IDVOffPrint getDVOffPrint() throws DVException {
+//		return new DVOffPrint(this, new StringBuffer());
+//	}
 
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IDVEng#getDVOnPrint()
 	 */
-	public IDVOnPrint getDVOnPrint() throws DVException {
-		return getDVOnPrint(new StringBuffer(2500));
-	}
+//	public IDVPrint getDVPrint() throws DVException {
+//		return getDVPrint(new StringBuffer(2500));
+//	}
 	
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IDVEng#getDVOnPrint()
 	 */
-	public IDVOnPrint getDVOnPrint( StringBuffer con) throws DVException {
-		return new DVPrint(this, con);
-	}
+//	public IDVPrint getDVPrint( StringBuffer con) throws DVException {
+//		return new DVPrint(this, con);
+//	}
 	
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IDVEng#getDVSession()
@@ -198,7 +200,7 @@ class DVEng implements IDVOnEng, IDVOffEng {
 					 pemBuff.append(pemB64.charAt(i));
 					 // Wrap line after 65-bytes. Looks better.
 					 if ( (ct % 64) == 0 ) {
-						 pemBuff.append(dvPrint.getEOL());
+						 pemBuff.append(EOL);
 						 ct=0;
 					 }
 				 }
@@ -224,7 +226,6 @@ class DVEng implements IDVOnEng, IDVOffEng {
 		}
 		
 		long sz = (derenccert!=null) ? derenccert.length : 0;
-		dvPrint.println("Certificate written successfully, byte(s)="+sz);
 		return sz;
 	}
 }

@@ -32,7 +32,7 @@ class DVX509Certificate implements IDVX509Certificate {
 	private X509Certificate cert;
 	private X509Certificate[] chain;
 	private DVX509Certificate[] dvChain;
-	private IDVOnEng eng;
+	private IDVEng eng;
 	
 	private String signingAlgorithm;
 	private String signingAlgorithmOID;
@@ -56,7 +56,7 @@ class DVX509Certificate implements IDVX509Certificate {
 	 * @param cert X509Certificate to initialize
 	 * @throws DVException Thrown on trouble
 	 */
-	DVX509Certificate( IDVOnEng eng, X509Certificate cert ) throws DVException {
+	DVX509Certificate( IDVEng eng, X509Certificate cert ) throws DVException {
 		try {
 			this.cert = cert;
 			this.eng = eng;

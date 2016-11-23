@@ -12,8 +12,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.mps.deepviolet.api.DVFactory;
 import com.mps.deepviolet.api.IDVCipherSuite;
-import com.mps.deepviolet.api.IDVOffEng;
-import com.mps.deepviolet.api.IDVOnEng;
+import com.mps.deepviolet.api.IDVEng;
 import com.mps.deepviolet.api.IDVSession;
 import com.mps.deepviolet.api.IDVX509Certificate;
 
@@ -46,13 +45,12 @@ public class DVEngTest {
 			assertTrue(session.getHostInterfaces().length > 0);
 			assertTrue(session.getPropertyNames().length > 0);
 
-			IDVOnEng eng = DVFactory.getDVEng(session);
-			IDVOffEng oeng = DVFactory.getDVOffEng();
+			IDVEng eng = DVFactory.getDVEng(session);
 			assertTrue(eng != null);
 			System.out.println("DVEng test complete - host init");
 
 			System.out.println("DVEng test starting - version string");
-			String sVersion = oeng.getDeepVioletStringVersion();
+			String sVersion = eng.getDeepVioletStringVersion();
 			assertTrue(sVersion != null);
 			assertTrue(sVersion.length() > 0);
 			assertTrue(sVersion.indexOf('V') > -1);

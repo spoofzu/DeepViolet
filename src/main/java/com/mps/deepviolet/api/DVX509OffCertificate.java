@@ -4,7 +4,7 @@ import java.security.cert.X509Certificate;
 
 class DVX509OffCertificate extends DVX509Certificate {
 
-	DVX509OffCertificate(IDVOnEng eng, X509Certificate cert) throws DVException {
+	DVX509OffCertificate(IDVEng eng, X509Certificate cert) throws DVException {
 		
 		super(eng,cert);		
 		
