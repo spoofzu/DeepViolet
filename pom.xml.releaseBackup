@@ -3,7 +3,7 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>com.github.spoofzu</groupId>
    <artifactId>DeepViolet</artifactId>
-   <version>1.5.0</version>
+   <version>1.0.0-SNAPSHOT</version>
    <name>${project.groupId}:${project.artifactId}</name>
    <description>SSL/TLS security introspection tool</description>
    <url>https://github.com/spoofzu/DeepViolet/</url>
@@ -22,11 +22,10 @@
       </developer>
    </developers>
    <scm>
-      <connection>scm:git:git@github.com:Self/DeepViolet.git</connection>
-      <developerConnection>scm:git:git@github.com:Self/DeepViolet.git</developerConnection>
+      <connection>scm:git:git@github.com:/spoofzu/DeepViolet.git</connection>
+      <developerConnection>scm:git:git@github.com:/spoofzu/DeepViolet.git</developerConnection>
       <url>git@github.com:/spoofzu/DeepViolet.git</url>
-     <tag>DeepViolet-1.5.0</tag>
-  </scm>
+   </scm>
    <dependencies>
       <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
       <dependency>
