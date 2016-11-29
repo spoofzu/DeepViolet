@@ -3,7 +3,8 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>com.github.spoofzu</groupId>
    <artifactId>DeepViolet</artifactId>
-   <version>1.5.0</version>
+   <version>1.5.1-SNAPSHOT</version>
+   <packaging>jar</packaging>
    <name>${project.groupId}:${project.artifactId}</name>
    <description>SSL/TLS security introspection tool</description>
    <url>https://github.com/spoofzu/DeepViolet/</url>
@@ -16,17 +17,17 @@
    <developers>
       <developer>
          <name>Milton Smith</name>
-         <email>milton.smith.rr@gmail.com</email>
-         <organization>Self</organization>
-         <organizationUrl>http://www.securitycurmudgeon.com/</organizationUrl>
+         <email>milton.smith@owasp.org</email>
+         <organization>OWASP</organization>
+         <organizationUrl>https://www.owasp.org/index.php/OWASP_DeepViolet_TLS/SSL_Scanner</organizationUrl>
       </developer>
    </developers>
    <scm>
-      <connection>scm:git:git@github.com:Self/DeepViolet.git</connection>
-      <developerConnection>scm:git:git@github.com:Self/DeepViolet.git</developerConnection>
+      <connection>scm:git:git@github.com:OWASP/DeepViolet.git</connection>
+      <developerConnection>scm:git:git@github.com:OWASP/DeepViolet.git</developerConnection>
       <url>git@github.com:/spoofzu/DeepViolet.git</url>
-     <tag>DeepViolet-1.5.0</tag>
-  </scm>
+      <tag>${project.artifactId}-${project.verison}</tag>
+   </scm>
    <dependencies>
       <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
       <dependency>
@@ -87,6 +88,10 @@
          <id>ossrh</id>
          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
       </snapshotRepository>
+      <repository>
+         <id>ossrh</id>
+         <url>https://oss.sonatype.org/service/local/staging/deployment/maven2</url>
+      </repository>
    </distributionManagement>
    <build>
       <plugins>
@@ -102,7 +107,7 @@
          <plugin>
             <groupId>org.sonatype.plugins</groupId>
             <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.3</version>
+            <version>1.6.6</version>
             <extensions>true</extensions>
             <configuration>
                <serverId>ossrh</serverId>
@@ -110,27 +115,41 @@
                <autoReleaseAfterClose>true</autoReleaseAfterClose>
             </configuration>
          </plugin>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-release-plugin</artifactId>
-            <version>2.5.3</version>
-            <configuration>
-               <mavenExecutorId>forked-path</mavenExecutorId>
-               <useReleaseProfile>false</useReleaseProfile>
-               <arguments>-Psonatype-oss-release</arguments>
-            </configuration>
-         </plugin>
       </plugins>
    </build>
    <profiles>
       <profile>
-         <id>release</id>
+         <id>sign</id>
+         <build>
+            <plugins>
+               <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-gpg-plugin</artifactId>
+                  <version>1.6</version>
+                  <executions>
+                     <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                           <goal>sign</goal>
+                        </goals>
+                     </execution>
+                  </executions>
+               </plugin>
+            </plugins>
+         </build>
+      </profile>
+      <profile>
+         <id>build-extras</id>
+         <activation>
+            <activeByDefault>true</activeByDefault>
+         </activation>
          <build>
             <plugins>
                <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-source-plugin</artifactId>
-                  <version>3.0.1</version>
+                  <version>2.4</version>
                   <executions>
                      <execution>
                         <id>attach-sources</id>
@@ -143,25 +162,12 @@
                <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-javadoc-plugin</artifactId>
+                  <version>2.10.3</version>
                   <executions>
                      <execution>
                         <id>attach-javadocs</id>
                         <goals>
                            <goal>jar</goal>
-                        </goals>
-                     </execution>
-                  </executions>
-               </plugin>
-               <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-gpg-plugin</artifactId>
-                  <version>1.5</version>
-                  <executions>
-                     <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                           <goal>sign</goal>
                         </goals>
                      </execution>
                   </executions>
