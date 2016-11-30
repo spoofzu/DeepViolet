@@ -8,7 +8,7 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
 	mv build/pubring.gpg ~/.gnupg/pubring.gpg
 	mv build/secring.gpg ~/.gnupg/secring.gpg
 	#gpg -v --batch --import build/signingkey.asc
-	gpg --list-keys
+	gpg --list-keys 
 	gpg --list-secret-keys
 	echo $GPG_PASSPHRASE | gpg -ab --passphrase-fd 0 pom.xml 
 fi
