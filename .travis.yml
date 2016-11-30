@@ -9,6 +9,10 @@ env:
 
 addons:
 
+before_install:
+  - sudo apt-get update -q
+  - sudo apt-get install gnupg
+
 install: mvn install -P !build-extras -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 
 script: mvn test -P !build-extras -B
