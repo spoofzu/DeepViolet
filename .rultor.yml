@@ -7,8 +7,18 @@ decrypt:
   pubring.gpg: "repo/pubring.gpg.asc"
   secring.gpg: "repo/secring.gpg.asc"
 
+merge:
+  script: mvn clean install
+
+deploy:
+  env:
+    MAVEN_OPTS: "-XX:MaxPermSize=256m -Xmx1g"
+  script:
+    - mvn clean deploy --settings ../settings.xml
+    - mvn clean site-deploy --settings ../settings.xml
+
 release:
   script: |
     mvn versions:set "-DnewVersion=${tag}"
     git commit -am "${tag}"
-    mvn clean deploy -Pjcabi --settings /home/r/settings.xml
+    mvn clean deploy --settings /home/r/settings.xml
