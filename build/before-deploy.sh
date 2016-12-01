@@ -11,5 +11,4 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
 	gpg --version
 	gpg --list-keys 
 	gpg --list-secret-keys
-	echo $GPG_PASSPHRASE | gpg -ab --passphrase-fd 0 pom.xml 
 fi
