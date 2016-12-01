@@ -6,8 +6,8 @@
       <id>oss.sonatype.org</id>
       <username>${env.OSSRH_USER}</username>
       <password>${env.OSSRH_PASS}</password>
+	</server>
   </servers>
-  
   <profiles>
     <profile>
       <id>spoofzu/DeepViolet</id>
@@ -15,7 +15,6 @@
         <gpg.keyname>${env.GPG_KEY_NAME}</gpg.keyname>
         <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
       </properties>
-
     </profile>
   </profiles>
 </settings>
