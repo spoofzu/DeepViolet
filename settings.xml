@@ -16,7 +16,10 @@
       <id>gpg</id>
       <properties>
 		<gpg.homedir>${env.HOME}/.gnupg/</gpg.homedir>
+	    <gpg.publicKeyring>/${env.HOME}/.gnupg/pubring.gpg</gpg.publicKeyring>
+	    <gpg.secretKeyring>${env.HOME}/.gnupg/secring.gpg</gpg.secretKeyring>
 		<gpg.gpgexecutable>gpg2</gpg.gpgexecutable>
+		<gpg.defaultKeyring>false</gpg.defaultKeyring>
         <gpg.keyname>${env.GPG_KEY_NAME}</gpg.keyname>
         <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
       </properties>
