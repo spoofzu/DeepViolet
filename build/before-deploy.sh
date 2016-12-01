@@ -11,4 +11,5 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
 	gpg --version
 	gpg --list-keys 
 	gpg --list-secret-keys
+	gpg2 --version
 fi

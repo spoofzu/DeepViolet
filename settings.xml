@@ -16,6 +16,7 @@
       <id>gpg</id>
       <properties>
 		<gpg.homedir>${env.HOME}/.gnupg/</gpg.homedir>
+		<gpg.gpgexecutable>gpg2</gpg.gpgexecutable>
         <gpg.keyname>${env.GPG_KEY_NAME}</gpg.keyname>
         <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
       </properties>
