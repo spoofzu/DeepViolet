@@ -14,9 +14,8 @@ env:
 
 #install: mvn install -P !build-extras -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 #script: mvn test -P !build-extras -B
-
 	
-after_install:
+before_script:
 	- echo "default-key $GPG_KEY_NAME" >> ~/.gnupg/gpg.conf
 
 #after_success:
