@@ -11,6 +11,7 @@
       <password>${env.OSSRH_PASS}</password>
 	</server>
   </servers>
+  <!--
   <profiles>
     <profile>
       <id>gpg</id>
@@ -28,4 +29,5 @@
   <activeProfiles>
     <activeProfile>gpg</activeProfile>
   </activeProfiles>
+  -->
 </settings>
