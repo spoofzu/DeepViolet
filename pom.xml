@@ -3,7 +3,7 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>com.github.spoofzu</groupId>
    <artifactId>DeepViolet</artifactId>
-   <version>1.5.1-SNAPSHOT</version>
+   <version>1.0.0-SNAPSHOT</version>
    <packaging>jar</packaging>
    <name>${project.groupId}:${project.artifactId}</name>
    <description>SSL/TLS security introspection tool</description>
@@ -154,9 +154,6 @@
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-gpg-plugin</artifactId>
                   <version>${maven.gpg.plugin}</version>
-                  <configuration>
-                     <passphrase>${gpg.passphrase}</passphrase>
-                  </configuration>
                   <executions>
                      <execution>
                         <id>sign-artifacts</id>
