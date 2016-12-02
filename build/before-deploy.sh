@@ -10,7 +10,7 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
 
 	openssl aes-256-cbc -pass pass:$OPENSSL_ENCRYPT_KEY -in build/private-key.gpg.enc -out build/private-key.gpg -d
 	gpg2 -v --batch --import build/private-key.gpg
-	gpg --yes --edit-key $GPG_KEY_NAME updpref save
+	yes | gpg --edit-key $GPG_KEY_NAME updpref save
 fi
 
 gpg2 --list-keys 
