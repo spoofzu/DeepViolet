@@ -3,11 +3,15 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>com.github.spoofzu</groupId>
    <artifactId>DeepViolet</artifactId>
-   <version>1.0.0-SNAPSHOT</version>
+   <version>1.0.3-SNAPSHOT</version>
    <packaging>jar</packaging>
    <name>${project.groupId}:${project.artifactId}</name>
-   <description>SSL/TLS security introspection tool</description>
+   <description>TLS/SSL security introspection API</description>
    <url>https://github.com/spoofzu/DeepViolet/</url>
+   <issueManagement>
+      <system>GitHub Issue Tracker</system>
+      <url>https://github.com/spoofzu/DeepViolet/issues</url>
+   </issueManagement>
    <licenses>
       <license>
          <name>The Apache License, Version 2.0</name>
@@ -44,13 +48,23 @@
       <maven.clean.plugin>3.0.0</maven.clean.plugin>
       <maven.compiler.plugin>3.6.0</maven.compiler.plugin>
       <maven.jar.plugin>3.0.2</maven.jar.plugin>
-      <nexus.staging.maven.plugin>1.6.6</nexus.staging.maven.plugin>
+      <nexus.staging.maven.plugin>1.6.7</nexus.staging.maven.plugin>
       <maven.source.plugin>2.4</maven.source.plugin>
       <maven.javadoc.plugin>2.10.3</maven.javadoc.plugin>
    </properties>
+   <distributionManagement>
+      <snapshotRepository>
+         <id>ossrh</id>
+         <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      </snapshotRepository>
+      <repository>
+         <id>ossrh</id>
+         <url>https://oss.sonatype.org/service/local/staging/deployment/maven2</url>
+      </repository>
+   </distributionManagement>
    <scm>
-      <connection>scm:git:git@github.com:OWASP/DeepViolet.git</connection>
-      <developerConnection>scm:git:git@github.com:OWASP/DeepViolet.git</developerConnection>
+      <connection>scm:git:git@github.com:spoofzu/DeepViolet.git</connection>
+      <developerConnection>scm:git:git@github.com:spoofzu/DeepViolet.git</developerConnection>
       <url>git@github.com:/spoofzu/DeepViolet.git</url>
       <tag>${project.artifactId}-${project.verison}</tag>
    </scm>
@@ -111,16 +125,6 @@
       </dependency>
       -->
    </dependencies>
-   <distributionManagement>
-      <snapshotRepository>
-         <id>ossrh</id>
-         <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-      </snapshotRepository>
-      <repository>
-         <id>ossrh</id>
-         <url>https://oss.sonatype.org/service/local/staging/deployment/maven2</url>
-      </repository>
-   </distributionManagement>
    <build>
       <plugins>
          <plugin>
