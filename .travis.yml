@@ -23,7 +23,6 @@ env:
 
 before_install:
   - sudo apt-get update -q
-  - sudo apt-get install libgcrypt20
   - sudo apt-get install gnupg2
  
 install: 
