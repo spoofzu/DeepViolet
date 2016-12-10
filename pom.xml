@@ -167,7 +167,8 @@
                         </goals>
 				        <configuration>
 				          <keyname>${gpg.keyname}</keyname>
-				          <passphraseServerId>ossrh</passphraseServerId>
+				          <passphraseServerId>${gpg.keyname}</passphraseServerId>
+						  <useAgent>fase</useAgent>
 				        </configuration>
                      </execution>
                   </executions>
