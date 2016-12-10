@@ -13,17 +13,18 @@
   </servers>
   <profiles>
     <profile>
-      <id>gpg</id>
+      <id>ossrh</id>
+      <activation>
+          <activeByDefault>true</activeByDefault>
+      </activation>
       <properties>
-		<gpg.homedir>${env.HOME}/.gnupg/</gpg.homedir>
 		<gpg.gpgexecutable>gpg</gpg.gpgexecutable>
 		<gpg.defaultKeyring>false</gpg.defaultKeyring>
         <gpg.keyname>${env.GPG_KEY_NAME}</gpg.keyname>
         <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
+        <gpg.publicKeyring>${env.HOME}/.gnupg/pubring.gpg</gpg.publicKeyring>
+        <gpg.secretKeyring>${env.HOME}/.gnupg/secring.gpg</gpg.secretKeyring>
       </properties>
     </profile>
   </profiles>
-  <activeProfiles>
-    <activeProfile>gpg</activeProfile>
-  </activeProfiles>
 </settings>

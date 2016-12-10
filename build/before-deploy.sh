@@ -14,6 +14,8 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
  	rm ~/.gnupg/secring.gpg
  	mv build/pubring.gpg ~/.gnupg/pubring.gpg
  	mv build/secring.gpg ~/.gnupg/secring.gpg
+    sha256sum ~/.gnupg/pubring.gpg
+	sha256sum ~/.gnupg/secring.gpg
 	
 fi
 
