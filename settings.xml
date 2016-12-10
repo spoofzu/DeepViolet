@@ -4,7 +4,7 @@
       <id>${env.GPG_KEY_NAME}</id>
       <username>${env.OSSRH_USER}</username>
       <password>${env.OSSRH_PASS}</password>
-	  <passphrase>${env.GPG_PASSPHRASE}<passphrase>
+	  <passphrase>${env.GPG_PASSPHRASE}</passphrase>
 	</server>
   </servers>
   <profiles>
