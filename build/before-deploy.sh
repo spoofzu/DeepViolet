@@ -3,8 +3,16 @@
 
 set -e
 
-echo "User HOME folder is $HOME"
+echo "*** User HOME folder is $HOME"
+
+echo "*** gpg version info"
 gpg --version
+
+# start gpg-agent to manage passphrases
+eval $(gpg-agent --daemon)
+
+echo "*** gpg-agent version info"
+gpg-agent --version
 
 if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; then
 
