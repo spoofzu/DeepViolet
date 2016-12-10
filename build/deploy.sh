@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 
-set -e -u
+set -e
 
 if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; then
 	echo "Publishing Maven snapshot..."
