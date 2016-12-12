@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<settings>
   <servers>
     <server>
       <id>${env.GPG_KEY_NAME}</id>
@@ -14,10 +15,8 @@
       </activation>
       <properties>
 		<gpg.executable>gpg2</gpg.executable>
-				<!--
         <gpg.keyname>66EF37E5</gpg.keyname>
 		<gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
-	     -->
       </properties>
     </profile>
   </profiles>
