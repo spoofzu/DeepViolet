@@ -16,7 +16,6 @@
       <properties>
 		<gpg.executable>gpg2</gpg.executable>
         <gpg.keyname>66EF37E5</gpg.keyname>
-		<gpg.useAgent>false</gpg.useAgent>
 		<gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
       </properties>
     </profile>
