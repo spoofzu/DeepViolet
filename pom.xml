@@ -160,7 +160,6 @@
                   <version>${maven.gpg.plugin}</version>
 		          <configuration>
 		            <passphraseServerId>ossrh</passphraseServerId>
-				    <useAgent>false</useAgent>
 		          </configuration>
                   <executions>
                      <execution>
