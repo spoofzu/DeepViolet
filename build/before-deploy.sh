@@ -9,10 +9,10 @@ echo "*** gpg version info"
 gpg2 --version
 
 # start gpg-agent to manage passphrases
-# eval $(gpg-agent --daemon)
+eval $(gpg-agent --daemon)
 
 #echo "*** gpg-agent version info"
-#gpg-agent --version
+gpg-agent --version
 
 if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; then
 
