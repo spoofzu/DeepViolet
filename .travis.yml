@@ -14,7 +14,7 @@ env:
 before_install:
   - sudo apt-get update -q
   - sudo apt-get install gnupg2
-  - sudo apt-get install gnupg-agent pinentry-curses
+  #- sudo apt-get install gnupg-agent pinentry-curses
  
 install: 
   #- sudo echo "default-key $GPG_KEY_NAME" >> ~/.gnupg/gpg.conf
