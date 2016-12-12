@@ -5,7 +5,7 @@ set -e
 
 if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; then
 	echo "Publishing Maven snapshot..."
-	mvn release:perform -X --batch-mode --settings="./settings.xml" -Dgpg.dryRun=true -Dmaven.test.skip=true -Darguments=-Dgpg.passphrase="$GPG_PASSPHRASE"
+	mvn --batch-mode -X release:prepare release:perform --settings="./settings.xml" -Dgpg.dryRun=true -Dmaven.test.skip=true -Darguments=-Dgpg.passphrase="$GPG_PASSPHRASE"
     echo "Maven snapshot published..."
 fi
 
