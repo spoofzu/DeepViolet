@@ -6,7 +6,7 @@ set -e
 echo "*** User HOME folder is $HOME"
 
 echo "*** gpg version info"
-gpg --version
+gpg2 --version
 
 # start gpg-agent to manage passphrases
 eval $(gpg-agent --daemon)
@@ -27,5 +27,5 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
 	
 fi
 
-gpg --list-keys 
-gpg --list-secret-keys
+gpg2 --list-keys 
+gpg2 --list-secret-keys
