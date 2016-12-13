@@ -30,6 +30,8 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
 	sha256sum ~/.gnupg/secring.gpg
 # git config --global user.email "milton.smith.rr+travisci@gmail.com"
 # git config --global user.name "travisci"
+
+echo "<settingsSecurity><master>{YbaXibPTjI8HEmz/lr/0WuqGHG7TU+/dJ+ZRWXf8/ek=}</master></settingsSecurity>" > ~/.m2/settings-security.xml
 	
 fi
 
