@@ -5,14 +5,14 @@ set -e
 
 echo "*** User HOME folder is $HOME"
 
-echo "*** gpg version info"
-gpg2 --version
+#echo "*** gpg version info"
+#gpg2 --version
 
 # start gpg-agent to manage passphrases
-eval $(gpg-agent --daemon)
+#eval $(gpg-agent --daemon)
 
 #echo "*** gpg-agent version info"
-gpg-agent --version
+#gpg-agent --version
 
 if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; then
 
@@ -24,6 +24,8 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
  	mv build/secring.gpg ~/.gnupg/secring.gpg
     sha256sum ~/.gnupg/pubring.gpg
 	sha256sum ~/.gnupg/secring.gpg
+#	git config --global user.email "milton.smith.rr+travisci@gmail.com"
+#	git config --global user.name "travisci"
 	
 fi
 
