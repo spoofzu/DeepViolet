@@ -28,8 +28,8 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
  	mv build/secring.gpg ~/.gnupg/secring.gpg
     sha256sum ~/.gnupg/pubring.gpg
 	sha256sum ~/.gnupg/secring.gpg
-#	git config --global user.email "milton.smith.rr+travisci@gmail.com"
-#	git config --global user.name "travisci"
+# git config --global user.email "milton.smith.rr+travisci@gmail.com"
+# git config --global user.name "travisci"
 	
 fi
 
