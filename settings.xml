@@ -2,7 +2,7 @@
 <settings>
   <servers>
     <server>
-      <id>${env.GPG_KEY_NAME}</id>
+      <id>ossrh</id>
       <username>${env.OSSRH_USER}</username>
       <password>${env.OSSRH_PASS}</password>
 	</server>
