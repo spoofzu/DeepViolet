@@ -15,7 +15,7 @@ before_install:
   - sudo apt-get update -q
   - sudo apt-get install gnupg2
   - sudo apt-get install gnupg-agent
-  - sudo apt-get install libgcrypt20
+  - sudo apt-get install libgcrypt11
  
 install: 
   #- sudo echo "default-key $GPG_KEY_NAME" >> ~/.gnupg/gpg.conf
