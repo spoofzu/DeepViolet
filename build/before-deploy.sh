@@ -5,14 +5,18 @@ set -e
 
 echo "*** User HOME folder is $HOME"
 
-#echo "*** gpg version info"
-#gpg2 --version
+echo "*** gpg version info"
+gpg2 --version
 
 # start gpg-agent to manage passphrases
-#eval $(gpg-agent --daemon)
+eval $(gpg-agent --batch --v --daemon)
 
-#echo "*** gpg-agent version info"
-#gpg-agent --version
+echo "*** gpg-agent version info"
+gpg-agent --version
+
+echo "*** apply GPG tty settings"
+GPG_TTY=$(tty)
+export GPG_TTY
 
 if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; then
 
