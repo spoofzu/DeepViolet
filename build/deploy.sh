@@ -5,7 +5,9 @@ set -e
 
 if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; then
 	echo "Publishing Maven snapshot..."
-	mvn --batch-mode -X release:prepare release:perform --settings="./settings.xml" -Dgpg.dryRun=true -Dmaven.test.skip=true -Darguments=-Dgpg.passphrase="$GPG_PASSPHRASE"
+	git config --global user.email "milton.smith.rr+travisci@gmail.com"
+	git config --global user.name "travisci"
+	mvn --batch-mode -X release:clean release:prepare release:perform --settings="./settings.xml" -Dgpg.dryRun=true -Dmaven.test.skip=true -Darguments=-Dgpg.passphrase="$GPG_PASSPHRASE"
     echo "Maven snapshot published..."
 fi
 
