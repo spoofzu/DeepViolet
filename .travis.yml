@@ -14,7 +14,7 @@ env:
 before_install:
   - sudo apt-get update -q
   - sudo apt-get install gnupg2
-  - sudo apt-get install gnupg-agent
+  #- sudo apt-get install gnupg-agent
   #- sudo apt-get install libgcrypt11
  
 install: 
