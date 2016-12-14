@@ -4,7 +4,7 @@
    <groupId>com.github.spoofzu</groupId>
    <artifactId>DeepViolet</artifactId>
    <!-- MANAGED BY TRAVIS CI, DO NOT EDIT VERSION -->
-   <version>1.0.5</version>
+   <version>1.0.5-SNAPSHOT</version>
    <packaging>jar</packaging>
    <name>${project.groupId}:${project.artifactId}</name>
    <description>TLS/SSL security introspection API</description>
