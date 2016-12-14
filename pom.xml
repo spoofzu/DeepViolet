@@ -66,8 +66,7 @@
    <scm>
       <connection>scm:git:git@github.com:spoofzu/DeepViolet.git</connection>
       <developerConnection>scm:git:git@github.com:spoofzu/DeepViolet.git</developerConnection>
-      <url>git@github.com:/spoofzu/DeepViolet.git</url>
-      <tag>DeepViolet-1.0.5</tag>
+      <url>scm:git@github.com:/spoofzu/DeepViolet.git</url>
    </scm>
    <dependencies>
       <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
