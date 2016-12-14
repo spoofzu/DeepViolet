@@ -31,19 +31,19 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
     sha256sum ~/.gnupg/pubring.gpg
 	sha256sum ~/.gnupg/secring.gpg
 	
-	# Required by mvn release:prepare
-	git config --global user.email "noreply@travisci.com"
-	git config --global user.name "DeepViolet Travisci Bot"
-	
-	# Required or receives, fatal: ref HEAD is not a symbolic ref
-	git checkout master
-	git pull origin master
-	
 	# Setup GH credentials for TravisCI push to GitHub (tagging)
 	# Clone repo can be done via default git credentials but push
 	# takes GH API key credentials.
     - git config credential.helper "store --file=.git/credentials"
     - echo "https://${GH_TOKEN}:@github.com" > .git/credentials
+	
+	# Required by mvn release:prepare
+	git config --global user.email "noreply@travisci.com"
+	git config --global user.name "DeepViolet (via TravisCI)"
+	
+	# Required or receives, fatal: ref HEAD is not a symbolic ref
+	git checkout master
+	git pull origin master
 
     # Maven master password
 	# echo "<settingsSecurity><master>{YbaXibPTjI8HEmz/lr/0WuqGHG7TU+/dJ+ZRWXf8/ek=}</master></settingsSecurity>" > ~/.m2/settings-security.xml

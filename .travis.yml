@@ -2,6 +2,12 @@ language: java
 
 jdk: oraclejdk8
 
+# Don't build release tags. This avoids publish conflicts because the version commit exists both on master and the release tag.
+# See https://github.com/travis-ci/travis-ci/issues/1532
+branches:
+  except:
+    - /^[0-9]/
+
 cache:
   directories:
     - ~/.m2/repository
@@ -20,7 +26,10 @@ before_install:
 install: 
   #- sudo echo "default-key $GPG_KEY_NAME" >> ~/.gnupg/gpg.conf
   - mvn install -P !build-extras -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-   
+
+before_script:   
+  - echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+
 script: mvn test -P !build-extras -B
    
 after_success:
@@ -31,3 +40,5 @@ after_success:
 # check results at https://webchat.freenode.net/
 notifications:
   irc: "irc.freenode.org#deepviolet"
+  template:
+      - '%{repository_slug}#%{build_number} (%{branch}) %{message} %{build_url}'
