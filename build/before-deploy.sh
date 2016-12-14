@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 #
 
-set -e
+# errexit: stop executing if any errors occur, by default bash will just continue past any errors to run the next command
+# nounset: stop executing if an unset variable is encountered, by default bash will use an empty string for the value of such variables.
+set -o errexit -o nounset
 
 echo "*** User HOME folder is $HOME"
 
@@ -32,6 +34,12 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
 	# Required by mvn release:prepare
 	git config --global user.email "noreply@travisci.com"
 	git config --global user.name "DeepViolet Travisci Bot"
+	# Setup GH credentials for TravisCI push to GitHub (tagging)
+	# Clone repo can be done via default git credentials but push
+	# takes GH API key credentials.
+    - git config credential.helper "store --file=.git/credentials"
+    - echo "https://${GH_TOKEN}:@github.com" > .git/credentials
+	
 	# Required or receives, fatal: ref HEAD is not a symbolic ref
 	git checkout master
 	git pull origin master
