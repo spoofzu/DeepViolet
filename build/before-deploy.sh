@@ -28,6 +28,10 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
  	mv build/secring.gpg ~/.gnupg/secring.gpg
     sha256sum ~/.gnupg/pubring.gpg
 	sha256sum ~/.gnupg/secring.gpg
+	
+	# Required by mvn release:prepare
+	git config --global user.email "noreply@travisci.com"
+	git config --global user.name "DeepViolet Travisci Bot"
 
     # Maven master password
 	# echo "<settingsSecurity><master>{YbaXibPTjI8HEmz/lr/0WuqGHG7TU+/dJ+ZRWXf8/ek=}</master></settingsSecurity>" > ~/.m2/settings-security.xml
