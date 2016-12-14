@@ -32,6 +32,9 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
 	# Required by mvn release:prepare
 	git config --global user.email "noreply@travisci.com"
 	git config --global user.name "DeepViolet Travisci Bot"
+	# Required or receives, fatal: ref HEAD is not a symbolic ref
+	git checkout master
+	git pull origin master
 
     # Maven master password
 	# echo "<settingsSecurity><master>{YbaXibPTjI8HEmz/lr/0WuqGHG7TU+/dJ+ZRWXf8/ek=}</master></settingsSecurity>" > ~/.m2/settings-security.xml
