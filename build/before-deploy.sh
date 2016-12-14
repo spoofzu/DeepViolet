@@ -9,14 +9,14 @@ echo "*** gpg2 version info"
 gpg2 --version
 
 # start gpg-agent to manage passphrases
-eval $(gpg-agent --batch --v --daemon)
+#eval $(gpg-agent --batch --v --daemon)
 
-echo "*** gpg-agent version info"
-gpg-agent --version
+#echo "*** gpg-agent version info"
+#gpg-agent --version
 
-echo "*** apply GPG tty settings"
-GPG_TTY=$(tty)
-export GPG_TTY
+#echo "*** apply GPG tty settings"
+#GPG_TTY=$(tty)
+#export GPG_TTY
 
 if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; then
 
@@ -31,7 +31,7 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
 # git config --global user.email "milton.smith.rr+travisci@gmail.com"
 # git config --global user.name "travisci"
 
-echo "<settingsSecurity><master>{YbaXibPTjI8HEmz/lr/0WuqGHG7TU+/dJ+ZRWXf8/ek=}</master></settingsSecurity>" > ~/.m2/settings-security.xml
+# echo "<settingsSecurity><master>{YbaXibPTjI8HEmz/lr/0WuqGHG7TU+/dJ+ZRWXf8/ek=}</master></settingsSecurity>" > ~/.m2/settings-security.xml
 	
 fi
 

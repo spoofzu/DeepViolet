@@ -16,9 +16,13 @@
       <properties>
 		<gpg.publicKeyring>~/.gnupg/pubring.gpg</gpg.publicKeyring>
 		<gpg.secretKeyring>~/.gnupg/secring.gpg</gpg.secretKeyring>
+		<gpg.gpgArguments>--debug-all</gpg.gpgArguments>
 		<gpg.executable>gpg2</gpg.executable>
         <gpg.keyname>388E94D5</gpg.keyname>
+		<!--
 		<gpg.passphrase>{E74ZYYFcY00HRertkMtxcaiExtcThy5zDTaJ9270g1E=}</gpg.passphrase>
+		-->
+		<gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
       </properties>
     </profile>
   </profiles>
