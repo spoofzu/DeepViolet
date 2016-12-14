@@ -17,7 +17,7 @@
 		<gpg.publicKeyring>~/.gnupg/pubring.gpg</gpg.publicKeyring>
 		<gpg.secretKeyring>~/.gnupg/secring.gpg</gpg.secretKeyring>
 		<gpg.gpgArguments>
-			<arg>--debug-all</arg>
+			<gpg.arg>--debug-all</gpg.arg>
 		</gpg.gpgArguments>
 		<gpg.executable>gpg2</gpg.executable>
         <gpg.keyname>388E94D5</gpg.keyname>
