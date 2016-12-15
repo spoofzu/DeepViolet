@@ -5,9 +5,9 @@
 # nounset: stop executing if an unset variable is encountered, by default bash will use an empty string for the value of such variables.
 set -o errexit -o nounset
 
-echo "*** User HOME folder is $HOME"
+echo "*** before-deploy.sh, user HOME folder is $HOME"
 
-echo "*** gpg2 version info"
+echo "*** before-deploy.sh, gpg2 version info"
 gpg2 --version
 
 # start gpg-agent to manage passphrases
@@ -22,6 +22,8 @@ gpg2 --version
 
 if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; then
 
+	echo "*** before-deploy.sh, deploying release"
+
 	openssl aes-256-cbc -a -in build/pubring.gpg.enc -out build/pubring.gpg -d -k $OPENSSL_ENCRYPT_KEY
  	openssl aes-256-cbc -a -in build/secring.gpg.enc -out build/secring.gpg -d -k $OPENSSL_ENCRYPT_KEY
  	rm ~/.gnupg/pubring.gpg
@@ -35,12 +37,12 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
 	# Clone repo can be done via default git credentials but push
 	# takes GH API key credentials.
 	#
-    - git config credential.helper "store --file=.git/credentials"
-    - echo "https://${GH_TOKEN}:@github.com" > .git/credentials
+    - git config credential.helper "store --file=~/.git/credentials"
+    - echo "https://${GH_TOKEN}:@github.com" > ~/.git/credentials
 	
-	# Required by mvn release:prepare
+	# Required by mvn release:prepare, fatal: empty ident name <> not allowed
 	#
-	git init
+	#git init
 	git config --global user.email "noreply@travisci.com"
 	git config --global user.name "DeepViolet (via TravisCI)"
 	
@@ -49,7 +51,7 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
 	git checkout master
 	git pull origin master
 
-    # Maven master password
+    # Maven encrypt master password
 	#
 	# echo "<settingsSecurity><master>{YbaXibPTjI8HEmz/lr/0WuqGHG7TU+/dJ+ZRWXf8/ek=}</master></settingsSecurity>" > ~/.m2/settings-security.xml
 	
