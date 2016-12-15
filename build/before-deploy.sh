@@ -24,6 +24,7 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
 
 	echo "*** before-deploy.sh, pre-deployment started."
 
+	# update keyrings
 	openssl aes-256-cbc -a -in build/pubring.gpg.enc -out build/pubring.gpg -d -k $OPENSSL_ENCRYPT_KEY
  	openssl aes-256-cbc -a -in build/secring.gpg.enc -out build/secring.gpg -d -k $OPENSSL_ENCRYPT_KEY
  	rm ~/.gnupg/pubring.gpg
@@ -32,6 +33,12 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
  	mv build/secring.gpg ~/.gnupg/secring.gpg
     sha256sum ~/.gnupg/pubring.gpg
 	sha256sum ~/.gnupg/secring.gpg
+
+	# update ssh deploy keys. Required for mvn to push to github for release
+    openssl aes-256-cbc -a -in build/id_rsa.gpg.enc -out build/id_rsa.gpg -d -k $OPENSSL_ENCRYPT_KEY	
+	chmod 600 build/id_rsa.gpg
+	eval 'ssh-agent -s'
+	ssh-add build/id_rsa.gpg
 	
 	# Setup GH credentials for TravisCI push to GitHub (tagging)
 	# Clone repo can be done via default git credentials but push
