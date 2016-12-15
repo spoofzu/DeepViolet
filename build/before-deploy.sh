@@ -37,6 +37,7 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
 	# Clone repo can be done via default git credentials but push
 	# takes GH API key credentials.
 	#
+	mkdir -p ~/.git/
     git config credential.helper "store --file=~/.git/credentials"
     echo "https://${GH_TOKEN}:@github.com" > ~/.git/credentials
 	
