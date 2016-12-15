@@ -22,7 +22,7 @@ gpg2 --version
 
 if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; then
 
-	echo "*** before-deploy.sh, deploying release"
+	echo "*** before-deploy.sh, pre-deployment started."
 
 	openssl aes-256-cbc -a -in build/pubring.gpg.enc -out build/pubring.gpg -d -k $OPENSSL_ENCRYPT_KEY
  	openssl aes-256-cbc -a -in build/secring.gpg.enc -out build/secring.gpg -d -k $OPENSSL_ENCRYPT_KEY
@@ -37,8 +37,8 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
 	# Clone repo can be done via default git credentials but push
 	# takes GH API key credentials.
 	#
-    - git config credential.helper "store --file=~/.git/credentials"
-    - echo "https://${GH_TOKEN}:@github.com" > ~/.git/credentials
+    git config credential.helper "store --file=~/.git/credentials"
+    echo "https://${GH_TOKEN}:@github.com" > ~/.git/credentials
 	
 	# Required by mvn release:prepare, fatal: empty ident name <> not allowed
 	#
@@ -54,6 +54,7 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
     # Maven encrypt master password
 	#
 	# echo "<settingsSecurity><master>{YbaXibPTjI8HEmz/lr/0WuqGHG7TU+/dJ+ZRWXf8/ek=}</master></settingsSecurity>" > ~/.m2/settings-security.xml
+	echo "*** before-deploy.sh, pre-deployment complete."
 	
 fi
 

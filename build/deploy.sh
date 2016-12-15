@@ -7,7 +7,7 @@ set -o errexit -o nounset
 
 if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; then
 	
-	echo "*** deploy.sh, deploying release"
+	echo "*** deploy.sh, deploying release."
 	
 	#note: milton 12/2/2016, this is not optimial but keyrings are also password encrypted
 	mvn --batch-mode -X release:prepare release:perform --settings="./settings.xml" -Dmaven.test.skip=true \
@@ -28,7 +28,7 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
 		 # -Darguments=-Dgpg.passphrase="{1ytJn1Uv10gHLO/URDhNnZZgm0pIYpGSbk8h9mOPE+w=}" \
 	     # -Dgpg.passphrase="{1ytJn1Uv10gHLO/URDhNnZZgm0pIYpGSbk8h9mOPE+w=}"
 
-	echo "*** deploy.sh, deployment complete"
+	echo "*** deploy.sh, deployment complete."
 fi
 
 # mvn versions:set "-DnewVersion=${tag}"
