@@ -18,11 +18,6 @@ branches:
 cache:
   directories:
     - ~/.m2/repository
-
-#env:
-  #global:
-   # GH_TOKEN
-   #secure: "ejbUqrRdKFPHVGXVDdu15z5GYS6sY2h+UQT48Jvr6p6CC3Ta6sQajvRzBc3DQP+KKXyiFryNN5fBhF0UezoElQ1V1eD4I82JDqF7HKmpk1nJnoLkdYQjbIEvTv7fRSs+IGpL62zYZUMR2/Iy+V32qECjUCEvnCHPRHaTnKDUlegGDEuBKyb7YGEzzxMRQWXJkd2xrR0tcaGYArtnAXtOH4sYSATFZB7UDiq1hRvX4eB5KVyKEVpHM45gnhccoGXkeeTy3m5KWxHypF7tK3pbe1mJejX4EURCER/hGrcS8xNzRmBbAhuk/KwAUCGo7AjOa5g301wp6n61Aen5sG4g+NMCjkUc0GmCDZ1/k/rH+DhXPmhI0X0cMG/BKtCdVbYDtFh03RCjwfxvxr3kjoXgz/rGBA14otzwnf2Ct9Q2VYiBFKCFm254fFgdlSu9DN53kyUIGSwXXxtj7+kExatpIMIQ22wiloWdZUQFk+J8eOGdfUzBgPc3Xe/HuNGI+G/Y6RWVhXY49xOmn6kHNSGj4ajyki8U0QthrEJ54mTQ+ZSAVtTx1BxGbOpN4MTg4UhLNv0vATi+a1lESCfu7Sn+XRRULPryeHFgSeLIsRxNjMics2Eg3KnDmKH8XOtmxj3v5WigZ+kI159C1h9nSJ4KvdrFvY8K/qXyM2lL77Fh4Bg="
  
 before_install:
   - sudo apt-get update -q
