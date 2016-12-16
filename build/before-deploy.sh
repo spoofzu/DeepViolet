@@ -11,17 +11,18 @@ echo "*** before-deploy.sh, gpg2 version info"
 gpg2 --version
 
 # start gpg-agent to manage passphrases
-eval $(gpg-agent --batch --v --daemon)
+#eval $(gpg-agent --batch --v --daemon)
 
-echo "*** gpg-agent version info"
-gpg-agent --version
+#echo "*** gpg-agent version info"
+#gpg-agent --version
 
-echo "*** apply GPG tty settings"
-GPG_TTY=$(tty)
-export GPG_TTY
+#echo "*** apply GPG tty settings"
+#GPG_TTY=$(tty)
+#export GPG_TTY
 
-if [ "$TRAVIS_BRANCH" == 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ] && \
-   ! [ "$TRAVIS_TAG" =~ '^v[0-9].[0-9].[0-9]$' ]; then
+# Don't run unless merging to "master".  Anything tagged by Maven release will not run.
+if ([ "$TRAVIS_BRANCH" == "master" ] || [ ! -z "$TRAVIS_TAG" ]) && \
+      [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 
 	echo "*** before-deploy.sh, pre-deployment started."
 
@@ -58,8 +59,8 @@ if [ "$TRAVIS_BRANCH" == 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ] && 
 	
 	# Required or receives, fatal: ref HEAD is not a symbolic ref
 	#
-	#git checkout master
-	#git pull origin master
+	git checkout master
+	git pull origin master
 
     # Maven encrypt master password
 	#
