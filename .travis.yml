@@ -2,18 +2,13 @@ language: java
 
 jdk: oraclejdk8
 
-# Don't build release tags. This avoids publish conflicts because the version commit exists both on master and the release tag.
+# Deploy only on tags of the form v1.2.3
 # See https://github.com/travis-ci/travis-ci/issues/1532
-branches:
-  except:
-    - /^[0-9]/
-
-#deploy only on tags of the form v1.2.3
 #
-#deploy:
-#  on:
-#    tags: true
-#    condition: "$TRAVIS_TAG =~ ^v[0-9].[0-9].[0-9]$"
+deploy:
+  on:
+    tags: true
+    condition: "$TRAVIS_TAG =~ ^v[0-9].[0-9].[0-9]$"
 
 cache:
   directories:
@@ -37,6 +32,8 @@ script: mvn test -P !build-extras -B
 after_success:
   - build/before-deploy.sh
   - build/deploy.sh
+
+#deploy:
   
 # configure notifications (email, IRC, campfire etc)
 # check results at https://webchat.freenode.net/

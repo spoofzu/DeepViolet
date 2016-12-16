@@ -64,6 +64,7 @@
       </repository>
    </distributionManagement>
    <scm>
+	  <!-- Note: HTTPS access method is required since account uses 2FA -->
       <connection>scm:git:https://${GH_TOKEN}@github.com/spoofzu/DeepViolet.git</connection>
       <developerConnection>scm:git:https://${GH_TOKEN}@github.com/spoofzu/DeepViolet.git</developerConnection>
       <url>scm:git:https://${GH_TOKEN}@github.com/spoofzu/DeepViolet.git</url>

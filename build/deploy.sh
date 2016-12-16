@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 #
 
-# errexit: stop executing if any errors occur, by default bash will just continue past any errors to run the next command
-# nounset: stop executing if an unset variable is encountered, by default bash will use an empty string for the value of such variables.
-set -o errexit -o nounset
+# -e exit on error
+# -x print command prior to execution
+set -e -x
 
 if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; then
 	
 	echo "*** deploy.sh, deploying release."
 	
 	#note: milton 12/2/2016, this is not optimial but keyrings are also password encrypted
-	mvn --batch-mode -X release:prepare release:perform --settings="./settings.xml" -Dmaven.test.skip=true \
+	mvn --batch-mode -X release:prepare release:perform -P sign,build-extras --settings="./settings.xml" -Dmaven.test.skip=true \
 	     -Darguments=-Dgpg.passphrase="I love Mac." \
          -Dgpg.passphrase="I love Mac."
 	     #-DconnectionUrl="scm:git:git@github.com:spoofzu/DeepViolet.git"
