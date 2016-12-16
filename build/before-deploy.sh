@@ -20,7 +20,8 @@ echo "*** apply GPG tty settings"
 GPG_TTY=$(tty)
 export GPG_TTY
 
-if [ "$TRAVIS_BRANCH" == 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; then
+if [ "$TRAVIS_BRANCH" == 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ] && \
+   ["$TRAVIS_TAG != ^v[0-9].[0-9].[0-9]$"]; then
 
 	echo "*** before-deploy.sh, pre-deployment started."
 
@@ -57,8 +58,8 @@ if [ "$TRAVIS_BRANCH" == 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; th
 	
 	# Required or receives, fatal: ref HEAD is not a symbolic ref
 	#
-	git checkout master
-	git pull origin master
+	#git checkout master
+	#git pull origin master
 
     # Maven encrypt master password
 	#
