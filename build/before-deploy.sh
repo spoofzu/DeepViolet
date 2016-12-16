@@ -47,7 +47,7 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
 	#mkdir -p ~/.git/
     #git config credential.helper "store --file=~/.git/credentials"
     #echo "https://${GH_TOKEN}:@github.com" > ~/.git/credentials
-	git remote set-url origin https://${GH_TOKEN}:github.com/spoofzu/DeepViolet.git
+	git remote set-url origin https://${GH_TOKEN}@github.com/spoofzu/DeepViolet.git
 	
 	# Required by mvn release:prepare, fatal: empty ident name <> not allowed
 	#
