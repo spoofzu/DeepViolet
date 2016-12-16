@@ -21,7 +21,7 @@ before_install:
   #- sudo apt-get install libgcrypt11
  
 install: 
-  #- sudo echo "default-key $GPG_KEY_NAME" >> ~/.gnupg/gpg.conf
+  - sudo echo "default-key $GPG_KEY_NAME" >> ~/.gnupg/gpg.conf
   - mvn install -P !build-extras -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 
 before_script:   
