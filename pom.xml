@@ -64,9 +64,9 @@
       </repository>
    </distributionManagement>
    <scm>
-      <connection>scm:git:git@github.com:spoofzu/DeepViolet.git</connection>
-      <developerConnection>scm:git:git@github.com:spoofzu/DeepViolet.git</developerConnection>
-      <url>scm:git@github.com:/spoofzu/DeepViolet.git</url>
+      <connection>scm:git:${env.GH_TOKEN}@github.com:spoofzu/DeepViolet.git</connection>
+      <developerConnection>scm:git:${env.GH_TOKEN}@github.com:spoofzu/DeepViolet.git</developerConnection>
+      <url>scm:${env.GH_TOKEN}@github.com:/spoofzu/DeepViolet.git</url>
    </scm>
    <dependencies>
       <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
