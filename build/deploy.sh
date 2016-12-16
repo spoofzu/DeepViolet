@@ -6,7 +6,7 @@
 set -e
 
 if [ "$TRAVIS_BRANCH" == 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ] && \
-   ["$TRAVIS_TAG != ^v[0-9].[0-9].[0-9]$"]; then
+   ! [["$TRAVIS_TAG =~ ^v[0-9].[0-9].[0-9]$"]]; then
 	
 	echo "*** deploy.sh, deploying release."
 	
