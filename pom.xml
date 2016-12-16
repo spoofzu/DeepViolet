@@ -68,6 +68,7 @@
       <connection>scm:git:https://${GH_TOKEN}@github.com/spoofzu/DeepViolet.git</connection>
       <developerConnection>scm:git:https://${GH_TOKEN}@github.com/spoofzu/DeepViolet.git</developerConnection>
       <url>scm:git:https://${GH_TOKEN}@github.com/spoofzu/DeepViolet.git</url>
+	  <!--  MANAGED BY TRAVIS CI, DO NOT EDIT TAG -->
      <tag>HEAD</tag>
   </scm>
    <dependencies>
