@@ -12,7 +12,7 @@ before_install:
   #- sudo apt-get install gnupg-agent
  
 install: 
-  - sudo echo "default-key $GPG_KEY_NAME" >> ~/.gnupg/gpg.conf
+  - echo "default-key 388E94D5" >> ~/.gnupg/gpg.conf
   - mvn install -P !build-extras -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 
 before_script:   
