@@ -17,7 +17,7 @@ cache:
 before_install:
   - sudo apt-get update -q
   - sudo apt-get install gnupg2
-  #- sudo apt-get install gnupg-agent
+  - sudo apt-get install gnupg-agent
   #- sudo apt-get install libgcrypt11
  
 install: 
@@ -25,7 +25,7 @@ install:
   - mvn install -P !build-extras -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 
 before_script:   
-  - echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+  #- echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
 
 script: mvn test -P !build-extras -B
    
