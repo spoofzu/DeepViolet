@@ -171,9 +171,6 @@
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-gpg-plugin</artifactId>
                   <version>${maven.gpg.plugin}</version>
-		          <configuration>
-		            <passphraseServerId>ossrh</passphraseServerId>
-		          </configuration>
                   <executions>
                      <execution>
                         <id>sign-artifacts</id>
