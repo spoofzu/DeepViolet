@@ -2,14 +2,6 @@ language: java
 
 jdk: oraclejdk8
 
-# Deploy only on tags of the form v1.2.3
-# See https://github.com/travis-ci/travis-ci/issues/1532
-#
-deploy:
-  on:
-    tags: true
-    condition: "$TRAVIS_TAG =~ ^v[0-9].[0-9].[0-9]$"
-
 cache:
   directories:
     - ~/.m2/repository
@@ -17,8 +9,7 @@ cache:
 before_install:
   - sudo apt-get update -q
   - sudo apt-get install gnupg2
-  - sudo apt-get install gnupg-agent
-  #- sudo apt-get install libgcrypt11
+  #- sudo apt-get install gnupg-agent
  
 install: 
   - sudo echo "default-key $GPG_KEY_NAME" >> ~/.gnupg/gpg.conf
@@ -32,8 +23,6 @@ script: mvn test -P !build-extras -B
 after_success:
   - build/before-deploy.sh
   - build/deploy.sh
-
-#deploy:
   
 # configure notifications (email, IRC, campfire etc)
 # check results at https://webchat.freenode.net/

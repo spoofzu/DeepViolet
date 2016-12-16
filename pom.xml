@@ -45,7 +45,7 @@
       <mockito.core>1.10.19</mockito.core>
       <logback.classic>1.1.2</logback.classic>
       <bcpkix.jdk15on>1.50</bcpkix.jdk15on>
-      <maven.gpg.plugin>1.6</maven.gpg.plugin>
+      <maven.gpg.plugin>1.5</maven.gpg.plugin>
       <maven.clean.plugin>3.0.0</maven.clean.plugin>
       <maven.compiler.plugin>3.6.0</maven.compiler.plugin>
       <maven.jar.plugin>3.0.2</maven.jar.plugin>
@@ -149,6 +149,16 @@
                <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                <autoReleaseAfterClose>true</autoReleaseAfterClose>
             </configuration>
+			<executions>
+			  <execution>
+			    <id>deploy-to-sonatype</id>
+			    <phase>deploy</phase>
+			    <goals>
+			      <goal>deploy</goal>
+			      <goal>release</goal>
+			    </goals>
+			  </execution>
+			</executions>
          </plugin>
       </plugins>
    </build>

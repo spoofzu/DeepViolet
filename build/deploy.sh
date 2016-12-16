@@ -5,8 +5,9 @@
 # -x print command prior to execution (warn: info leakage)
 set -e
 
-if [ "$TRAVIS_BRANCH" == 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ] && \
-   ! [ "$TRAVIS_TAG" =~ '^v[0-9].[0-9].[0-9]$' ]; then
+# Don't run unless merging to "master".  Anything tagged by Maven release will not run.
+if ([ "$TRAVIS_BRANCH" == "master" ] || [ ! -z "$TRAVIS_TAG" ]) && \
+      [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 	
 	echo "*** deploy.sh, deploying release."
 	
