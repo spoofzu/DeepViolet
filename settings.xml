@@ -8,11 +8,16 @@
 	</server>
   </servers>
   <profiles>
+	<activeProfiles>
+	  <activeProfile>ossrh</activeProfile>
+	</activeProfiles>
     <profile>
       <id>ossrh</id>
+	  <!--
       <activation>
           <activeByDefault>true</activeByDefault>
       </activation>
+	  -->
       <properties>
 		<gpg.publicKeyring>~/.gnupg/pubring.gpg</gpg.publicKeyring>
 		<gpg.secretKeyring>~/.gnupg/secring.gpg</gpg.secretKeyring>
