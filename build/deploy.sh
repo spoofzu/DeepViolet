@@ -5,7 +5,7 @@
 # -x print command prior to execution (warn: info leakage)
 set -e
 
-if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; then
+if [ "$TRAVIS_BRANCH" == 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; then
 	
 	echo "*** deploy.sh, deploying release."
 	
