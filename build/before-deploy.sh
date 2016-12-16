@@ -21,7 +21,7 @@ GPG_TTY=$(tty)
 export GPG_TTY
 
 if [ "$TRAVIS_BRANCH" == 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ] && \
-   ! [["$TRAVIS_TAG =~ ^v[0-9].[0-9].[0-9]$"]]; then
+   ! [["$TRAVIS_TAG" =~ '^v[0-9].[0-9].[0-9]$']]; then
 
 	echo "*** before-deploy.sh, pre-deployment started."
 
