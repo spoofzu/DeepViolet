@@ -31,9 +31,9 @@ script: mvn test -P !build-extras -B
    
 after_success:
   - build/before-deploy.sh
-
-deploy:
   - build/deploy.sh
+
+#deploy:
   
 # configure notifications (email, IRC, campfire etc)
 # check results at https://webchat.freenode.net/

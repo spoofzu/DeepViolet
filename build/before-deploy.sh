@@ -53,7 +53,7 @@ if [ "$TRAVIS_BRANCH" = 'master' ] && [ "$TRAVIS_PULL_REQUEST" == 'false' ]; the
 	#
 	#git init
 	git config --global user.email "noreply@travisci.com"
-	git config --global user.name "DeepViolet (via TravisCI)"
+	git config --global user.name "DV BuildBot (via TravisCI)"
 	
 	# Required or receives, fatal: ref HEAD is not a symbolic ref
 	#
