@@ -12,7 +12,7 @@ if ([ "$TRAVIS_BRANCH" == "master" ] || [ ! -z "$TRAVIS_TAG" ]) && \
 	echo "*** deploy.sh, deploying release."
 	
 	#note: milton 12/2/2016, this is not optimial but keyrings are also password encrypted
-	mvn --batch-mode -X release:prepare release:perform -P sign,build-extras --settings="settings.xml" \
+	mvn --batch-mode -X release:prepare release:perform --settings="settings.xml" \
 		 -Dmaven.test.skip=true \
 	     -Darguments=-Dgpg.passphrase="I\ love\ Mac." \
          #-Dgpg.passphrase="I love Mac." \
