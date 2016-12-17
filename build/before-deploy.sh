@@ -7,8 +7,8 @@ set -e
 
 echo "*** before-deploy.sh, user HOME folder is $HOME"
 
-echo "*** before-deploy.sh, gpg2 version info"
-gpg2 --version
+#echo "*** before-deploy.sh, gpg2 version info"
+#gpg2 --version
 
 # start gpg-agent to manage passphrases
 #eval $(gpg-agent --batch --v --daemon)
