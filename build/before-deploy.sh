@@ -7,9 +7,9 @@ set -e
 
 echo "*** before-deploy.sh, user HOME folder is $HOME"
 
-# Exit on any github tag that is not a release.
-if  [[ ! "$TRAVIS_TAG" =~ "^release.*$"  ]]; then
-	echo "*** before-deploy.sh, release not detected, skipping before-deploy."
+# Exit on any github tag that is a release.
+if  [[ "$TRAVIS_TAG" =~ "^v.*$"  ]]; then
+	echo "*** before-deploy.sh, release detected, skipping deploy/release."
 	exit 0;
 fi
 
