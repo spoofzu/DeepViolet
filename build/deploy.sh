@@ -5,17 +5,23 @@
 # -x print command prior to execution (warn: info leakage)
 set -e
 
-# Don't run unless merging to "master".  Anything tagged by Maven release will not run.
-if ([ "$TRAVIS_BRANCH" == "master" ] || [ ! -z "$TRAVIS_TAG" ]) && \
-      [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+#note: milton 12/17/2016, Very important, reserved bash shell characters must be escaped
+#                        with a slash. 
+
+# Exit any github tag since already released.
+if  [[ !  -z  "$TRAVIS_TAG"  ]]; then
+	echo "*** deploy.sh, tagged version was already released, skipping deploy/release."
+	exit 0;
+fi
+
+# Don't release unless merging pull request to "master".
+if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 	
 	echo "*** deploy.sh, deploying release."
 	
-	#note: milton 12/2/2016, this is not optimial but keyrings are also password encrypted
-	#note: milton 12/17/2016, -DdryRun=true, add flag for test run
-	#note: milton 12/17/2016, Very important, reserved bash shell characters must be escaped
-	#                        with a slash. 
-	mvn --batch-mode -X release:prepare release:perform --settings="settings.xml" \
+	mvn --batch-mode \
+		 #-X \
+	     release:prepare release:perform --settings="settings.xml" \
 		 -Dmaven.test.skip=true \
 	     -Darguments=-Dgpg.passphrase="I\ love\ Mac." \
 		 #-DdryRun=true \

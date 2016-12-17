@@ -7,18 +7,11 @@ set -e
 
 echo "*** before-deploy.sh, user HOME folder is $HOME"
 
-#echo "*** before-deploy.sh, gpg2 version info"
-#gpg2 --version
-
-# start gpg-agent to manage passphrases
-#eval $(gpg-agent --batch --v --daemon)
-
-#echo "*** gpg-agent version info"
-#gpg-agent --version
-
-#echo "*** apply GPG tty settings"
-#GPG_TTY=$(tty)
-#export GPG_TTY
+# Exit any tag since already released.
+if  [[ !  -z  "$TRAVIS_TAG"  ]]; then
+	echo "*** before-deploy.sh, tagged version was already released, skipping before-deploy."
+	exit 0;
+fi
 
 # Don't run unless merging to "master".  Anything tagged by Maven release will not run.
 if ([ "$TRAVIS_BRANCH" == "master" ] || [ ! -z "$TRAVIS_TAG" ]) && \

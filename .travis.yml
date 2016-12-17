@@ -6,11 +6,6 @@ cache:
   directories:
     - ~/.m2/repository
  
-before_install:
-  #- sudo apt-get update -q
-  #- sudo apt-get install gnupg2
-  #- sudo apt-get install gnupg-agent
- 
 install: 
   - echo "default-key 388E94D5" >> ~/.gnupg/gpg.conf
   - mvn install -P !build-extras -DskipTests=true -Dmaven.javadoc.skip=true -B -V
