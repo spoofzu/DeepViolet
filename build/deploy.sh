@@ -8,7 +8,7 @@ set -e
 #note: milton 12/17/2016, Very important, reserved bash shell characters must be escaped
 #                        with a slash. 
 
-# Exit any github tag since already released.
+# Exit on any github tag that is not a release.
 if  [[ ! "$TRAVIS_TAG" =~ "^release.*$"  ]]; then
 	echo "*** deploy.sh, release not detected, skipping deploy/release."
 	exit 0;
