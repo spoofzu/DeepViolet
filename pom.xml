@@ -48,6 +48,7 @@
       <maven.gpg.plugin>1.5</maven.gpg.plugin>
       <maven.clean.plugin>3.0.0</maven.clean.plugin>
       <maven.compiler.plugin>3.6.0</maven.compiler.plugin>
+	  <maven.release.plugin>2.5.3</maven.release.plugin>
       <maven.jar.plugin>3.0.2</maven.jar.plugin>
       <nexus.staging.maven.plugin>1.6.7</nexus.staging.maven.plugin>
       <maven.source.plugin>2.4</maven.source.plugin>
@@ -160,6 +161,14 @@
 			  </execution>
 			</executions>
          </plugin>
+		 <plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-release-plugin</artifactId>
+		    <version>${maven.release.plugin}</version>
+		    <configuration>
+		       <tagNameFormat>v@{project.version}</tagNameFormat>
+		    </configuration>
+		 </plugin>
       </plugins>
    </build>
    <profiles>
