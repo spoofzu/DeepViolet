@@ -12,13 +12,13 @@ if ([ "$TRAVIS_BRANCH" == "master" ] || [ ! -z "$TRAVIS_TAG" ]) && \
 	echo "*** deploy.sh, deploying release."
 	
 	#note: milton 12/2/2016, this is not optimial but keyrings are also password encrypted
-	#note: milton 12/17/2016 -DdryRun=true, add flag for test run
-	#note: milton 12/17/2016 Very important, reserved bash shell characters must be escaped
+	#note: milton 12/17/2016, -DdryRun=true, add flag for test run
+	#note: milton 12/17/2016, Very important, reserved bash shell characters must be escaped
 	#                        with a slash. 
 	mvn --batch-mode -X release:prepare release:perform --settings="settings.xml" \
 		 -Dmaven.test.skip=true \
 	     -Darguments=-Dgpg.passphrase="I\ love\ Mac." \
-		 -DdryRun=true \
+		 #-DdryRun=true \
 	     -DconnectionUrl="scm:git:https://${GH_TOKEN}@github.com/spoofzu/DeepViolet.git"
 
 	echo "*** deploy.sh, deployment complete."
