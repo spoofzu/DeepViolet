@@ -4,7 +4,7 @@
    <groupId>com.github.spoofzu</groupId>
    <artifactId>DeepViolet</artifactId>
    <!-- MANAGED BY TRAVIS CI, DO NOT EDIT VERSION -->
-   <version>1.0.7</version>
+   <version>1.0.8-SNAPSHOT</version>
    <packaging>jar</packaging>
    <name>${project.groupId}:${project.artifactId}</name>
    <description>TLS/SSL security introspection API</description>
@@ -70,7 +70,7 @@
       <developerConnection>scm:git:https://${env.GH_TOKEN}@github.com/spoofzu/DeepViolet.git</developerConnection>
       <url>scm:git:https://${env.GH_TOKEN}@github.com/spoofzu/DeepViolet.git</url>
 	  <!--  MANAGED BY TRAVIS CI, DO NOT EDIT TAG -->
-     <tag>v1.0.7</tag>
+     <tag>HEAD</tag>
   </scm>
    <dependencies>
       <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
