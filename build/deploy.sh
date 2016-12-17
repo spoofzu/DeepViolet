@@ -5,8 +5,8 @@
 # -x print command prior to execution (warn: info leakage)
 set -e
 
-#note: milton 12/17/2016, Very important, reserved bash shell characters must be escaped
-#                        with a slash. 
+# note: milton 12/17/2016, Very important, reserved bash shell characters must be escaped
+#                          with a slash.
 
 # Exit on any github tag that is not a release.
 if  [[ ! "$TRAVIS_TAG" =~ "^release.*$"  ]]; then
