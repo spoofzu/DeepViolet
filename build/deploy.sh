@@ -19,11 +19,12 @@ if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; th
 	
 	echo "*** deploy.sh, deploying release."
 	
-	mvn --batch-mode release:prepare release:perform -P sign,build-extras --settings="settings.xml" \
+	mvn release:prepare release:perform -P sign build-extras --settings="settings.xml" \
 		 -Dmaven.test.skip=true \
 	     -Darguments=-Dgpg.passphrase="I\ love\ Mac." \
+	     -B
 		 #-DdryRun=true \
-	     -DconnectionUrl="scm:git:https://${GH_TOKEN}@github.com/spoofzu/DeepViolet.git"
+	     #-DconnectionUrl="scm:git:https://${GH_TOKEN}@github.com/spoofzu/DeepViolet.git"
 
 	echo "*** deploy.sh, deployment complete."
 fi
