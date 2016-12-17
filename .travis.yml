@@ -7,8 +7,8 @@ cache:
     - ~/.m2/repository
  
 before_install:
-  - sudo apt-get update -q
-  - sudo apt-get install gnupg2
+  #- sudo apt-get update -q
+  #- sudo apt-get install gnupg2
   #- sudo apt-get install gnupg-agent
  
 install: 
