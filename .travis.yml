@@ -7,7 +7,7 @@ cache:
     - ~/.m2/repository
  
 install: 
-  - echo "default-key 388E94D5" >> ~/.gnupg/gpg.conf
+  #- echo "default-key 388E94D5" >> ~/.gnupg/gpg.conf
   - mvn install -P !build-extras -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 
 before_script:   

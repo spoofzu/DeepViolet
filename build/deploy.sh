@@ -9,8 +9,8 @@ set -e
 #                        with a slash. 
 
 # Exit any github tag since already released.
-if  [[ !  -z  "$TRAVIS_TAG"  ]]; then
-	echo "*** deploy.sh, tagged version was already released, skipping deploy/release."
+if  [[ ! "$TRAVIS_TAG" =~ "^release.*$"  ]]; then
+	echo "*** deploy.sh, release not detected, skipping deploy/release."
 	exit 0;
 fi
 
@@ -29,6 +29,3 @@ if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; th
 
 	echo "*** deploy.sh, deployment complete."
 fi
-
-# mvn versions:set "-DnewVersion=${tag}"
-# git commit -am "${tag}"
