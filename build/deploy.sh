@@ -21,7 +21,7 @@ if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; th
 	
 	mvn --batch-mode \
 		 #-X \
-	     release:prepare release:perform --settings="settings.xml" \
+	     clean install release:prepare release:perform --settings="settings.xml" \
 		 -Dmaven.test.skip=true \
 	     -Darguments=-Dgpg.passphrase="I\ love\ Mac." \
 		 #-DdryRun=true \
