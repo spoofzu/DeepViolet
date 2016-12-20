@@ -14,13 +14,18 @@ before_install:
   - sudo apt-get install haveged
   - sudo service haveged restart
   #- sudo apt-get install gnupg2
-  #- sudo apt-get install gnupg-agent
+  - sudo apt-get install gnupg-agent
 
 script: mvn --settings="settings.xml" clean verify
    
 #after_success:
   #- build/before-deploy.sh
 #  - build/deploy.sh
+
+before_deploy:
+  - killall ssh-agent gpg-agent
+  - unset GPG_AGENT_INFO SSH_AGENT_PID SSH_AUTH_SOCK
+  - eval $(gpg-agent --daemon --enable-ssh-support)
 
 deploy:
   -
