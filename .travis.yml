@@ -23,8 +23,7 @@ script: mvn --settings="settings.xml" clean verify
   # - build/deploy.sh
 
 before_deploy:
-  - sudo service ssh-agent stop
-  - sudo service gnupg-agent stop
+  - sudo killall -q ssh-agent gnupg-agent
   - unset GPG_AGENT_INFO SSH_AGENT_PID SSH_AUTH_SOCK
   - eval $(gpg-agent --daemon --enable-ssh-support)
 
