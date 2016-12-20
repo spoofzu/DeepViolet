@@ -24,6 +24,11 @@ if [ ! -z "$TRAVIS_TAG" ]; then
 	-Prelease \
 	-X
 	
+	#
+	# Create GPG keys
+	#
+	source build/gpg.sh
+	
 	# 
 	# Deploy
 	#			 

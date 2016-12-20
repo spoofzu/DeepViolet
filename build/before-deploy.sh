@@ -15,7 +15,7 @@ if [ ! -z "$TRAVIS_TAG" ]; then
 	echo "*** before-deploy.sh, pre-deployment started."
 	
 	echo "*** gpg version info"
-	gpg2 --version
+	gpg --version
 	
 	#echo "*** gpg-agent version info"
 	#gpg-agent --version
@@ -44,8 +44,8 @@ if [ ! -z "$TRAVIS_TAG" ]; then
 
 	# Print keyring for debugging
 	#
-	gpg2 --list-keys 
-	gpg2 --list-secret-keys
+	gpg --list-keys 
+	gpg --list-secret-keys
 	
 	# Required or receives, fatal: ref HEAD is not a symbolic ref
 	#

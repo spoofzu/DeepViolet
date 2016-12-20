@@ -10,19 +10,25 @@ cache:
     - ~/.m2/repository
  
 before_install:
-  - sudo apt-get update -q
-  - sudo apt-get install gnupg2
+  #- sudo apt-get update -q
+  #- sudo apt-get install gnupg2
   #- sudo apt-get install gnupg-agent
 
-install: 
-- mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-
-script: 
-- mvn test -B
+script: mvn --settings="settings.xml" clean verify
    
-after_success:
-  - build/before-deploy.sh
-  - build/deploy.sh
+#after_success:
+  #- build/before-deploy.sh
+#  - build/deploy.sh
+
+deploy:
+  -
+    provider: script
+    script: build/deploy.sh
+    skip_cleanup: true
+    on:
+      repo: spoofzu/DeepViolet
+      tags: true
+      jdk: oraclejdk8
   
 # configure notifications (email, IRC, campfire etc)
 # check results at https://webchat.freenode.net/
