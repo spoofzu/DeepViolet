@@ -11,8 +11,8 @@ cache:
  
 before_install:
   - sudo apt-get update -q
-  #- sudo apt-get install gnupg2
-  - sudo apt-get install gnupg-agent
+  - sudo apt-get install gnupg2
+  #- sudo apt-get install gnupg-agent
 
 install: 
 - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
