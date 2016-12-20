@@ -19,25 +19,27 @@ if [ ! -z "$TRAVIS_TAG" ]; then
 	# 
 	# Set version in pom.xml to $TRAVIS_TAG
 	#
-	mvn --settings="settings.xml" org.codehaus.mojo:versions-maven-plugin:2.3:set \
+	mvn --settings="settings.xml" \
 	-DnewVersion="$TRAVIS_TAG" \
+	--batch_mode \
+    -Dgpg.passphrase="I\ love\ Mac." \
 	-Prelease \
-	--batch_mode
-    -Dgpg.passphrase="I\ love\ Mac."
-	-Darguments=-Dgpg.passphrase="I\ love\ Mac."
+	-Darguments=-Dgpg.passphrase="I\ love\ Mac." \
+	org.codehaus.mojo:versions-maven-plugin:2.3:set
 	# -DdryRun=true \
 	# -X
 	
 	# 
 	# Set version in pom.xml to $TRAVIS_TAG
 	#			 
-    mvn clean deploy --settings="settings.xml" \
+    mvn --settings="settings.xml" \
 	-DskipTests=true \
+    --batch_mode \
 	--update-snapshots \
-	--batch_mode
+    -Dgpg.passphrase="I\ love\ Mac." \
 	-Prelease \
-    -Dgpg.passphrase="I\ love\ Mac."
-	-Darguments=-Dgpg.passphrase="I\ love\ Mac."
+	-Darguments=-Dgpg.passphrase="I\ love\ Mac." \
+	clean deploy
 	# -DdryRun=true \
 	# -X
 
