@@ -7,14 +7,10 @@ set -e
 
 echo "*** before-deploy.sh, user HOME folder is $HOME"
 
-# Exit on any github tag that is a release.
-if  [[ "$TRAVIS_TAG" =~ "^v.*$"  ]]; then
-	echo "*** before-deploy.sh, release detected, skipping deploy/release."
-	exit 0;
-fi
-
-# Don't release unless merging pull request to "master".
-if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+#
+# Do if: new tag
+#
+if [ ! -z "$TRAVIS_TAG" ]; then
 
 	echo "*** before-deploy.sh, pre-deployment started."
 
@@ -27,21 +23,6 @@ if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; th
  	mv build/secring.gpg ~/.gnupg/secring.gpg
     sha256sum ~/.gnupg/pubring.gpg
 	sha256sum ~/.gnupg/secring.gpg
-
-	# update ssh deploy keys. Required for mvn to push to github for release
-    #openssl aes-256-cbc -a -in build/id_rsa.gpg.enc -out build/id_rsa.gpg -d -k $OPENSSL_ENCRYPT_KEY	
-	#chmod 600 build/id_rsa.gpg
-	#eval 'ssh-agent -s'
-	#ssh-add build/id_rsa.gpg
-	
-	# Setup GH credentials for TravisCI push to GitHub (tagging)
-	# Clone repo can be done via default git credentials but push
-	# takes GH API key credentials.
-	#
-	#mkdir -p ~/.git/
-    #git config credential.helper "store --file=~/.git/credentials"
-    #echo "https://${GH_TOKEN}@github.com" > ~/.git/credentials
-	#git remote set-url origin https://${GH_TOKEN}@github.com/spoofzu/DeepViolet.git
 	
 	# Required by mvn release:prepare, fatal: empty ident name <> not allowed
 	#
@@ -61,5 +42,7 @@ if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; th
 	
 fi
 
-gpg --list-keys 
-gpg --list-secret-keys
+# Print keyring for debugging
+#
+#gpg --list-keys 
+#gpg --list-secret-keys

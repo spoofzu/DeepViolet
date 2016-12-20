@@ -18,9 +18,6 @@
 		<gpg.secretKeyring>~/.gnupg/secring.gpg</gpg.secretKeyring>
 		<gpg.executable>gpg</gpg.executable>
         <gpg.keyname>388E94D5</gpg.keyname>
-		<!--
-		<gpg.passphrase>{E74ZYYFcY00HRertkMtxcaiExtcThy5zDTaJ9270g1E=}</gpg.passphrase>
-		-->
       </properties>
     </profile>
   </profiles>
