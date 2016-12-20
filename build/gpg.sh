@@ -12,9 +12,9 @@ cat >gen-key-script <<EOF
     Key-Length: 4096
     Subkey-Type: 1
     Subkey-Length: 4096
-    Name-Real: Opensource Idealo
-    Name-Email: opensource-logback-redis@idealo.de
-    Expire-Date: 2y
+    Name-Real: Milton Smith
+    Name-Email: milton.smith.rr@gmail.com
+    Expire-Date: 1y
     Passphrase: ${GPG_PASSPHRASE}
     %commit
     %echo done

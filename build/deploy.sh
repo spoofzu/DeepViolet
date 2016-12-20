@@ -37,8 +37,6 @@ if [ ! -z "$TRAVIS_TAG" ]; then
     --batch-mode \
 	--update-snapshots \
 	-Prelease \
-    -Dgpg.passphrase="I\ love\ Mac." \
-	-Darguments=-Dgpg.passphrase="I\ love\ Mac." \
 	-X
 
 	echo "*** deploy.sh, deployment complete."
