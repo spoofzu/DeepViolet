@@ -34,7 +34,7 @@ if [ ! -z "$TRAVIS_TAG" ]; then
 	--update-snapshots \
 	-Prelease \
     -Dgpg.passphrase="I\ love\ Mac." \
-	-Darguments=-Dgpg.passphrase="I\ love\ Mac." \
+	-Darguments="-Dgpg.passphrase=I\ love\ Mac."
 	
 	# -DdryRun=true \
 	# -X
