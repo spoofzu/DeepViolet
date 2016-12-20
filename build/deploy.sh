@@ -22,6 +22,7 @@ if [ ! -z "$TRAVIS_TAG" ]; then
 	mvn --settings="settings.xml" org.codehaus.mojo:versions-maven-plugin:2.3:set \
 	-DnewVersion="$TRAVIS_TAG" \
 	-Prelease \
+    -Dgpg.passphrase="I\ love\ Mac."
 	# -DdryRun=true \
 	# -X
 	
@@ -32,7 +33,7 @@ if [ ! -z "$TRAVIS_TAG" ]; then
 	-DskipTests=true \
 	--update-snapshots \
 	-Prelease \
-    -Darguments=-Dgpg.passphrase="I\ love\ Mac." \
+    -Dgpg.passphrase="I\ love\ Mac."
 	# -DdryRun=true \
 	# -X
 

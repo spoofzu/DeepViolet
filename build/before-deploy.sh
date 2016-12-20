@@ -13,6 +13,16 @@ echo "*** before-deploy.sh, user HOME folder is $HOME"
 if [ ! -z "$TRAVIS_TAG" ]; then
 
 	echo "*** before-deploy.sh, pre-deployment started."
+	
+	# start gpg-agent to manage passphrases
+	eval $(gpg-agent --batch --v --daemon)
+
+	#echo "*** gpg-agent version info"
+	gpg-agent --version
+
+	#echo "*** apply GPG tty settings"
+	GPG_TTY=$(tty)
+	export GPG_TTY
 
 	# update keyrings
 	openssl aes-256-cbc -a -in build/pubring.gpg.enc -out build/pubring.gpg -d -k $OPENSSL_ENCRYPT_KEY
@@ -28,6 +38,11 @@ if [ ! -z "$TRAVIS_TAG" ]; then
 	#
 	git config --global user.email "noreply@travisci.com"
 	git config --global user.name "DV BuildBot (via TravisCI)"
+
+	# Print keyring for debugging
+	#
+	#gpg2 --list-keys 
+	#gpg2 --list-secret-keys
 	
 	# Required or receives, fatal: ref HEAD is not a symbolic ref
 	#
@@ -38,7 +53,3 @@ if [ ! -z "$TRAVIS_TAG" ]; then
 	
 fi
 
-# Print keyring for debugging
-#
-#gpg --list-keys 
-#gpg --list-secret-keys
