@@ -16,6 +16,7 @@
       <properties>
 		<gpg.executable>gpg</gpg.executable>
         <gpg.keyname>${env.GPG_PASSPHRASE}</gpg.keyname>
+		<gpg.useAgent>true</gpg.useAgent>
       </properties>
     </profile>
   </profiles>
