@@ -31,8 +31,8 @@ if [ ! -z "$TRAVIS_TAG" ]; then
 	
 	# Required or receives, fatal: ref HEAD is not a symbolic ref
 	#
-	git checkout master
-	git pull origin master
+	#git checkout master
+	#git pull origin master
 
 	echo "*** before-deploy.sh, pre-deployment complete."
 	
