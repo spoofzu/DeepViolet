@@ -20,12 +20,23 @@ if [ ! -z "$TRAVIS_TAG" ]; then
 	# Set version in pom.xml to $TRAVIS_TAG
 	#
 	mvn --settings="settings.xml" org.codehaus.mojo:versions-maven-plugin:2.3:set \
-		 -DnewVersion="$TRAVIS_TAG" \
-	     -Prelease \
-		 -Dmaven.test.skip=true \
-	     -Darguments=-Dgpg.passphrase="I\ love\ Mac." \
-	     -B
-		 #-DdryRun=true
+	-DnewVersion="$TRAVIS_TAG" \
+	-Prelease \
+	# -DdryRun=true \
+	# -X \
+	-B
+	
+	# 
+	# Set version in pom.xml to $TRAVIS_TAG
+	#			 
+    mvn clean deploy --settings="settings.xml" \
+	-DskipTests=true \
+	--update-snapshots \
+	-Prelease \
+    -Darguments=-Dgpg.passphrase="I\ love\ Mac." \
+	# -DdryRun=true \
+	# -X \
+	-B
 
 	echo "*** deploy.sh, deployment complete."
 fi
