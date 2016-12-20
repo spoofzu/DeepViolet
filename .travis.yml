@@ -6,6 +6,10 @@ cache:
   directories:
     - ~/.m2/repository
  
+before_install:
+	- sudo apt-get -qq update
+	- sudo apt-get install gnupg-agent
+	
 install: 
   - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 

@@ -14,11 +14,14 @@ if [ ! -z "$TRAVIS_TAG" ]; then
 
 	echo "*** before-deploy.sh, pre-deployment started."
 	
+	echo "*** gpg version info"
+	gpg --version
+	
+	echo "*** gpg-agent version info"
+	gpg-agent --version
+	
 	# start gpg-agent to manage passphrases
 	eval $(gpg-agent --batch --v --daemon)
-
-	#echo "*** gpg-agent version info"
-	gpg-agent --version
 
 	#echo "*** apply GPG tty settings"
 	GPG_TTY=$(tty)
