@@ -6,7 +6,8 @@
 set -e
 
 # note: milton 12/17/2016, Very important, reserved bash shell characters must be escaped
-#                          with a slash.
+#                          with a slash like -Darguments=-Dgpg.passphrase="I\ love\ Mac." \
+#
 
 #
 # Do if: new tag
@@ -18,7 +19,9 @@ if [ ! -z "$TRAVIS_TAG" ]; then
 	# 
 	# Set version in pom.xml to $TRAVIS_TAG
 	#
-	mvn --settings="settings.xml" org.codehaus.mojo:versions-maven-plugin:2.3:set -DnewVersion="$TRAVIS_TAG" -Prelease \
+	mvn --settings="settings.xml" org.codehaus.mojo:versions-maven-plugin:2.3:set \
+		 -DnewVersion="$TRAVIS_TAG" \
+	     -Prelease \
 		 -Dmaven.test.skip=true \
 	     -Darguments=-Dgpg.passphrase="I\ love\ Mac." \
 	     -B

@@ -26,7 +26,6 @@ if [ ! -z "$TRAVIS_TAG" ]; then
 	
 	# Required by mvn release:prepare, fatal: empty ident name <> not allowed
 	#
-	#git init
 	git config --global user.email "noreply@travisci.com"
 	git config --global user.name "DV BuildBot (via TravisCI)"
 	
@@ -35,9 +34,6 @@ if [ ! -z "$TRAVIS_TAG" ]; then
 	git checkout master
 	git pull origin master
 
-    # Maven encrypt master password
-	#
-	# echo "<settingsSecurity><master>{YbaXibPTjI8HEmz/lr/0WuqGHG7TU+/dJ+ZRWXf8/ek=}</master></settingsSecurity>" > ~/.m2/settings-security.xml
 	echo "*** before-deploy.sh, pre-deployment complete."
 	
 fi

@@ -7,9 +7,10 @@ cache:
     - ~/.m2/repository
  
 install: 
-  - mvn install -P !build-extras -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 
-script: mvn test -P !build-extras -B
+script: 
+  - mvn test -B
    
 after_success:
   - build/before-deploy.sh
