@@ -24,8 +24,8 @@ if [ ! -z "$TRAVIS_TAG" ]; then
 	#eval $(gpg-agent --batch --v --daemon)
 
 	#echo "*** apply GPG tty settings"
-	GPG_TTY=$(tty)
-	export GPG_TTY
+	#GPG_TTY=$(tty)
+	#export GPG_TTY
 
 	# update keyrings
 	openssl aes-256-cbc -a -in build/pubring.gpg.enc -out build/pubring.gpg -d -k $OPENSSL_ENCRYPT_KEY
