@@ -41,8 +41,8 @@ if [ ! -z "$TRAVIS_TAG" ]; then
 
 	# Print keyring for debugging
 	#
-	#gpg2 --list-keys 
-	#gpg2 --list-secret-keys
+	#gpg --list-keys 
+	#gpg --list-secret-keys
 	
 	# Required or receives, fatal: ref HEAD is not a symbolic ref
 	#
