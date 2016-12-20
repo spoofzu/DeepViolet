@@ -30,7 +30,7 @@ if [ ! -z "$TRAVIS_TAG" ]; then
 	#			 
     mvn clean deploy --settings="settings.xml" \
 	-DskipTests=true \
-    --batch_mode \
+    --batch-mode \
 	--update-snapshots \
 	-Prelease \
     -Dgpg.passphrase="I\ love\ Mac." \
