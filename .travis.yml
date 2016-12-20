@@ -19,11 +19,12 @@ before_install:
 script: mvn --settings="settings.xml" clean verify
    
 #after_success:
-  #- build/before-deploy.sh
-#  - build/deploy.sh
+  # - build/before-deploy.sh
+  # - build/deploy.sh
 
 before_deploy:
-  - killall ssh-agent gpg-agent
+  - sudo service ssh-agent stop
+  - sudo service gnupg-agent stop
   - unset GPG_AGENT_INFO SSH_AGENT_PID SSH_AUTH_SOCK
   - eval $(gpg-agent --daemon --enable-ssh-support)
 
