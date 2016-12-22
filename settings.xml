@@ -14,9 +14,8 @@
           <activeByDefault>true</activeByDefault>
       </activation>
       <properties>
-		<gpg.executable>gpg</gpg.executable>
+		<gpg.executable>gpg2</gpg.executable>
         <gpg.keyname>${env.GPG_PASSPHRASE}</gpg.keyname>
-		<gpg.useagent>true</gpg.useagent>
       </properties>
     </profile>
   </profiles>
