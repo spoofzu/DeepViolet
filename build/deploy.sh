@@ -32,12 +32,12 @@ if [ ! -z "$TRAVIS_TAG" ]; then
 	# 
 	# Deploy
 	#			 
-    mvn clean deploy --settings="settings.xml" \
-	-DskipTests=true \
-    --batch-mode \
-	--update-snapshots \
-	-Prelease \
-	-X
+    #mvn clean deploy --settings="settings.xml" \
+	#-DskipTests=true \
+    #--batch-mode \
+	#--update-snapshots \
+	#-Prelease \
+	#-X
 
 	echo "*** deploy.sh, deployment complete."
 fi
