@@ -146,6 +146,8 @@
       <profile>
          <id>release</id>
          <build>
+            <!-- commented out.  prep for publishing to mavencentral. -->
+            <!--
             <plugins>
                <plugin>
                   <groupId>org.sonatype.plugins</groupId>
@@ -200,6 +202,33 @@
                         </goals>
                      </execution>
                   </executions>
+               </plugin>
+            </plugins>
+		   -->
+            <plugins>
+               <!-- build jar but no push to mavencentral at the moment.  ;o(  -->
+               <plugin>
+                  <artifactId>maven-assembly-plugin</artifactId>
+                  <executions>
+                     <execution>
+                        <phase>package</phase>
+                        <goals>
+                           <goal>single</goal>
+                        </goals>
+                     </execution>
+                  </executions>
+                  <configuration>
+                     <!--
+			         	 <archive>
+			 	          <manifest>
+			 	            <mainClass>com.mps.deepviolet.bin.StartUI</mainClass>
+			 	          </manifest>
+			 	        </archive>
+			 	        -->
+                     <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                     </descriptorRefs>
+                  </configuration>
                </plugin>
             </plugins>
          </build>
