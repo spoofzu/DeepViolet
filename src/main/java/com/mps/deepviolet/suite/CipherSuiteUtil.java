@@ -467,7 +467,7 @@ public class CipherSuiteUtil {
 				if (!scanblk.contains(sh.cipherSuite)) {
 					//TODO need a better way to communicate this in the future
 					String ciphersuite = Integer.toHexString(sh.cipherSuite);
-					logger.error("Error: server wants to use"
+					logger.debug("Error: server wants to use"
 						+ " cipher suite "+ciphersuite+" which client"
 						+ " did not announce.");
 					break;
