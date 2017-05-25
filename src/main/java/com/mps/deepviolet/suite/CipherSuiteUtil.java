@@ -280,19 +280,20 @@ public class CipherSuiteUtil {
 			ArrayList<String> listv = new ArrayList<String>();
 			String[] tmp = new String[0];
 			
-			if (lastSuppCS == null || !lastSuppCS.equals(vsc)) {
-				
+//			if (lastSuppCS == null || !lastSuppCS.equals(vsc)) {
+//				
 				for (int c : vsc) {
 					if( !vulnFREAK ) { vulnFREAK = cipherSuiteString(c).indexOf("EXPORT") > -1; }
 					listv.add( cipherSuiteString(c)+"(0x"+Integer.toHexString(c)+")" );
-				}				
-				lastSuppCS = vsc;
+				}			
+				
+//				lastSuppCS = vsc;
 			
-			} else {
+//			} else {
 
 				//don't add anything for now.
 				//listv.add( NO_CIPHERS );
-			}
+//			}
 			hostdata.setVectorValue( "getServerMetadataInstance",versionString(v), listv.toArray(tmp));
 			
 		}
@@ -467,7 +468,7 @@ public class CipherSuiteUtil {
 				if (!scanblk.contains(sh.cipherSuite)) {
 					//TODO need a better way to communicate this in the future
 					String ciphersuite = Integer.toHexString(sh.cipherSuite);
-					logger.error("Error: server wants to use"
+					logger.debug("Error: server wants to use"
 						+ " cipher suite "+ciphersuite+" which client"
 						+ " did not announce.");
 					break;

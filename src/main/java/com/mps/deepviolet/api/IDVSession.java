@@ -1,6 +1,8 @@
 package com.mps.deepviolet.api;
 
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created upon successful initialization of a target host.
@@ -41,5 +43,11 @@ public interface IDVSession {
 	 * @see <a href="DVFactory.html#initializeSession(URL)">DVFactory.initializeSession(URL)</a>
 	 */
 	URL getURL();
+	
+	/**
+	 * Get HTTP(S) response headers when session was initialized.
+	 * @return Headers
+	 */
+	Map<String, List<String>> getHttpResponseHeaders();
 
 }
