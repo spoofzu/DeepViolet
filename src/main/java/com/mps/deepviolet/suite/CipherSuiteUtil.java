@@ -280,19 +280,20 @@ public class CipherSuiteUtil {
 			ArrayList<String> listv = new ArrayList<String>();
 			String[] tmp = new String[0];
 			
-			if (lastSuppCS == null || !lastSuppCS.equals(vsc)) {
-				
+//			if (lastSuppCS == null || !lastSuppCS.equals(vsc)) {
+//				
 				for (int c : vsc) {
 					if( !vulnFREAK ) { vulnFREAK = cipherSuiteString(c).indexOf("EXPORT") > -1; }
 					listv.add( cipherSuiteString(c)+"(0x"+Integer.toHexString(c)+")" );
-				}				
-				lastSuppCS = vsc;
+				}			
+				
+//				lastSuppCS = vsc;
 			
-			} else {
+//			} else {
 
 				//don't add anything for now.
 				//listv.add( NO_CIPHERS );
-			}
+//			}
 			hostdata.setVectorValue( "getServerMetadataInstance",versionString(v), listv.toArray(tmp));
 			
 		}
