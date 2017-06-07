@@ -27,42 +27,20 @@ class DVEng implements IDVEng {
 	
 	private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.api.DVEng");
 	
-	private static final int VERSION_MAJOR = 1;
-	private static final int VERSION_MINOR = 5;
-	private static final int VERSION_BUILD = 2;
+	private static final int VERSION_MAJOR = 1;  //TODO: Review each release
+	private static final int VERSION_MINOR = 5;  //TODO: Review each release
+	private static final int VERSION_BUILD = 3;  //TODO: Review each release
 	private static final String VERSION_STRING = "V"+VERSION_MAJOR+"."+VERSION_MINOR+"."+VERSION_BUILD;
 	
 	private final String EOL = System.getProperty("line.separator");
 	
 	private IDVSession session;
-//    private DVPrint dvPrint;
 	
 	/* (non-Javadoc)
 	 */
 	DVEng( IDVSession session ) {
 		this.session = session;
 	}
-
-//	/* (non-Javadoc)
-//	 * @see com.mps.deepviolet.api.IDVEng#getDVOffPrint()
-//	 */
-//	public IDVOffPrint getDVOffPrint() throws DVException {
-//		return new DVOffPrint(this, new StringBuffer());
-//	}
-
-	/* (non-Javadoc)
-	 * @see com.mps.deepviolet.api.IDVEng#getDVOnPrint()
-	 */
-//	public IDVPrint getDVPrint() throws DVException {
-//		return getDVPrint(new StringBuffer(2500));
-//	}
-	
-	/* (non-Javadoc)
-	 * @see com.mps.deepviolet.api.IDVEng#getDVOnPrint()
-	 */
-//	public IDVPrint getDVPrint( StringBuffer con) throws DVException {
-//		return new DVPrint(this, con);
-//	}
 	
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IDVEng#getDVSession()

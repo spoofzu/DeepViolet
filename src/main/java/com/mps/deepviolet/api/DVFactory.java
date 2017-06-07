@@ -2,14 +2,11 @@ package com.mps.deepviolet.api;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
-
-import com.mps.deepviolet.util.LogUtils;
 
 /**
  * Initial entry point for all DeepViolet API work.
@@ -35,11 +32,6 @@ import com.mps.deepviolet.util.LogUtils;
  *
  */
 public class DVFactory {
-
-	// Initialize logging before we do anything
-	static {
-		LogUtils.logInit();
-	}
 
 	private DVFactory() {
 	}
