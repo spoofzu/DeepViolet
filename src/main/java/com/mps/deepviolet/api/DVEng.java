@@ -27,8 +27,8 @@ class DVEng implements IDVEng {
 	
 	private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.api.DVEng");
 	
-	private static final int VERSION_MAJOR = 1;  //TODO: Review each release
-	private static final int VERSION_MINOR = 5;  //TODO: Review each release
+	private static final int VERSION_MAJOR = 5;  //TODO: Review each release
+	private static final int VERSION_MINOR = 0;  //TODO: Review each release
 	private static final int VERSION_BUILD = 3;  //TODO: Review each release
 	private static final String VERSION_STRING = "V"+VERSION_MAJOR+"."+VERSION_MINOR+"."+VERSION_BUILD;
 	
