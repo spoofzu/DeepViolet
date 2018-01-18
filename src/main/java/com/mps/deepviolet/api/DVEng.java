@@ -16,6 +16,7 @@ import javax.net.ssl.SSLHandshakeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.mps.deepviolet.api.IDVEng.CIPHER_NAME_CONVENTION;
 import com.mps.deepviolet.suite.CipherSuiteUtil;
 import com.mps.deepviolet.suite.ServerMetadata;
 
@@ -28,8 +29,8 @@ class DVEng implements IDVEng {
 	private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.api.DVEng");
 	
 	private static final int VERSION_MAJOR = 5;  //TODO: Review each release
-	private static final int VERSION_MINOR = 0;  //TODO: Review each release
-	private static final int VERSION_BUILD = 3;  //TODO: Review each release
+	private static final int VERSION_MINOR = 1;  //TODO: Review each release
+	private static final int VERSION_BUILD = 0;  //TODO: Review each release
 	private static final String VERSION_STRING = "V"+VERSION_MAJOR+"."+VERSION_MINOR+"."+VERSION_BUILD;
 	
 	private final String EOL = System.getProperty("line.separator");
@@ -81,11 +82,18 @@ class DVEng implements IDVEng {
 	 * @see com.mps.deepviolet.api.IDVEng#getCipherSuites()
 	 */
 	public final IDVCipherSuite[] getCipherSuites() throws DVException {
+		return getCipherSuites(CIPHER_NAME_CONVENTION.IANA );
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.mps.deepviolet.api.IDVEng#getCipherSuites()
+	 */
+	public final IDVCipherSuite[] getCipherSuites(CIPHER_NAME_CONVENTION cipher_name_convention ) throws DVException {
 		List<IDVCipherSuite> list = new ArrayList<IDVCipherSuite>();
 		URL url = session.getURL();
 		try {
 			Map<String,List<String>> allCiphers = new HashMap<String, List<String>>();
-			ServerMetadata m = CipherSuiteUtil.getServerMetadataInstance( url );
+			ServerMetadata m = CipherSuiteUtil.getServerMetadataInstance( url, cipher_name_convention );
 			if( m == null ) {
 				return null;
 			}

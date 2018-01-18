@@ -10,11 +10,26 @@ package com.mps.deepviolet.api;
 public interface IDVEng {
 
 	/**
+	 * Enumeration of supported ciphersuite naming conventions.
+	 */
+	public enum CIPHER_NAME_CONVENTION {
+		GnuTLS, NSS, IANA, OpenSSL
+	}
+	
+	/**
+	 * Return ciphersuites for the target host.  Calls <code>getCipherSuites(CIPHER_NAME_CONVENTION CIPHER_NAME_CONVENTION)</code> with
+	 * CIPHER_NAME_CONVENTION.IANA as the default.
+	 * @return Ciphersuites supported by target host.
+	 * @throws DVException thrown on problems fetching ciphersuites.
+	 */
+	IDVCipherSuite[] getCipherSuites() throws DVException;	
+	
+	/**
 	 * Return ciphersuites for the target host.
 	 * @return Ciphersuites supported by target host.
 	 * @throws DVException thrown on problems fetching ciphersuites.
 	 */
-	IDVCipherSuite[] getCipherSuites() throws DVException;
+	IDVCipherSuite[] getCipherSuites(CIPHER_NAME_CONVENTION CIPHER_NAME_CONVENTION) throws DVException;
 
 	/**
 	 * Return session instance for the target host when IDVOnEng.
@@ -23,25 +38,6 @@ public interface IDVEng {
 	 * @see <a href="DVFactory.html#initializeSession(URL)">DVFactory.initializeSession(URL)</a>
 	 */
 	IDVSession getDVSession();
-	
-//	/**
-//     * Return online print engine instance for target.
-//     * host when IDVOnEng was created.
-//	 * @return Online print engine.
-//	 * @see <a href="DVFactory.html#initializeSession(URL)">DVFactory.initializeSession(URL)</a>
-//	 * @throws DVException Thrown on problems
-//	 */
-//	IDVPrint getDVPrint() throws DVException;
-//	
-//	/**
-//     * Return online print engine instance for target
-//     * host when IDVOnEng was created.
-//     * @param con Buffer to write reports.
-//	 * @return Online print engine.
-//	 * @see <a href="DVFactory.html#initializeSession(URL)">DVFactory.initializeSession(URL)</a>
-//	 * @throws DVException Thrown on problems
-//	 */
-//	IDVPrint getDVPrint(StringBuffer con) throws DVException;
 
 	/**
 	 * Write PEM encoded X.509 certificate for the target
@@ -90,15 +86,6 @@ public interface IDVEng {
 	 * @return Suitable for printing in log files, displaying in About boxes, etc.
 	 */
 	String getDeepVioletStringVersion();
-	
-//	/**
-//     * Return offline print engine instance.  Useful for reporting
-//     * featurees that don't require initializing an online host.
-//     * For example, printing PEM encoded X.509 certificates.
-//	 * @return Offline print engine instance
-//	 * @throws DVException on problems.
-//	 */
-//	IDVOffPrint getDVOffPrint() throws DVException;
 	
 	
 }

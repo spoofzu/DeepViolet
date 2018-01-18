@@ -66,6 +66,7 @@ import org.slf4j.LoggerFactory;
 
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
+import com.mps.deepviolet.api.IDVEng.CIPHER_NAME_CONVENTION;
 import com.mps.deepviolet.util.FileUtils;
 
 //import sun.security.provider.certpath.OCSP;
@@ -193,7 +194,7 @@ public class CipherSuiteUtil {
 		
 	// TODO This needs to go bye bye, abad idea.  I'm thinking a better way to do this is eventually
 	// get to a MVC type architecture.  This would better address the ways deepviolet can be used
-	public static synchronized ServerMetadata getServerMetadataInstance( URL url ) throws Exception {
+	public static synchronized ServerMetadata getServerMetadataInstance( URL url, CIPHER_NAME_CONVENTION cipher_name_convention ) throws Exception {
 		
 		HostData hostdata = null;
 		Boolean compress = false;
@@ -258,8 +259,8 @@ public class CipherSuiteUtil {
 				vc2.add(c);
 			}
 			for (int c : vc2) {
-				if( !vulnFREAK ) { vulnFREAK = cipherSuiteStringV2(c).indexOf("EXPORT") > -1; }
-				listv2.add( cipherSuiteStringV2(c)+"(0x"+Integer.toHexString(c)+")" );
+				if( !vulnFREAK ) { vulnFREAK = cipherSuiteStringV2(c, CIPHER_NAME_CONVENTION.IANA).indexOf("EXPORT") > -1; }
+				listv2.add( cipherSuiteStringV2(c, cipher_name_convention)+"(0x"+Integer.toHexString(c)+")" );
 
 			}
 			suppCS.put(0x0200, vc2);
@@ -283,8 +284,8 @@ public class CipherSuiteUtil {
 //			if (lastSuppCS == null || !lastSuppCS.equals(vsc)) {
 //				
 				for (int c : vsc) {
-					if( !vulnFREAK ) { vulnFREAK = cipherSuiteString(c).indexOf("EXPORT") > -1; }
-					listv.add( cipherSuiteString(c)+"(0x"+Integer.toHexString(c)+")" );
+					if( !vulnFREAK ) { vulnFREAK = cipherSuiteString(c, CIPHER_NAME_CONVENTION.IANA).indexOf("EXPORT") > -1; }
+					listv.add( cipherSuiteString(c, cipher_name_convention)+"(0x"+Integer.toHexString(c)+")" );
 				}			
 				
 //				lastSuppCS = vsc;
@@ -308,32 +309,41 @@ public class CipherSuiteUtil {
 		
 		
 		// Iterate over supported ciphersuites.
-//		int agMaxStrength = STRONG;
-//		int agMinStrength = STRONG;
-//		boolean vulnBEAST = false;
-//		for (int v : sv) {
-//			Set<Integer> vsc = suppCS.get(v);
-//			agMaxStrength = Math.min(
-//				maxStrength(vsc), agMaxStrength);
-//			agMinStrength = Math.min(
-//				minStrength(vsc), agMinStrength);
-//			if (!vulnBEAST) {
-//				vulnBEAST = testBEAST(isa, v, vsc);
-//			}
-//		}
+		int agMaxStrength = STRONG;
+		int agMinStrength = STRONG;
+		boolean vulnBEAST = false;
+		boolean vulnROBOT = false;
+		for (int v : sv) {
+			Set<Integer> vsc = suppCS.get(v);
+			agMaxStrength = Math.min(
+				maxStrength(vsc), agMaxStrength);
+			agMinStrength = Math.min(
+				minStrength(vsc), agMinStrength);
+			if (!vulnBEAST) {
+				vulnBEAST = testBEAST(isa, v, vsc);
+			}
+			if (!vulnROBOT) {
+				vulnROBOT = cipherSuiteString(v, cipher_name_convention.IANA).startsWith("TLS_RSA");
+			}
+		}
 		
-//TODO: NEEDS TO BE CHECKED AND TESTED.  COMMENT OUT AT YOUR OWN RISK.
-//		hostdata.setScalarValue("analysis","MINIMAL_ENCRYPTION_STRENGTH", strengthString(agMinStrength));
-//		hostdata.setScalarValue("analysis","ACHIEVABLE_ENCRYPTION_STRENGTH", strengthString(agMinStrength));
-//		hostdata.setScalarValue("analysis","BEAST_VULNERABLE", vulnBEAST ? "vulnerable" : "protected");
-//		hostdata.setScalarValue("analysis","CRIME_VULNERABLE", compress ? "vulnerable" : "protected");
-//		hostdata.setScalarValue("analysis","FREAK_VULNERABLE", vulnFREAK ? "vulnerable" : "protected");
+//TODO: NEEDS TO BE CHECKED AND TESTED.
+		hostdata.setScalarValue("analysis","MINIMAL_ENCRYPTION_STRENGTH", strengthString(agMinStrength));
+		hostdata.setScalarValue("analysis","ACHIEVABLE_ENCRYPTION_STRENGTH", strengthString(agMinStrength));
+		hostdata.setScalarValue("analysis","BEAST_VULNERABLE", vulnBEAST ? "vulnerable" : "protected");
+		hostdata.setScalarValue("analysis","CRIME_VULNERABLE", compress ? "vulnerable" : "protected");
+		hostdata.setScalarValue("analysis","FREAK_VULNERABLE", vulnFREAK ? "vulnerable" : "protected");
+		hostdata.setScalarValue("analysis","ROBOT_VULNERABLE", vulnROBOT ? "vulnerable" : "protected");
 		
 		return hostdata;
 		
 	}
 	
-	
+	/*
+	 * Original Mozilla JSON file
+	 * server-side-tls-conf-4.0.json = https://statics.tls.security.mozilla.org/server-side-tls-conf-4.0.json
+	 * ciphermap.json = https://github.com/april/tls-table/blob/master/tls-table.py
+	 */
 	private static void initCipherMap() {
 		
 		    String ciphermap = FileUtils.getJsonResourceAsString("ciphermap.json");
@@ -1620,23 +1630,23 @@ public class CipherSuiteUtil {
 
 
 	
-	static final String cipherSuiteString(int suite)
+	static final String cipherSuiteString(int suite, CIPHER_NAME_CONVENTION cipher_name_convention)
 	{
 		CipherSuite cs = CIPHER_SUITES.get(suite);
 		if (cs == null) {
 			return String.format("UNKNOWN_SUITE:%04X", suite);
 		}
-		return (String)cs.names.get("IANA"); // user needs to choose which cipher name to return. 
+		return (String)cs.names.get(cipher_name_convention); 
 	}
 
-	static final String cipherSuiteStringV2(int suite)
+	static final String cipherSuiteStringV2(int suite, CIPHER_NAME_CONVENTION cipher_name_convention)
 	{
 		CipherSuite cs = CIPHER_SUITES.get(suite);
 		if (cs == null) {
 			return String.format("UNKNOWN_SUITE:%02X,%02X,%02X",
 				suite >> 16, (suite >> 8) & 0xFF, suite & 0XFF);
 		}
-		return (String)cs.names.get("IANA"); // user needs to choose which cipher name to return. 
+		return (String)cs.names.get(cipher_name_convention); 
 	}
 
 	//*****************************************************************
