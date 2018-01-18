@@ -107,23 +107,6 @@ public class DVFactory {
 		return session;
 	}
 
-//	/**
-//	 * Retrieve an instance of IDVOffEng. Provided since there are some offline
-//	 * functions that don't require an initialized host. For example, reading
-//	 * PEM encoded X.509 certificates.
-//	 * 
-//	 * @return Engine instance for offline functions
-//	 */
-//	public static final synchronized getDVOffEng() {
-//		URL localhost = null;
-//		try {
-//			localhost = new URL("https://localhost/");
-//		} catch (MalformedURLException e) {
-//			e.printStackTrace();
-//		}
-//		return new DVEng(new MutableDVSession(localhost, new IDVHost[0]));
-//	}
-
 	/**
 	 * Retrieve an instance of IDVOnEng. Use this method for online functions
 	 * against an initialize host.
