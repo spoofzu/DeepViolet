@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import com.mps.deepviolet.util.FileUtils;
+
 /**
  * Initial entry point for all DeepViolet API work.
  * <p>
@@ -53,6 +55,10 @@ public class DVFactory {
 		SSLSocket socket = null;
 
 		try {
+			
+			// Creates default working dir if needed for log files.
+			FileUtils.createWorkingDirectory();
+			
 			socket = (SSLSocket) factory.createSocket(url.getHost(), url.getDefaultPort());
 
 			// Add interfaces
