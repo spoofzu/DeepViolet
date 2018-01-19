@@ -259,7 +259,14 @@ public class CipherSuiteUtil {
 				vc2.add(c);
 			}
 			for (int c : vc2) {
-				if( !vulnFREAK ) { vulnFREAK = cipherSuiteStringV2(c, CIPHER_NAME_CONVENTION.IANA).indexOf("EXPORT") > -1; }
+				if( !vulnFREAK ) {
+					String suitename = cipherSuiteStringV2(c, cipher_name_convention);
+					if( suitename == null || suitename.length()==0 ) {
+						logger.error("Error: Freak vulnerability analysis skipped due to null ciphersuite name. id=0x" + c );
+					} else {
+						vulnFREAK = cipherSuiteStringV2(c, cipher_name_convention).indexOf("EXPORT") > -1; 
+					}
+				}
 				listv2.add( cipherSuiteStringV2(c, cipher_name_convention)+"(0x"+Integer.toHexString(c)+")" );
 
 			}
@@ -284,7 +291,14 @@ public class CipherSuiteUtil {
 //			if (lastSuppCS == null || !lastSuppCS.equals(vsc)) {
 //				
 				for (int c : vsc) {
-					if( !vulnFREAK ) { vulnFREAK = cipherSuiteString(c, CIPHER_NAME_CONVENTION.IANA).indexOf("EXPORT") > -1; }
+					
+					String suitename = cipherSuiteString(c, cipher_name_convention);
+					if( suitename == null || suitename.length()==0 ) {
+						logger.error("Error: Freak vulnerability analysis skipped due to null ciphersuite name. id=0x" + c );
+					} else {
+						vulnFREAK = cipherSuiteString(c, cipher_name_convention).indexOf("EXPORT") > -1; 
+					}
+					
 					listv.add( cipherSuiteString(c, cipher_name_convention)+"(0x"+Integer.toHexString(c)+")" );
 				}			
 				
