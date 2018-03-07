@@ -63,7 +63,7 @@ public class DVEndMultiTest {
 		}
 
 		System.out.println("prop names : ");
-		String[] names = session.getPropertyNames();
+		IDVSession.SESSION_PROPERTIES[] names = session.getPropertyNames();
 		for (int i = 0; i < names.length; i++) {
 			System.out.print(names[i] + " = ");
 			System.out.println(session.getPropertyValue(names[i]));

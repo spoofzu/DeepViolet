@@ -89,17 +89,17 @@ public class DVFactory {
 			String enabledProtocols = String.join(",", socket.getEnabledProtocols());
 
 			session = new MutableDVSession(url, (IDVHost[]) list.toArray(new ImmutableDVHost[0]));
-			session.setProperty("SO_KEEPALIVE", soKeepalive);
-			session.setProperty("SO_RCVBUF", soRcvbuf);
-			session.setProperty("SO_LINGER", soLinger);
-			session.setProperty("SO_TIMEOUT", soTimeout);
-			session.setProperty("SO_REUSEADDR", soReuseaddr);
-			session.setProperty("SO_SENDBUFF", soSendbuff);
-			session.setProperty("CLIENT_AUTH_REQ", clientAuthReq);
-			session.setProperty("CLIENT_AUTH_WANT", clientAuthWant);
-			session.setProperty("TRAFFIC_CLASS", trafficClass);
-			session.setProperty("TCP_NODELAY", tcpNodelay);
-			session.setProperty("ENABLED_PROTOCOLS", enabledProtocols);
+			session.setProperty(IDVSession.SESSION_PROPERTIES.SO_KEEPALIVE, soKeepalive);
+			session.setProperty(IDVSession.SESSION_PROPERTIES.SO_RCVBUF, soRcvbuf);
+			session.setProperty(IDVSession.SESSION_PROPERTIES.SO_LINGER, soLinger);
+			session.setProperty(IDVSession.SESSION_PROPERTIES.SO_TIMEOUT, soTimeout);
+			session.setProperty(IDVSession.SESSION_PROPERTIES.SO_REUSEADDR, soReuseaddr);
+			session.setProperty(IDVSession.SESSION_PROPERTIES.SO_SENDBUFF, soSendbuff);
+			session.setProperty(IDVSession.SESSION_PROPERTIES.CLIENT_AUTH_REQ, clientAuthReq);
+			session.setProperty(IDVSession.SESSION_PROPERTIES.CLIENT_AUTH_WANT, clientAuthWant);
+			session.setProperty(IDVSession.SESSION_PROPERTIES.TRAFFIC_CLASS, trafficClass);
+			session.setProperty(IDVSession.SESSION_PROPERTIES.TCP_NODELAY, tcpNodelay);
+			session.setProperty(IDVSession.SESSION_PROPERTIES.ENABLED_PROTOCOLS, enabledProtocols);
 		} catch (Exception e) {
 			throw new DVException(e);
 		} finally {
