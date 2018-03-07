@@ -35,6 +35,9 @@ public class DVEngTest {
 	@Test
 	public void testGetCipherSuites() throws DVException {
 		assertEquals(16, e.getCipherSuites().length);
+		for ( IDVCipherSuite c : e.getCipherSuites() ) {
+			System.out.println("CipherSuite: name="+c.getSuiteName()+" strengtheEvaluation="+c.getStrengthEvaluation() );
+		}
 	}
 
 	@Test

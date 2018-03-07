@@ -10,7 +10,9 @@ package com.mps.deepviolet.api;
 public interface IDVEng {
 
 	/**
-	 * Enumeration of supported ciphersuite naming conventions.
+	 * Enumeration of supported ciphersuite naming conventions.  The following conventions are 
+	 * supported: CIPHER_NAME_CONVENTION.GnuTLS, CIPHER_NAME_CONVENTION.NSS,
+	 * CIPHER_NAME_CONVENTION.IANA, CIPHER_NAME_CONVENTION.OpenSSL
 	 */
 	public enum CIPHER_NAME_CONVENTION {
 		GnuTLS, NSS, IANA, OpenSSL

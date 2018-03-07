@@ -139,6 +139,7 @@ public class CipherSuiteUtil {
 		0x54, 0x54, 0x54, 0x54,
 		0x54, 0x54, 0x54, 0x54
 	};
+	static final int UNASSIGNED = -1; // no evaluation in json mapping file
 	static final int CLEAR  = 0; // no encryption
 	static final int WEAK   = 1; // weak encryption: 40-bit key
 	static final int MEDIUM = 2; // medium encryption: 56-bit key
@@ -244,8 +245,7 @@ public class CipherSuiteUtil {
 		}
 
 		Set<Integer> lastSuppCS = null;
-		Map<Integer, Set<Integer>> suppCS =
-			new TreeMap<Integer, Set<Integer>>();
+		Map<Integer, Set<Integer>> suppCS = new TreeMap<Integer, Set<Integer>>();
 		Set<String> certID = new TreeSet<String>();
 		boolean vulnFREAK = false;
 		
@@ -259,26 +259,31 @@ public class CipherSuiteUtil {
 				vc2.add(c);
 			}
 			for (int c : vc2) {
+				
+				String suitename = cipherSuiteStringV2(c, cipher_name_convention);
+				
 				if( !vulnFREAK ) {
-					String suitename = cipherSuiteStringV2(c, cipher_name_convention);
 					if( suitename == null || suitename.length()==0 ) {
-						logger.error("Error: Freak vulnerability analysis skipped due to null ciphersuite name. id=0x" + c );
+						logger.info("Freak vulnerability analysis skipped due to null ciphersuite name. id=0x" + c );
 					} else {
 						vulnFREAK = cipherSuiteStringV2(c, cipher_name_convention).indexOf("EXPORT") > -1; 
 					}
 				}
-				listv2.add( cipherSuiteStringV2(c, cipher_name_convention)+"(0x"+Integer.toHexString(c)+")" );
+				listv2.add( suitename+"(0x"+Integer.toHexString(c)+")" );
 
 			}
+			
 			suppCS.put(0x0200, vc2);
 			if (sh2.serverCertName != null) {
 				hostdata.setScalarValue("getServerMetadataInstance",sh2.serverCertHash, sh2.serverCertName);				
 			}
+			
 			hostdata.setVectorValue( "getServerMetadataInstance",versionString(0x0200), listv2.toArray(tmp));
 			
 		}
 
 		for (int v : sv) {
+			
 			if (v == 0x0200) {
 				continue;
 			}
@@ -287,39 +292,22 @@ public class CipherSuiteUtil {
 			
 			ArrayList<String> listv = new ArrayList<String>();
 			String[] tmp = new String[0];
-			
-//			if (lastSuppCS == null || !lastSuppCS.equals(vsc)) {
-//				
-				for (int c : vsc) {
-					
-					String suitename = cipherSuiteString(c, cipher_name_convention);
-					if( suitename == null || suitename.length()==0 ) {
-						logger.error("Error: Freak vulnerability analysis skipped due to null ciphersuite name. id=0x" + c );
-					} else {
-						vulnFREAK = cipherSuiteString(c, cipher_name_convention).indexOf("EXPORT") > -1; 
-					}
-					
-					listv.add( cipherSuiteString(c, cipher_name_convention)+"(0x"+Integer.toHexString(c)+")" );
-				}			
+						
+			for (int c : vsc) {
 				
-//				lastSuppCS = vsc;
-			
-//			} else {
+				String suitename = cipherSuiteString(c, cipher_name_convention);
+				if( suitename == null || suitename.length()==0 ) {
+					logger.info("Freak vulnerability analysis skipped due to null ciphersuite name. id=0x" + c );
+				} else {
+					vulnFREAK = cipherSuiteString(c, cipher_name_convention).indexOf("EXPORT") > -1; 
+				}
+				
+				listv.add( suitename+"(0x"+Integer.toHexString(c)+")" );
+			}			
 
-				//don't add anything for now.
-				//listv.add( NO_CIPHERS );
-//			}
 			hostdata.setVectorValue( "getServerMetadataInstance",versionString(v), listv.toArray(tmp));
 			
 		}
-		
-//		for (int v : sv) {
-//			if (v == 0x0200) {
-//				continue;
-//			}
-//			Set<Integer> vsc = supportedSuites(isa, v, certID);
-//			suppCS.put(v, vsc);
-//		}
 		
 		
 		// Iterate over supported ciphersuites.
@@ -341,7 +329,7 @@ public class CipherSuiteUtil {
 			}
 		}
 		
-//TODO: NEEDS TO BE CHECKED AND TESTED.
+		//TODO: NEEDS TO BE CHECKED AND TESTED.
 		hostdata.setScalarValue("analysis","MINIMAL_ENCRYPTION_STRENGTH", strengthString(agMinStrength));
 		hostdata.setScalarValue("analysis","ACHIEVABLE_ENCRYPTION_STRENGTH", strengthString(agMinStrength));
 		hostdata.setScalarValue("analysis","BEAST_VULNERABLE", vulnBEAST ? "vulnerable" : "protected");
@@ -492,7 +480,7 @@ public class CipherSuiteUtil {
 				if (!scanblk.contains(sh.cipherSuite)) {
 					//TODO need a better way to communicate this in the future
 					String ciphersuite = Integer.toHexString(sh.cipherSuite);
-					logger.debug("Error: server wants to use"
+					logger.warn("Server wants to use"
 						+ " cipher suite "+ciphersuite+" which client"
 						+ " did not announce.");
 					break;
@@ -1633,12 +1621,13 @@ public class CipherSuiteUtil {
 	static final String strengthString(int strength)
 	{
 		switch (strength) {
+		case UNASSIGNED: return "unassigned evaluation";
 		case CLEAR:  return "no encryption";
 		case WEAK:   return "weak encryption (40-bit)";
 		case MEDIUM: return "medium encryption (56-bit)";
 		case STRONG: return "strong encryption (96-bit or more)";
 		default:
-			throw new Error("strange strength: " + strength);
+			throw new Error("Unknown strength evalution: " + strength);
 		}
 	}
 
@@ -1647,20 +1636,26 @@ public class CipherSuiteUtil {
 	static final String cipherSuiteString(int suite, CIPHER_NAME_CONVENTION cipher_name_convention)
 	{
 		CipherSuite cs = CIPHER_SUITES.get(suite);
-		if (cs == null) {
-			return String.format("UNKNOWN_SUITE:%04X", suite);
+		String ciphername = String.format("UNKNOWN_SUITE:%04X", suite);
+		
+		//Need to map Enum name to String name of the ciphersuite since that's way it's stored in JSON.
+		if( cs != null ) {
+			ciphername = (String)cs.names.get(cipher_name_convention.toString());
 		}
-		return (String)cs.names.get(cipher_name_convention); 
+		return ciphername;
 	}
 
 	static final String cipherSuiteStringV2(int suite, CIPHER_NAME_CONVENTION cipher_name_convention)
 	{
 		CipherSuite cs = CIPHER_SUITES.get(suite);
-		if (cs == null) {
-			return String.format("UNKNOWN_SUITE:%02X,%02X,%02X",
+		String ciphername = String.format("UNKNOWN_SUITE:%02X,%02X,%02X",
 				suite >> 16, (suite >> 8) & 0xFF, suite & 0XFF);
+		
+		//Need to map Enum name to String name of the ciphersuite since that's way it's stored in JSON.
+		if (cs != null) {
+			ciphername = (String)cs.names.get(cipher_name_convention.toString());
 		}
-		return (String)cs.names.get(cipher_name_convention); 
+		return ciphername; 
 	}
 
 	//*****************************************************************
@@ -1677,6 +1672,7 @@ public class CipherSuiteUtil {
 //		cs.isCBC = isCBC;
 		cs.strength = strength;
 		CIPHER_SUITES.put(suite, cs);
+		
 
 //		/*
 //		 * Consistency test: the strength and CBC status can normally

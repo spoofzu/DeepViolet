@@ -13,7 +13,7 @@ class MutableDVSession implements IDVSession {
 	private VMID id;
 	private IDVHost[] hosts;
 	private URL url;
-	private HashMap<String,String> map = new HashMap<String,String>();
+	private HashMap<SESSION_PROPERTIES,String> map = new HashMap<SESSION_PROPERTIES,String>();
 	private Map<String, List<String>> headers = new HashMap<String, List<String>>();
 	
 	MutableDVSession( URL url, IDVHost[] hosts ) {
@@ -34,16 +34,16 @@ class MutableDVSession implements IDVSession {
 		return hosts;
 	}
 	
-	public String getPropertyValue( String keyname ) {
+	public String getPropertyValue( SESSION_PROPERTIES keyname ) {
 		return map.get(keyname);
 	}
 	
-	public String[] getPropertyNames() {
-		return map.keySet().toArray(new String[0]);
+	public SESSION_PROPERTIES[] getPropertyNames() {
+		return map.keySet().toArray(new SESSION_PROPERTIES[0]);
 	}
 	
-	void setProperty( String key, String value ) {
-		map.put(key,value);
+	void setProperty( SESSION_PROPERTIES soKeepalive, String value ) {
+		map.put(soKeepalive,value);
 	}
 
 	public String getIdentity() {
