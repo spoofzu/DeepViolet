@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import com.mps.deepviolet.api.IDVEng.CIPHER_NAME_CONVENTION;
 import com.mps.deepviolet.util.FileUtils;
 
 /**
@@ -87,7 +88,7 @@ public class DVFactory {
 
 			// Grab enabled protocols as reported by socket
 			String enabledProtocols = String.join(",", socket.getEnabledProtocols());
-
+			
 			session = new MutableDVSession(url, (IDVHost[]) list.toArray(new ImmutableDVHost[0]));
 			session.setProperty(IDVSession.SESSION_PROPERTIES.SO_KEEPALIVE, soKeepalive);
 			session.setProperty(IDVSession.SESSION_PROPERTIES.SO_RCVBUF, soRcvbuf);
@@ -115,14 +116,33 @@ public class DVFactory {
 
 	/**
 	 * Retrieve an instance of IDVOnEng. Use this method for online functions
+	 * against an initialize host.  Calls {@link #getDVEng(IDVSession, CIPHER_NAME_CONVENTION)} and
+	 * passes CIPHER_NAME_CONVENTION.IANA.
+	 *
+	 * @param session
+	 *            Initialized session from previous call to initializeSession(URL)
+	 * @return Engine instance for offline functions
+	 * @throws DVException
+	 *           Thrown on problems initializing host.
+	 * @see #initializeSession(URL)
+	 */
+	public static final synchronized IDVEng getDVEng(IDVSession session) throws DVException {
+		return new DVEng(session, CIPHER_NAME_CONVENTION.IANA);
+	}
+	
+	/**
+	 * Retrieve an instance of IDVOnEng. Use this method for online functions
 	 * against an initialize host.
 	 * 
 	 * @param session
 	 *            Initialized session from previous call to initializeSession(URL)
+	 *  @param cipher_name_convention Cipher suite name convention.
 	 * @return Engine instance for offline functions
+	 * @throws DVException
+	 *           Thrown on problems initializing host.
 	 * @see #initializeSession(URL)
 	 */
-	public static final synchronized IDVEng getDVEng(IDVSession session) {
-		return new DVEng(session);
+	public static final synchronized IDVEng getDVEng(IDVSession session, CIPHER_NAME_CONVENTION cipher_name_convention ) throws DVException {
+		return new DVEng(session, cipher_name_convention);
 	}
 }
