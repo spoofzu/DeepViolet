@@ -17,13 +17,13 @@ import org.junit.Test;
 @Ignore
 public class DVEngTest {
 
-	private DVEng e;
+	private IDVEng e;
 	private IDVSession session;
 
 	@Before
 	public void setup() throws MalformedURLException, DVException {
 		session = DVFactory.initializeSession(new URL("https://github.com"));
-		e = new DVEng(session);
+		e = DVFactory.getDVEng(session);
 	}
 
 	@After

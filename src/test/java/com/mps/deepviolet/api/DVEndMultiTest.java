@@ -53,7 +53,7 @@ public class DVEndMultiTest {
 
 	public void testSpecificSSLConfig(String url) throws DVException, MalformedURLException {
 		IDVSession session = DVFactory.initializeSession(new URL(url));
-		DVEng e = new DVEng(session);
+		IDVEng e = DVFactory.getDVEng(session);
 		System.out.println("ID = " + session.getIdentity());
 
 		IDVHost[] ifs = session.getHostInterfaces();

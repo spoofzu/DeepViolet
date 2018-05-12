@@ -1,5 +1,6 @@
 package com.mps.deepviolet.api;
 
+import com.mps.deepviolet.api.IDVSession.SESSION_PROPERTIES;
 
 /**
  * Interface specification for engine features available
@@ -18,6 +19,30 @@ public interface IDVEng {
 		GnuTLS, NSS, IANA, OpenSSL
 	}
 	
+//	public enum ENGINE_PROPERTIES {
+//		MINIMAL_ENCRYPTION_STRENGTH,
+//		ACHIEVABLE_ENCRYPTION_STRENGTH,
+//		BEAST_VULNERABLE,
+//		CRIME_VULNERABLE,
+//		FREAK_VULNERABLE,
+//		ROBOT_VULNERABLE
+//	}
+	
+	/**
+	 * Return target property value
+	 * @param keyname Name of target property to return
+	 * @return Property value
+	 * @throws DVException 
+	 */
+	String getPropertyValue(String keyname) throws DVException;
+	
+	/**
+	 * Return property names.  Specify these in {@link #getPropertyValue(String)}
+	 * to return the property value.
+	 * @return Array of a property names
+	 */
+	String[] getPropertyNames();
+	
 	/**
 	 * Return ciphersuites for the target host.  Calls <code>getCipherSuites(CIPHER_NAME_CONVENTION CIPHER_NAME_CONVENTION)</code> with
 	 * CIPHER_NAME_CONVENTION.IANA as the default.
@@ -25,13 +50,6 @@ public interface IDVEng {
 	 * @throws DVException thrown on problems fetching ciphersuites.
 	 */
 	IDVCipherSuite[] getCipherSuites() throws DVException;	
-	
-	/**
-	 * Return ciphersuites for the target host.
-	 * @return Ciphersuites supported by target host.
-	 * @throws DVException thrown on problems fetching ciphersuites.
-	 */
-	IDVCipherSuite[] getCipherSuites(CIPHER_NAME_CONVENTION CIPHER_NAME_CONVENTION) throws DVException;
 
 	/**
 	 * Return session instance for the target host when IDVOnEng.

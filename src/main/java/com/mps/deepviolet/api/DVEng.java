@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mps.deepviolet.api.IDVEng.CIPHER_NAME_CONVENTION;
+import com.mps.deepviolet.api.IDVSession.SESSION_PROPERTIES;
 import com.mps.deepviolet.suite.CipherSuiteUtil;
 import com.mps.deepviolet.suite.ServerMetadata;
 
@@ -28,19 +29,43 @@ class DVEng implements IDVEng {
 	
 	private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.api.DVEng");
 	
+	//private HashMap<ENGINE_PROPERTIES,String> map = new HashMap<ENGINE_PROPERTIES,String>();
+	private HashMap<String,String> map = new HashMap<String,String>();
+	
 	private static final int VERSION_MAJOR = 5;  //TODO: Review each release
 	private static final int VERSION_MINOR = 1;  //TODO: Review each release
 	private static final int VERSION_BUILD = 0;  //TODO: Review each release
 	private static final String VERSION_STRING = "V"+VERSION_MAJOR+"."+VERSION_MINOR+"."+VERSION_BUILD;
 	
 	private final String EOL = System.getProperty("line.separator");
+	private final URL url;
 	
 	private IDVSession session;
+	private ServerMetadata servmeta;
 	
 	/* (non-Javadoc)
 	 */
-	DVEng( IDVSession session ) {
-		this.session = session;
+	DVEng( IDVSession session,  CIPHER_NAME_CONVENTION cipher_name_convention ) throws DVException {
+		
+		try {
+			this.session = session;
+			this.url = session.getURL();
+			
+			servmeta = CipherSuiteUtil.getServerMetadataInstance(url,CIPHER_NAME_CONVENTION.IANA);
+			if( servmeta == null ) {
+				String msg = "Unable to create DVEng.  ServerMetadata is null";
+				logger.error(msg);
+				throw new DVException(msg);
+			}
+			
+		} catch( DVException e ) {
+			throw e;
+		} catch( Exception e ) {
+			String msg = "Problem creating DVEng. err="+e.getMessage();	
+			logger.error(msg,e );
+			throw new DVException(msg,e );
+		}
+		
 	}
 	
 	/* (non-Javadoc)
@@ -77,33 +102,26 @@ class DVEng implements IDVEng {
 	public final String getDeepVioletStringVersion() {
 		return VERSION_STRING;
 	}
- 	
+ 
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IDVEng#getCipherSuites()
 	 */
 	public final IDVCipherSuite[] getCipherSuites() throws DVException {
-		return getCipherSuites(CIPHER_NAME_CONVENTION.IANA );
-	}
-	
-	/* (non-Javadoc)
-	 * @see com.mps.deepviolet.api.IDVEng#getCipherSuites()
-	 */
-	public final IDVCipherSuite[] getCipherSuites(CIPHER_NAME_CONVENTION cipher_name_convention ) throws DVException {
 		List<IDVCipherSuite> list = new ArrayList<IDVCipherSuite>();
 		URL url = session.getURL();
 		try {
 			Map<String,List<String>> allCiphers = new HashMap<String, List<String>>();
-			ServerMetadata m = CipherSuiteUtil.getServerMetadataInstance( url, cipher_name_convention );
-			if( m == null ) {
+		
+			if( servmeta == null ) {
 				return null;
 			}
 
 			// TODO: Move protocol versions to own type
-			if( m.containsKey("getServerMetadataInstance","SSLv2") ) allCiphers.put("SSLv2",m.getVectorValue("getServerMetadataInstance","SSLv2"));
-			if( m.containsKey("getServerMetadataInstance","SSLv3") ) allCiphers.put("SSLv3",m.getVectorValue("getServerMetadataInstance","SSLv3"));
-			if( m.containsKey("getServerMetadataInstance","TLSv1.0") ) allCiphers.put("TLSv1.0",m.getVectorValue("getServerMetadataInstance","TLSv1.0"));
-			if( m.containsKey("getServerMetadataInstance","TLSv1.1") ) allCiphers.put("TLSv1.1",m.getVectorValue("getServerMetadataInstance","TLSv1.1"));
-			if( m.containsKey("getServerMetadataInstance","TLSv1.2") ) allCiphers.put("TLSv1.2",m.getVectorValue("getServerMetadataInstance","TLSv1.2"));
+			if( servmeta.containsKey("getServerMetadataInstance","SSLv2") ) allCiphers.put("SSLv2",servmeta.getVectorValue("getServerMetadataInstance","SSLv2"));
+			if( servmeta.containsKey("getServerMetadataInstance","SSLv3") ) allCiphers.put("SSLv3",servmeta.getVectorValue("getServerMetadataInstance","SSLv3"));
+			if( servmeta.containsKey("getServerMetadataInstance","TLSv1.0") ) allCiphers.put("TLSv1.0",servmeta.getVectorValue("getServerMetadataInstance","TLSv1.0"));
+			if( servmeta.containsKey("getServerMetadataInstance","TLSv1.1") ) allCiphers.put("TLSv1.1",servmeta.getVectorValue("getServerMetadataInstance","TLSv1.1"));
+			if( servmeta.containsKey("getServerMetadataInstance","TLSv1.2") ) allCiphers.put("TLSv1.2",servmeta.getVectorValue("getServerMetadataInstance","TLSv1.2"));
 
             for( String tlsVersion : allCiphers.keySet()  ) {
 				for(String cipher : allCiphers.get( tlsVersion )) {
@@ -213,6 +231,36 @@ class DVEng implements IDVEng {
 		
 		long sz = (derenccert!=null) ? derenccert.length : 0;
 		return sz;
+	}
+
+	public String getPropertyValue( String keyname ) throws DVException {
+		URL url = session.getURL();
+		try {
+			Map<String,List<String>> allCiphers = new HashMap<String, List<String>>();
+			if( servmeta == null ) {
+				return null;
+			}
+			
+			List<String> keys = servmeta.getKeys("analysis");
+			for( String key: keys ) {
+				map.put(key, servmeta.getScalarValue("analysis", key));
+			}
+			
+		} catch( Exception e ) {
+			String msg = "Problem fetching ciphersuites. err="+e.getMessage();	
+			logger.error(msg,e );
+			throw new DVException(msg,e);
+		}
+		
+		return map.get(keyname);
+	}
+	
+	public String[] getPropertyNames() {
+		return map.keySet().toArray(new String[0]);
+	}
+	
+	void setProperty( String name, String value ) {
+		map.put(name,value);
 	}
 }
 

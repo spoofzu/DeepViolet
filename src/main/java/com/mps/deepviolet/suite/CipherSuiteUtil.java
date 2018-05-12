@@ -92,8 +92,6 @@ public class CipherSuiteUtil {
 	
 	private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.suite.CipherSuiteUtil");
 	
-	private static final HashMap<URL, HostData> hostcache = new HashMap<URL,HostData>();
-	
 	// Common OIDs to Extension Mappings
 	private static final HashMap<String,String> OIDMAP = new HashMap<String,String>();
 	
@@ -197,20 +195,8 @@ public class CipherSuiteUtil {
 	// get to a MVC type architecture.  This would better address the ways deepviolet can be used
 	public static synchronized ServerMetadata getServerMetadataInstance( URL url, CIPHER_NAME_CONVENTION cipher_name_convention ) throws Exception {
 		
-		HostData hostdata = null;
+		HostData hostdata = new HostData(url);;
 		Boolean compress = false;
-		
-		// return cached instance of server TLS data if available and not expired.
-		if ( hostcache.containsKey( url ) ) {
-			hostdata = hostcache.get(url);
-//TODO: FOR NOW DON'T CACHE ANYTHING.  NOT SURE THIS MAKES SENSE.
-//			if( !hostdata.isExpired() )
-//				return hostdata;
-		// No cached instance of TLS data so create some
-		} else {
-			hostdata = new HostData(url);
-			hostcache.put(url, hostdata);	
-		}
 			
 		String name = url.getHost();
 		int port = ( url.getPort() > 0 ) ? url.getPort() : 443;
@@ -282,6 +268,11 @@ public class CipherSuiteUtil {
 			
 		}
 
+		int agMaxStrength = STRONG;
+		int agMinStrength = STRONG;
+		boolean vulnBEAST = false;
+		boolean vulnROBOT = false;
+		
 		for (int v : sv) {
 			
 			if (v == 0x0200) {
@@ -302,6 +293,18 @@ public class CipherSuiteUtil {
 					vulnFREAK = cipherSuiteString(c, cipher_name_convention).indexOf("EXPORT") > -1; 
 				}
 				
+				//Set<Integer> vsc = suppCS.get(c);
+				agMaxStrength = Math.min(
+					maxStrength(vsc), agMaxStrength);
+				agMinStrength = Math.min(
+					minStrength(vsc), agMinStrength);
+				if (!vulnBEAST) {
+					vulnBEAST = testBEAST(isa, c, vsc);
+				}
+				if (!vulnROBOT) {
+					vulnROBOT = suitename.startsWith("TLS_RSA");
+				}
+				
 				listv.add( suitename+"(0x"+Integer.toHexString(c)+")" );
 			}			
 
@@ -310,24 +313,24 @@ public class CipherSuiteUtil {
 		}
 		
 		
-		// Iterate over supported ciphersuites.
-		int agMaxStrength = STRONG;
-		int agMinStrength = STRONG;
-		boolean vulnBEAST = false;
-		boolean vulnROBOT = false;
-		for (int v : sv) {
-			Set<Integer> vsc = suppCS.get(v);
-			agMaxStrength = Math.min(
-				maxStrength(vsc), agMaxStrength);
-			agMinStrength = Math.min(
-				minStrength(vsc), agMinStrength);
-			if (!vulnBEAST) {
-				vulnBEAST = testBEAST(isa, v, vsc);
-			}
-			if (!vulnROBOT) {
-				vulnROBOT = cipherSuiteString(v, cipher_name_convention.IANA).startsWith("TLS_RSA");
-			}
-		}
+//		// Iterate over supported ciphersuites.
+//		int agMaxStrength = STRONG;
+//		int agMinStrength = STRONG;
+//		boolean vulnBEAST = false;
+//		boolean vulnROBOT = false;
+//		for (int v : sv) {
+//			Set<Integer> vsc = suppCS.get(v);
+//			agMaxStrength = Math.min(
+//				maxStrength(vsc), agMaxStrength);
+//			agMinStrength = Math.min(
+//				minStrength(vsc), agMinStrength);
+//			if (!vulnBEAST) {
+//				vulnBEAST = testBEAST(isa, v, vsc);
+//			}
+//			if (!vulnROBOT) {
+//				vulnROBOT = cipherSuiteString(v, cipher_name_convention).startsWith("TLS_RSA");
+//			}
+//		}
 		
 		//TODO: NEEDS TO BE CHECKED AND TESTED.
 		hostdata.setScalarValue("analysis","MINIMAL_ENCRYPTION_STRENGTH", strengthString(agMinStrength));
