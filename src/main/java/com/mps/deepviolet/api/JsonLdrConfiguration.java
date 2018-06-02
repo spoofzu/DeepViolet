@@ -1,8 +1,8 @@
-package com.mps.deepviolet.suite.json;
+package com.mps.deepviolet.api;
 
 import java.util.List;
 
-public class Configuration {
+class JsonLdrConfiguration {
 
 	private String openssl_ciphersuites;
 	private List<String> ciphersuites;

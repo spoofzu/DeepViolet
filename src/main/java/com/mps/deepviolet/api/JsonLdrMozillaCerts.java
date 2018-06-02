@@ -1,11 +1,11 @@
-package com.mps.deepviolet.suite.json;
+package com.mps.deepviolet.api;
 
 import java.util.Map;
 
-public class MozillaCerts {
+public class JsonLdrMozillaCerts {
 
 	private String href;
-	private Map<String, Configuration> configurations;
+	private Map<String, JsonLdrConfiguration> configurations;
 	private String version;
 
 	public String getHref() {
@@ -16,11 +16,11 @@ public class MozillaCerts {
 		this.href = href;
 	}
 
-	public Map<String, Configuration> getConfigurations() {
+	public Map<String, JsonLdrConfiguration> getConfigurations() {
 		return configurations;
 	}
 
-	public void setConfigurations(Map<String, Configuration> configurations) {
+	public void setConfigurations(Map<String, JsonLdrConfiguration> configurations) {
 		this.configurations = configurations;
 	}
 

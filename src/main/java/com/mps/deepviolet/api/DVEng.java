@@ -16,10 +16,6 @@ import javax.net.ssl.SSLHandshakeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mps.deepviolet.api.IDVEng.CIPHER_NAME_CONVENTION;
-import com.mps.deepviolet.api.IDVSession.SESSION_PROPERTIES;
-import com.mps.deepviolet.suite.CipherSuiteUtil;
-import com.mps.deepviolet.suite.ServerMetadata;
 
 /**
  * Utility class to access DeepViolet SSL/TLS features from API
@@ -40,18 +36,18 @@ class DVEng implements IDVEng {
 	private final String EOL = System.getProperty("line.separator");
 	private final URL url;
 	
-	private IDVSession session;
+	private MutableDVSession session;
 	private ServerMetadata servmeta;
 	
 	/* (non-Javadoc)
 	 */
-	DVEng( IDVSession session,  CIPHER_NAME_CONVENTION cipher_name_convention ) throws DVException {
+	DVEng( IDVSession session,  IDVSession.CIPHER_NAME_CONVENTION cipher_name_convention ) throws DVException {
 		
 		try {
-			this.session = session;
+			this.session = (MutableDVSession)session; //TODO: Ugly bug works
 			this.url = session.getURL();
 			
-			servmeta = CipherSuiteUtil.getServerMetadataInstance(url,CIPHER_NAME_CONVENTION.IANA);
+			servmeta = CipherSuiteUtil.getServerMetadataInstance(url, IDVSession.CIPHER_NAME_CONVENTION.IANA, this.session);
 			if( servmeta == null ) {
 				String msg = "Unable to create DVEng.  ServerMetadata is null";
 				logger.error(msg);
@@ -233,34 +229,36 @@ class DVEng implements IDVEng {
 		return sz;
 	}
 
-	public String getPropertyValue( String keyname ) throws DVException {
-		URL url = session.getURL();
-		try {
-			Map<String,List<String>> allCiphers = new HashMap<String, List<String>>();
-			if( servmeta == null ) {
-				return null;
-			}
-			
-			List<String> keys = servmeta.getKeys("analysis");
-			for( String key: keys ) {
-				map.put(key, servmeta.getScalarValue("analysis", key));
-			}
-			
-		} catch( Exception e ) {
-			String msg = "Problem fetching ciphersuites. err="+e.getMessage();	
-			logger.error(msg,e );
-			throw new DVException(msg,e);
-		}
-		
-		return map.get(keyname);
-	}
+//	public String getPropertyValue( String keyname ) throws DVException {
+//		URL url = session.getURL();
+//		try {
+//			Map<String,List<String>> allCiphers = new HashMap<String, List<String>>();
+//			if( servmeta == null ) {
+//				return null;
+//			}
+//			
+//			List<String> keys = servmeta.getKeys("analysis");
+//			for( String key: keys ) {
+//				map.put(key, servmeta.getScalarValue("analysis", key));
+//			}
+//			
+//		} catch( Exception e ) {
+//			String msg = "Problem fetching ciphersuites. err="+e.getMessage();	
+//			logger.error(msg,e );
+//			throw new DVException(msg,e);
+//		}
+//		
+//		return map.get(keyname);
+//	}
+//	
+//	public String[] getPropertyNames() {
+//		return map.keySet().toArray(new String[0]);
+//	}
+//	
+//	void setProperty( String name, String value ) {
+//		map.put(name,value);
+//	}
 	
-	public String[] getPropertyNames() {
-		return map.keySet().toArray(new String[0]);
-	}
 	
-	void setProperty( String name, String value ) {
-		map.put(name,value);
-	}
 }
 

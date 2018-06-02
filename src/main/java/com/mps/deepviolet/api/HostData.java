@@ -1,4 +1,4 @@
-package com.mps.deepviolet.suite;
+package com.mps.deepviolet.api;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public class HostData implements ServerMetadata {
+class HostData implements ServerMetadata {
 	
 	private HashMap<String, HashMap<String, Object>> featuremap = new HashMap<String, HashMap<String, Object>>();
 	

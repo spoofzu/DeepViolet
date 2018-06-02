@@ -36,9 +36,35 @@ public interface IDVSession {
 		CLIENT_AUTH_WANT,
 		TRAFFIC_CLASS,
 		TCP_NODELAY,
-		ENABLED_PROTOCOLS
+		ENABLED_PROTOCOLS,
+		DEFLATE_COMPRESSION
 	}
 	
+	/**
+	 * Vulnerability assessment properties.
+	 * MINIMAL_ENCRYPTION_STRENGTH, Minimal encryption strength of supported ciphersuites
+	 * ACHIEVABLE_ENCRYPTION_STRENGTH, Maximum achievable encryption strength of supported ciphersuites
+	 * BEAST_VULNERABLE, true, vulnerable to BEAST attack.  false, not vulnerable to BEAST attack
+	 * CRIME_VULNERABLE, true, vulnerable to CRIME attack.  false, not vulnerable to CRIME attack
+	 * FREAK_VULNERABLE, true, vulnerable to FREAK attack.  false, not vulnerable to FREAK attack
+	 */
+	public enum VULNERABILITY_ASSESSMENTS {
+		MINIMAL_ENCRYPTION_STRENGTH,
+		ACHIEVABLE_ENCRYPTION_STRENGTH,
+		BEAST_VULNERABLE,
+		CRIME_VULNERABLE,
+		FREAK_VULNERABLE
+	}
+	
+	/**
+	 * Enumeration of supported ciphersuite naming conventions.  The following conventions are 
+	 * supported: CIPHER_NAME_CONVENTION.GnuTLS, CIPHER_NAME_CONVENTION.NSS,
+	 * CIPHER_NAME_CONVENTION.IANA, CIPHER_NAME_CONVENTION.OpenSSL
+	 */
+	enum CIPHER_NAME_CONVENTION {
+		GnuTLS, NSS, IANA, OpenSSL
+	}
+
 	/**
 	 * All host interfaces
 	 * @return Host interfaces
@@ -50,14 +76,28 @@ public interface IDVSession {
 	 * @param keyname Name of target property to return
 	 * @return Property value
 	 */
-	String getPropertyValue(SESSION_PROPERTIES keyname);
+	String getSessionPropertyValue(SESSION_PROPERTIES keyname);
+	
+//	/**
+//	 * Return property names.  Specify these in {@link #getSessionPropertyValue(String)}
+//	 * to return the property value.
+//	 * @return Array of a property names
+//	 */
+//	SESSION_PROPERTIES[] getSessionPropertyNames();
 	
 	/**
-	 * Return property names.  Specify these in {@link #getPropertyValue(String)}
-	 * to return the property value.
-	 * @return Array of a property names
+	 * Return target vulnerability assessment value
+	 * @param keyname Name of target property to return
+	 * @return Property value
 	 */
-	SESSION_PROPERTIES[] getPropertyNames();
+	String getVulnerabilityAssessmentValue(VULNERABILITY_ASSESSMENTS keyname);
+	
+//	/**
+//	 * Return vulnerability names.  Specify these in {@link #getSessionPropertyValue(String)}
+//	 * to return the property value.
+//	 * @return Array of a property names
+//	 */
+//	VULNERABILITY_ASSESSMENTS[] getVulnerabilityAssessmentValues();
 	
 	/**
 	 * Return a globally unique identity for this object

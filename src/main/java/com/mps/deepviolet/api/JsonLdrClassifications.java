@@ -1,9 +1,9 @@
-package com.mps.deepviolet.suite.json;
+package com.mps.deepviolet.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Classifications {
+class JsonLdrClassifications {
 	public String getNSS() {
 		return NSS;
 	}

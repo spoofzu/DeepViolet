@@ -1,4 +1,4 @@
-package com.mps.deepviolet.suite;
+package com.mps.deepviolet.api;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -7,7 +7,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-public class ServerHello {
+public class CipherSuiteUtilServerHello {
 
 	int recordVersion;
 	int protoVersion;
@@ -17,10 +17,10 @@ public class ServerHello {
 	String serverCertName;
 	String serverCertHash;
 	
-	ServerHello(InputStream in)
+	CipherSuiteUtilServerHello(InputStream in)
 		throws IOException
 	{
-		InputRecord rec = new InputRecord(in);
+		CipherSuiteUtilInputRecord rec = new CipherSuiteUtilInputRecord(in);
 		rec.setExpectedType(CipherSuiteUtil.HANDSHAKE);
 
 		/*
