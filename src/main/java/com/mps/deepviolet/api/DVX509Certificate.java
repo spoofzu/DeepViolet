@@ -17,8 +17,6 @@ import javax.net.ssl.SSLHandshakeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mps.deepviolet.suite.CipherSuiteUtil;
-
 /**
  * Implementation of IDVX509Certificate specification
  * @author Milton Smith

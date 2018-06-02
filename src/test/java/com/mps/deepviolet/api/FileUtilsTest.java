@@ -1,4 +1,4 @@
-package com.mps.deepviolet.suite;
+package com.mps.deepviolet.api;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -12,30 +12,30 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mps.deepviolet.suite.json.CipherMap;
-import com.mps.deepviolet.suite.json.Configuration;
-import com.mps.deepviolet.suite.json.MozillaCerts;
+import com.mps.deepviolet.api.JsonLdrCipherMap;
+import com.mps.deepviolet.api.JsonLdrConfiguration;
+import com.mps.deepviolet.api.JsonLdrMozillaCerts;
 import com.mps.deepviolet.util.FileUtils;
 
 public class FileUtilsTest {
 
 	@Test
 	public void testReadCiphermapFromJSON() throws JsonParseException, JsonMappingException, IOException {
-		CipherMap map = FileUtils.readCiphermapFromJSON("./src/main/resources/ciphermap.json");
+		JsonLdrCipherMap map = FileUtils.readCiphermapFromJSON("./src/main/resources/ciphermap.json");
 		assertNotNull(map);
-		MozillaCerts certs = FileUtils.readMozillaCertsFromJSON("./src/main/resources/server-side-tls-conf-4.0.json");
+		JsonLdrMozillaCerts certs = FileUtils.readMozillaCertsFromJSON("./src/main/resources/server-side-tls-conf-4.0.json");
 		assertNotNull(certs);
 	}
 
 	@Test
 	public void testWriteMozillaJSON() throws JsonProcessingException {
-		MozillaCerts certs = new MozillaCerts();
+		JsonLdrMozillaCerts certs = new JsonLdrMozillaCerts();
 		certs.setHref("http://labla");
-		Map<String, Configuration> configs = new HashMap<>();
-		Configuration config1 = new Configuration();
+		Map<String, JsonLdrConfiguration> configs = new HashMap<>();
+		JsonLdrConfiguration config1 = new JsonLdrConfiguration();
 		config1.setOpenssl_ciphersuites("lot of ebc and so on");
 		configs.put("moden", config1);
-		Configuration config2 = new Configuration();
+		JsonLdrConfiguration config2 = new JsonLdrConfiguration();
 		config2.setOpenssl_ciphersuites("lot of ebc and cbc and so on");
 		configs.put("mdedium", config2);
 		certs.setConfigurations(configs);

@@ -1,4 +1,4 @@
-package com.mps.deepviolet.suite;
+package com.mps.deepviolet.api;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
 
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
-import com.mps.deepviolet.api.IDVEng.CIPHER_NAME_CONVENTION;
+import com.mps.deepviolet.api.IDVSession.CIPHER_NAME_CONVENTION;
 import com.mps.deepviolet.util.FileUtils;
 
 //import sun.security.provider.certpath.OCSP;
@@ -80,7 +80,7 @@ import com.mps.deepviolet.util.FileUtils;
  * <a href="http://www.bolet.org/TestSSLServer/">TestSSLServer</a>
  * @author Milton Smith
  */
-public class CipherSuiteUtil {
+class CipherSuiteUtil {
 
 // Handshake protocol version legend
 //	SSL v1
@@ -105,19 +105,7 @@ public class CipherSuiteUtil {
 	static final int HANDSHAKE          = 22;
 	static final int APPLICATION        = 23;
 	private static final SecureRandom RNG = new SecureRandom();
-	/*
-	 * A constant SSLv2 CLIENT-HELLO message. Only one connection
-	 * is needed for SSLv2, since the server response will contain
-	 * _all_ the cipher suites that the server is willing to
-	 * support.
-	 *
-	 * Note: when (mis)interpreted as a SSLv3+ record, this message
-	 * apparently encodes some data of (invalid) 0x80 type, using
-	 * protocol version TLS 44.1, and record length of 2 bytes.
-	 * Thus, the receiving part will quickly conclude that it will
-	 * not support that, instead of stalling for more data from the
-	 * client.
-	 */
+
 	private static final byte[] SSL2_CLIENT_HELLO = {
 		(byte)0x80, (byte)0x2E,  // header (record length)
 		(byte)0x01,              // message type (CLIENT HELLO)
@@ -137,6 +125,15 @@ public class CipherSuiteUtil {
 		0x54, 0x54, 0x54, 0x54,
 		0x54, 0x54, 0x54, 0x54
 	};
+	
+	private static final byte[] HEARTBEAT = {
+			(byte)0x018,             // message type (HEARTBEAT)
+			(byte)0x03, (byte)0x01,  // tls version
+			(byte)0x00, (byte)0x03,  // length
+			(byte)0x01,              // type (request)
+			(byte)0x40, (byte)0x00   // payload length
+	};
+	
 	static final int UNASSIGNED = -1; // no evaluation in json mapping file
 	static final int CLEAR  = 0; // no encryption
 	static final int WEAK   = 1; // weak encryption: 40-bit key
@@ -193,7 +190,7 @@ public class CipherSuiteUtil {
 		
 	// TODO This needs to go bye bye, abad idea.  I'm thinking a better way to do this is eventually
 	// get to a MVC type architecture.  This would better address the ways deepviolet can be used
-	public static synchronized ServerMetadata getServerMetadataInstance( URL url, CIPHER_NAME_CONVENTION cipher_name_convention ) throws Exception {
+	static synchronized ServerMetadata getServerMetadataInstance( URL url, IDVSession.CIPHER_NAME_CONVENTION cipher_name_convention, MutableDVSession session ) throws Exception {
 		
 		HostData hostdata = new HostData(url);;
 		Boolean compress = false;
@@ -205,7 +202,7 @@ public class CipherSuiteUtil {
 
 		Set<Integer> sv = new TreeSet<Integer>();
 		for (int v = 0x0300; v <= 0x0303; v ++) {
-			ServerHello sh = connect(isa,
+			CipherSuiteUtilServerHello sh = connect(isa,
 				v, CIPHER_SUITES.keySet());
 			if (sh == null) {
 				continue;
@@ -213,9 +210,10 @@ public class CipherSuiteUtil {
 			sv.add(sh.protoVersion);
 			if (sh.compression == 1) {
 				compress = true;
-				hostdata.setScalarValue("getServerMetadataInstance","DEFLATE_COMPRESSION", "TRUE");
+				session.setSessionPropertyValue(IDVSession.SESSION_PROPERTIES.DEFLATE_COMPRESSION, "true");
+				logger.warn("Server vulnerable to CRIME attack.  Compression enabled.");
 			}else{
-				hostdata.setScalarValue("getServerMetadataInstance","DEFLATE_COMPRESSION", "FALSE");
+				session.setSessionPropertyValue(IDVSession.SESSION_PROPERTIES.DEFLATE_COMPRESSION, "false");
 			}
 		}
 		
@@ -252,7 +250,10 @@ public class CipherSuiteUtil {
 					if( suitename == null || suitename.length()==0 ) {
 						logger.info("Freak vulnerability analysis skipped due to null ciphersuite name. id=0x" + c );
 					} else {
-						vulnFREAK = cipherSuiteStringV2(c, cipher_name_convention).indexOf("EXPORT") > -1; 
+						vulnFREAK = cipherSuiteStringV2(c, cipher_name_convention).indexOf("RSA_EXPORT") > -1; 
+						if (vulnFREAK ) {
+							logger.warn("Following ciphersuite vulnerable to FREAK attack, "+suitename);
+						}
 					}
 				}
 				listv2.add( suitename+"(0x"+Integer.toHexString(c)+")" );
@@ -271,7 +272,7 @@ public class CipherSuiteUtil {
 		int agMaxStrength = STRONG;
 		int agMinStrength = STRONG;
 		boolean vulnBEAST = false;
-		boolean vulnROBOT = false;
+		//boolean vulnROBOT = false;
 		
 		for (int v : sv) {
 			
@@ -290,7 +291,12 @@ public class CipherSuiteUtil {
 				if( suitename == null || suitename.length()==0 ) {
 					logger.info("Freak vulnerability analysis skipped due to null ciphersuite name. id=0x" + c );
 				} else {
-					vulnFREAK = cipherSuiteString(c, cipher_name_convention).indexOf("EXPORT") > -1; 
+					if( !vulnFREAK ) {
+						vulnFREAK = cipherSuiteString(c, cipher_name_convention).indexOf("RSA_EXPORT") > -1; 
+						if( vulnFREAK ) {
+							logger.warn("Following ciphersuite vulnerable to FREAK attack, "+suitename);
+						}
+					}
 				}
 				
 				//Set<Integer> vsc = suppCS.get(c);
@@ -300,10 +306,16 @@ public class CipherSuiteUtil {
 					minStrength(vsc), agMinStrength);
 				if (!vulnBEAST) {
 					vulnBEAST = testBEAST(isa, c, vsc);
+					if( vulnBEAST ) {
+						logger.warn("Following ciphersuite vulnerable to BEAST attack, "+suitename);
+					}
 				}
-				if (!vulnROBOT) {
-					vulnROBOT = suitename.startsWith("TLS_RSA");
-				}
+//				if (!vulnROBOT) {
+//					vulnROBOT = suitename.startsWith("TLS_RSA");
+//					if( vulnROBOT ) {
+//						logger.warn("Following ciphersuite vulnerable to ROBOT attack, "+suitename);
+//					}
+//				}
 				
 				listv.add( suitename+"(0x"+Integer.toHexString(c)+")" );
 			}			
@@ -333,12 +345,12 @@ public class CipherSuiteUtil {
 //		}
 		
 		//TODO: NEEDS TO BE CHECKED AND TESTED.
-		hostdata.setScalarValue("analysis","MINIMAL_ENCRYPTION_STRENGTH", strengthString(agMinStrength));
-		hostdata.setScalarValue("analysis","ACHIEVABLE_ENCRYPTION_STRENGTH", strengthString(agMinStrength));
-		hostdata.setScalarValue("analysis","BEAST_VULNERABLE", vulnBEAST ? "vulnerable" : "protected");
-		hostdata.setScalarValue("analysis","CRIME_VULNERABLE", compress ? "vulnerable" : "protected");
-		hostdata.setScalarValue("analysis","FREAK_VULNERABLE", vulnFREAK ? "vulnerable" : "protected");
-		hostdata.setScalarValue("analysis","ROBOT_VULNERABLE", vulnROBOT ? "vulnerable" : "protected");
+		session.setVulnerabilityAssessmentValue(IDVSession.VULNERABILITY_ASSESSMENTS.MINIMAL_ENCRYPTION_STRENGTH, strengthString(agMinStrength));
+		session.setVulnerabilityAssessmentValue(IDVSession.VULNERABILITY_ASSESSMENTS.ACHIEVABLE_ENCRYPTION_STRENGTH, strengthString(agMaxStrength));
+		session.setVulnerabilityAssessmentValue(IDVSession.VULNERABILITY_ASSESSMENTS.BEAST_VULNERABLE, Boolean.toString(vulnBEAST)); // Notes: Check TLS version <=1.0 and CBC enabled.  https://blog.qualys.com/ssllabs/2013/09/10/is-beast-still-a-threat
+		session.setVulnerabilityAssessmentValue(IDVSession.VULNERABILITY_ASSESSMENTS.CRIME_VULNERABLE, Boolean.toString(compress));  // Notes: Check TLS compression enabled, https://en.wikipedia.org/wiki/CRIME 
+		session.setVulnerabilityAssessmentValue(IDVSession.VULNERABILITY_ASSESSMENTS.FREAK_VULNERABLE, Boolean.toString(vulnFREAK)); // Notes: Check ciphers containing, RSA_EXPORT https://censys.io/blog/freak
+		//session.setVulnerabilityAssessmentValue(IDVSession.VULNERABILITY_ASSESSMENTS.ROBOT_VULNERABLE, Boolean.toString(vulnROBOT)); // Notes: Check ciphers starting, TLS_RSA https://robotattack.org/
 		
 		return hostdata;
 		
@@ -476,7 +488,7 @@ public class CipherSuiteUtil {
 				//TODO could make this multi-threaded to speed up scanning. 
 				//  although need to be kind to servers.  Don't want too
 				// many connections and create performance problems.
-				ServerHello sh = connect(isa, version, scanblk);
+				CipherSuiteUtilServerHello sh = connect(isa, version, scanblk);
 				if (sh == null) {
 					break;
 				}
@@ -559,7 +571,7 @@ public class CipherSuiteUtil {
 	 * @param protocol Ciphersuite protocol to test.
 	 * @return String indicating strength, CLEAR(no encryption), WEAK, MEDIUM, STRONG. 
 	 */
-	public static final String getStrength(String protocol) {
+	static final String getStrength(String protocol) {
 		
 		String clear = "CLEAR{no encryption}";
 		String weak = "WEAK";
@@ -608,7 +620,7 @@ public class CipherSuiteUtil {
 	 * @return X509Certificate Server certificate.
 	 * @throws Exception Thrown on problems.
 	 */
-	public static final X509Certificate getServerCertificate(URL url) throws Exception {
+	static final X509Certificate getServerCertificate(URL url) throws Exception {
 		
 		X509Certificate[] certs = getServerCertificateChain(url);
 		
@@ -622,7 +634,7 @@ public class CipherSuiteUtil {
 	 * @return Map HTTPS response headers
 	 * @throws Exception Thrown on problems.
 	 */
-	public static final Map<String, List<String>> getHttpResponseHeaders(URL url) throws Exception {
+	static final Map<String, List<String>> getHttpResponseHeaders(URL url) throws Exception {
 		
 		HttpsURLConnection conn = null;
 		
@@ -686,7 +698,7 @@ public class CipherSuiteUtil {
 	 * @param value true, chain will be tested.  false, chain will not be tested.
 	 * @throws Exception Thrown on error
 	 */
-	public static final void enableTLSChainTesting( boolean value ) throws Exception {
+	static final void enableTLSChainTesting( boolean value ) throws Exception {
 
 		if( value ) {
 			
@@ -716,7 +728,7 @@ public class CipherSuiteUtil {
 	 * @throws Exception Thrown on problems.
 	 * @see <a href="http://stackoverflow.com/questions/19723415/java-overriding-function-to-disable-ssl-certificate-check">java-overriding-function-to-disable-ssl-certificate-check</a>
 	 */
-	public static final X509Certificate[] getServerCertificateChain(URL url) throws Exception {
+	static final X509Certificate[] getServerCertificateChain(URL url) throws Exception {
 
         ArrayList<X509Certificate> list = new ArrayList<X509Certificate>();
 		
@@ -752,7 +764,7 @@ public class CipherSuiteUtil {
 	 * @return An array of X509Certificates root certificates from the Java trust store
 	 * @throws Exception Thrown on problems.
 	 */
-	public static final X509Certificate[] getJavaRootCertificates() throws Exception {
+	static final X509Certificate[] getJavaRootCertificates() throws Exception {
 		
 		//TODO: Maybe be good to consider caching this at some point (at least for a few seconds)
 		
@@ -807,7 +819,7 @@ public class CipherSuiteUtil {
 	 * @param IssuerDN Issuing authority
 	 * @return true, IssuerDN matches a Java root.  false, no matching IssuerDN found.
 	 */
-	public static final boolean isJavaRootCertificateDN(String IssuerDN) throws Exception {
+	static final boolean isJavaRootCertificateDN(String IssuerDN) throws Exception {
 		
 		boolean result = false;
 		
@@ -832,7 +844,7 @@ public class CipherSuiteUtil {
 	 * @throws IOException
 	 * @return True, the certificate chain is trusted.  False, the chain is not trusted.
 	 */
-	public static final boolean checkTrustedCertificate( X509Certificate[] certs, URL url) throws KeyStoreException,
+	static final boolean checkTrustedCertificate( X509Certificate[] certs, URL url) throws KeyStoreException,
 			NoSuchAlgorithmException, UnknownHostException, IOException {
 		
 		boolean valid = false;
@@ -922,7 +934,7 @@ public class CipherSuiteUtil {
 	 * @param cert Target certificate to test.
 	 * @return boolean True, certificate is self-signed.  False, certificate is not self-signed. 
 	 */
-	public static final boolean isSelfSignedCertificate( X509Certificate cert ) {
+	static final boolean isSelfSignedCertificate( X509Certificate cert ) {
 		
 		boolean result = false;
 		
@@ -962,7 +974,7 @@ public class CipherSuiteUtil {
 //	    * @return String SHA1 fingerprint in hex.
 //	    * @throws NoSuchAlgorithmException
 //	    */
-//	   public static final String sha1Fingerprint( byte[] der ) throws NoSuchAlgorithmException {
+//	   static final String sha1Fingerprint( byte[] der ) throws NoSuchAlgorithmException {
 //		   
 //		   MessageDigest sha1 = MessageDigest.getInstance("SHA1");
 //		   sha1.update( der );
@@ -980,7 +992,7 @@ public class CipherSuiteUtil {
 //	    * @return String MD5 fingerprint in hex.
 //	    * @throws NoSuchAlgorithmException
 //	    */	   
-//	   public static final String md5Fingerprint( byte[] der ) throws NoSuchAlgorithmException {
+//	   static final String md5Fingerprint( byte[] der ) throws NoSuchAlgorithmException {
 //		   
 //		   MessageDigest sha1 = MessageDigest.getInstance("MD5");
 //		   sha1.update( der );
@@ -997,7 +1009,7 @@ public class CipherSuiteUtil {
 	    * @param a Target byte array to convert.
 	    * @return String String based hex representation of target byte array. 
 	    */
-	   public static String byteArrayToHex(byte[] a) {
+	   static String byteArrayToHex(byte[] a) {
 		   StringBuilder sb = new StringBuilder(a.length * 2);
 		   for(byte b: a) {
 		      sb.append(String.format("%02x", b & 0xff));
@@ -1012,7 +1024,7 @@ public class CipherSuiteUtil {
 	    * @param oidkey OID number sequence.  Ex: 2.5.29.15
 	    * @return  Human readable String representation of the OID number sequence.  Ex: keyusage
 	    */
-	   public static String getOIDKeyName(String oidkey) {
+	   static String getOIDKeyName(String oidkey) {
 		   
 		   // TODO: Need to figure out a better way to do this.
 		   return (OIDMAP.get(oidkey)!=null) ? OIDMAP.get(oidkey) : oidkey;
@@ -1027,7 +1039,7 @@ public class CipherSuiteUtil {
 	 * @return <code>ASN1Primitive</code> representation of <code>der</code> encoded data
 	 * @throws IOException
 	 */
-	public static final ASN1Primitive toDERObject(byte[] data) throws IOException {
+	static final ASN1Primitive toDERObject(byte[] data) throws IOException {
 		   
 		ByteArrayInputStream inStream = new ByteArrayInputStream(data);
 		
@@ -1051,7 +1063,7 @@ public class CipherSuiteUtil {
 	 * @param buff
 	 * @throws IOException
 	 */
-	public static final void walkASN1Sequence( ASN1Primitive primitive, StringBuffer buff ) throws IOException {
+	static final void walkASN1Sequence( ASN1Primitive primitive, StringBuffer buff ) throws IOException {
 		
 		
 	    if (primitive instanceof DEROctetString) {
@@ -1279,7 +1291,7 @@ public class CipherSuiteUtil {
 	 * @return String String value for the specified OID parameter. 
 	 * @throws IOException
 	 */
-	public static final String getExtensionValue(X509Certificate X509Certificate, String oid) throws IOException {
+	static final String getExtensionValue(X509Certificate X509Certificate, String oid) throws IOException {
 		
 		StringBuffer buff = new StringBuffer();
 		
@@ -1318,7 +1330,7 @@ public class CipherSuiteUtil {
 	 * Connect to the server, send a ClientHello, and decode the
 	 * response (ServerHello). On error, null is returned.
 	 */
-	static ServerHello connect(InetSocketAddress isa,
+	static CipherSuiteUtilServerHello connect(InetSocketAddress isa,
 		int version, Collection<Integer> cipherSuites)
 	{
 		Socket s = null;
@@ -1338,7 +1350,7 @@ public class CipherSuiteUtil {
 			orec.setVersion(version);
 			orec.write(ch);
 			orec.flush();
-			return new ServerHello(s.getInputStream());
+			return new CipherSuiteUtilServerHello(s.getInputStream());
 		} catch (IOException ioe) {
 			// ignored
 		} finally {
@@ -1636,7 +1648,7 @@ public class CipherSuiteUtil {
 
 
 	
-	static final String cipherSuiteString(int suite, CIPHER_NAME_CONVENTION cipher_name_convention)
+	static final String cipherSuiteString(int suite, IDVSession.CIPHER_NAME_CONVENTION cipher_name_convention)
 	{
 		CipherSuite cs = CIPHER_SUITES.get(suite);
 		String ciphername = String.format("UNKNOWN_SUITE:%04X", suite);
@@ -1648,7 +1660,7 @@ public class CipherSuiteUtil {
 		return ciphername;
 	}
 
-	static final String cipherSuiteStringV2(int suite, CIPHER_NAME_CONVENTION cipher_name_convention)
+	static final String cipherSuiteStringV2(int suite, IDVSession.CIPHER_NAME_CONVENTION cipher_name_convention)
 	{
 		CipherSuite cs = CIPHER_SUITES.get(suite);
 		String ciphername = String.format("UNKNOWN_SUITE:%02X,%02X,%02X",
@@ -1774,7 +1786,7 @@ public class CipherSuiteUtil {
 			}
 			List<Integer> ns = new ArrayList<Integer>(strongCBC);
 			ns.addAll(strongStream);
-			ServerHello sh = connect(isa, version, ns);
+			CipherSuiteUtilServerHello sh = connect(isa, version, ns);
 			return !strongStream.contains(sh.cipherSuite);
 		}
 

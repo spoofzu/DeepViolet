@@ -1,4 +1,4 @@
-package com.mps.deepviolet.suite;
+package com.mps.deepviolet.api;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +9,7 @@ import java.io.InputStream;
  * have the expected type (e.g. "handshake"); alert messages
  * are skipped.
  */
-class InputRecord extends InputStream {
+class CipherSuiteUtilInputRecord extends InputStream {
 
 		private InputStream in;
 		private byte[] buffer = new byte[CipherSuiteUtil.MAX_RECORD_LEN + 5];
@@ -18,7 +18,7 @@ class InputRecord extends InputStream {
 		private int type;
 		private int expectedType;
 
-		InputRecord(InputStream in)
+		CipherSuiteUtilInputRecord(InputStream in)
 		{
 			this.in = in;
 			ptr = 0;

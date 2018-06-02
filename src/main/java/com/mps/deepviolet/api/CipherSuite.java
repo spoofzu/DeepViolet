@@ -1,8 +1,8 @@
-package com.mps.deepviolet.suite;
+package com.mps.deepviolet.api;
 
 import java.util.Map;
 
-public class CipherSuite {
+class CipherSuite {
 	
 	int suite;
 	Map names;

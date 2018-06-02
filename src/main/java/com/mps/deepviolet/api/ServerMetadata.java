@@ -1,9 +1,9 @@
-package com.mps.deepviolet.suite;
+package com.mps.deepviolet.api;
 
 import java.net.URL;
 import java.util.List;
 
-public interface ServerMetadata {
+interface ServerMetadata {
 
 	public URL getHost();
 	

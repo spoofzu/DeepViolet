@@ -1,6 +1,6 @@
-package com.mps.deepviolet.suite.json;
+package com.mps.deepviolet.api;
 
-public class CipherSuite {
+class JsonCipherSuite {
 
 	private String name;
 	private String keyExchange;
@@ -9,7 +9,7 @@ public class CipherSuite {
 	private String integrity;
 
 	// f.i ECDHE-ECDSA-AES256-GCM-SHA384
-	public CipherSuite(String ciphersuitename) {
+	public JsonCipherSuite(String ciphersuitename) {
 		name = ciphersuitename;
 		parseConfig(name);
 	}

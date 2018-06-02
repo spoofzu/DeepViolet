@@ -43,7 +43,6 @@ public class DVEngTest {
 			IDVSession session = DVFactory.initializeSession(url);
 			assertTrue(session != null);
 			assertTrue(session.getHostInterfaces().length > 0);
-			assertTrue(session.getPropertyNames().length > 0);
 
 			IDVEng eng = DVFactory.getDVEng(session);
 			assertTrue(eng != null);

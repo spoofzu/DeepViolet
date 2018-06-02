@@ -9,8 +9,8 @@ import java.io.InputStreamReader;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mps.deepviolet.suite.json.CipherMap;
-import com.mps.deepviolet.suite.json.MozillaCerts;
+import com.mps.deepviolet.api.JsonLdrCipherMap;
+import com.mps.deepviolet.api.JsonLdrMozillaCerts;
 
 public class FileUtils {
 
@@ -120,17 +120,17 @@ public class FileUtils {
 		return buff.toString();
 	}
 
-	public static CipherMap readCiphermapFromJSON(String file)
+	public static JsonLdrCipherMap readCiphermapFromJSON(String file)
 			throws JsonParseException, JsonMappingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		CipherMap obj = mapper.readValue(new File(file), CipherMap.class);
+		JsonLdrCipherMap obj = mapper.readValue(new File(file), JsonLdrCipherMap.class);
 		return obj;
 	}
 
-	public static MozillaCerts readMozillaCertsFromJSON(String file)
+	public static JsonLdrMozillaCerts readMozillaCertsFromJSON(String file)
 			throws JsonParseException, JsonMappingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		MozillaCerts obj = mapper.readValue(new File(file), MozillaCerts.class);
+		JsonLdrMozillaCerts obj = mapper.readValue(new File(file), JsonLdrMozillaCerts.class);
 		return obj;
 	}
 

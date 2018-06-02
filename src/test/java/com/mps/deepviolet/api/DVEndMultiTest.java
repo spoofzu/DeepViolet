@@ -63,11 +63,11 @@ public class DVEndMultiTest {
 		}
 
 		System.out.println("prop names : ");
-		IDVSession.SESSION_PROPERTIES[] names = session.getPropertyNames();
-		for (int i = 0; i < names.length; i++) {
-			System.out.print(names[i] + " = ");
-			System.out.println(session.getPropertyValue(names[i]));
+		for (IDVSession.SESSION_PROPERTIES name : IDVSession.SESSION_PROPERTIES.values() ) {	
+			System.out.print(name + " = ");
+			System.out.println(session.getSessionPropertyValue(name));
 		}
+		
 		assertEquals(36, e.getCipherSuites().length);
 	}
 

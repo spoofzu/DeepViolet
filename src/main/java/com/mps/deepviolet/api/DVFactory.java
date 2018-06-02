@@ -1,14 +1,14 @@
 package com.mps.deepviolet.api;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.URL;
+import java.net.InetAddress;
 import java.util.ArrayList;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-import com.mps.deepviolet.api.IDVEng.CIPHER_NAME_CONVENTION;
+import com.mps.deepviolet.api.IDVSession.CIPHER_NAME_CONVENTION;
 import com.mps.deepviolet.util.FileUtils;
 
 /**
@@ -90,17 +90,18 @@ public class DVFactory {
 			String enabledProtocols = String.join(",", socket.getEnabledProtocols());
 			
 			session = new MutableDVSession(url, (IDVHost[]) list.toArray(new ImmutableDVHost[0]));
-			session.setProperty(IDVSession.SESSION_PROPERTIES.SO_KEEPALIVE, soKeepalive);
-			session.setProperty(IDVSession.SESSION_PROPERTIES.SO_RCVBUF, soRcvbuf);
-			session.setProperty(IDVSession.SESSION_PROPERTIES.SO_LINGER, soLinger);
-			session.setProperty(IDVSession.SESSION_PROPERTIES.SO_TIMEOUT, soTimeout);
-			session.setProperty(IDVSession.SESSION_PROPERTIES.SO_REUSEADDR, soReuseaddr);
-			session.setProperty(IDVSession.SESSION_PROPERTIES.SO_SENDBUFF, soSendbuff);
-			session.setProperty(IDVSession.SESSION_PROPERTIES.CLIENT_AUTH_REQ, clientAuthReq);
-			session.setProperty(IDVSession.SESSION_PROPERTIES.CLIENT_AUTH_WANT, clientAuthWant);
-			session.setProperty(IDVSession.SESSION_PROPERTIES.TRAFFIC_CLASS, trafficClass);
-			session.setProperty(IDVSession.SESSION_PROPERTIES.TCP_NODELAY, tcpNodelay);
-			session.setProperty(IDVSession.SESSION_PROPERTIES.ENABLED_PROTOCOLS, enabledProtocols);
+			session.setSessionPropertyValue(IDVSession.SESSION_PROPERTIES.SO_KEEPALIVE, soKeepalive);
+			session.setSessionPropertyValue(IDVSession.SESSION_PROPERTIES.SO_RCVBUF, soRcvbuf);
+			session.setSessionPropertyValue(IDVSession.SESSION_PROPERTIES.SO_LINGER, soLinger);
+			session.setSessionPropertyValue(IDVSession.SESSION_PROPERTIES.SO_TIMEOUT, soTimeout);
+			session.setSessionPropertyValue(IDVSession.SESSION_PROPERTIES.SO_REUSEADDR, soReuseaddr);
+			session.setSessionPropertyValue(IDVSession.SESSION_PROPERTIES.SO_SENDBUFF, soSendbuff);
+			session.setSessionPropertyValue(IDVSession.SESSION_PROPERTIES.CLIENT_AUTH_REQ, clientAuthReq);
+			session.setSessionPropertyValue(IDVSession.SESSION_PROPERTIES.CLIENT_AUTH_WANT, clientAuthWant);
+			session.setSessionPropertyValue(IDVSession.SESSION_PROPERTIES.TRAFFIC_CLASS, trafficClass);
+			session.setSessionPropertyValue(IDVSession.SESSION_PROPERTIES.TCP_NODELAY, tcpNodelay);
+			session.setSessionPropertyValue(IDVSession.SESSION_PROPERTIES.ENABLED_PROTOCOLS, enabledProtocols);
+			
 		} catch (Exception e) {
 			throw new DVException(e);
 		} finally {
@@ -127,7 +128,7 @@ public class DVFactory {
 	 * @see #initializeSession(URL)
 	 */
 	public static final synchronized IDVEng getDVEng(IDVSession session) throws DVException {
-		return new DVEng(session, CIPHER_NAME_CONVENTION.IANA);
+		return new DVEng(session, IDVSession.CIPHER_NAME_CONVENTION.IANA);
 	}
 	
 	/**
@@ -142,7 +143,7 @@ public class DVFactory {
 	 *           Thrown on problems initializing host.
 	 * @see #initializeSession(URL)
 	 */
-	public static final synchronized IDVEng getDVEng(IDVSession session, CIPHER_NAME_CONVENTION cipher_name_convention ) throws DVException {
+	public static final synchronized IDVEng getDVEng(IDVSession session, IDVSession.CIPHER_NAME_CONVENTION cipher_name_convention ) throws DVException {
 		return new DVEng(session, cipher_name_convention);
 	}
 }

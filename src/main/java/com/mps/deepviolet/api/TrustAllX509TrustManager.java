@@ -1,4 +1,4 @@
-package com.mps.deepviolet.suite;
+package com.mps.deepviolet.api;
 
 import java.security.cert.X509Certificate;
 
@@ -11,7 +11,7 @@ import javax.net.ssl.X509TrustManager;
  * <a href="http://stackoverflow.com/questions/19723415/java-overriding-function-to-disable-ssl-certificate-check">Java: Overriding function to disable SSL certificate check</a>
  * @author Milton Smith
  */
-public class TrustAllX509TrustManager implements X509TrustManager {
+class TrustAllX509TrustManager implements X509TrustManager {
 
 	public X509Certificate[] getAcceptedIssuers() {
 	        return new X509Certificate[0];

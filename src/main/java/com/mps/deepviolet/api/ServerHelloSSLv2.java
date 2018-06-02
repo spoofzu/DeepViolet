@@ -1,4 +1,4 @@
-package com.mps.deepviolet.suite;
+package com.mps.deepviolet.api;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.security.cert.X509Certificate;
  * SSLv2. It includes the list of cipher suites, and the
  * identification of the server certificate.
  */
-public class ServerHelloSSLv2 {
+class ServerHelloSSLv2 {
 	int[] cipherSuites;
 	String serverCertName;
 	String serverCertHash;
