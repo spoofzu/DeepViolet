@@ -1,11 +1,9 @@
-<project
-    xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.spoofzu</groupId>
     <artifactId>DeepViolet</artifactId>
     <!-- MANAGED BY TRAVIS CI, DO NOT EDIT VERSION -->
-    <version>1.0.12-SNAPSHOT</version>
+    <version>5.1.1</version>
     <packaging>jar</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>TLS/SSL security introspection API</description>
@@ -73,7 +71,7 @@
         <developerConnection>scm:git:https://${env.GH_TOKEN}@github.com/spoofzu/DeepViolet.git</developerConnection>
         <url>scm:git:https://${env.GH_TOKEN}@github.com/spoofzu/DeepViolet.git</url>
         <!--  MANAGED BY TRAVIS CI, DO NOT EDIT TAG -->
-        <tag>v1.0.9</tag>
+        <tag>DeepViolet-5.1.1</tag>
     </scm>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
