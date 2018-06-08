@@ -28,7 +28,7 @@ DeepViolet is deployed in Maven Central repository.  Include the following depen
 
 ## Acknowledgements
 
-This tool implements ideas, code, and takes inspiration from other projects and leaders like: Qualys SSL Labs and Ivan Ristić, OpenSSL, and Oracle's Java Security Team.  Many thanks for around negotiating TLS/SSL handshakes and cipher suite handling adapted from code examples by Thomas Pornin.
+This tool implements ideas, code, and takes inspiration from other projects and leaders like: Qualys SSL Labs and Ivan Ristić, OpenSSL, and Oracle's Java Security Team.  Many thanks negotiating TLS/SSL handshakes and ciphersuite handling adapted from code examples by Thomas Pornin.
 
 ## More Information?
 
