@@ -26,12 +26,12 @@ DeepViolet is deployed in Maven Central repository.  Include the following depen
 </dependency>
 ```
 
-## Acknowledgements
-
-This tool implements ideas, code, and takes inspiration from other projects and leaders like: Qualys SSL Labs and Ivan Ristić, OpenSSL, and Oracle's Java Security Team.  Many thanks negotiating TLS/SSL handshakes and ciphersuite handling adapted from code examples by Thomas Pornin.
-
 ## More Information?
 
 See the [project wiki](https://github.com/spoofzu/DeepViolet/wiki) 
 
 <i>This project leverages the works of other open source community projects and is provided for educational purposes.  Use at your own risk.  See [LICENSE](https://github.com/spoofzu/DeepViolet/blob/master/LICENSE) for further information.</i>
+
+## Acknowledgements
+
+This tool implements ideas, code, and takes inspiration from other projects and leaders like: Qualys SSL Labs and Ivan Ristić, OpenSSL, and Oracle's Java Security Team.  Many thanks negotiating TLS/SSL handshakes and ciphersuite handling adapted from code examples by Thomas Pornin.
