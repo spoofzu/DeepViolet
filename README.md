@@ -19,11 +19,11 @@ Use X.509 certificate metadata in creative ways.  Extend security tooling to inc
 DeepViolet is deployed in Maven Central repository.  Include the following dependency in your pom.xml,
 
 ```xml
-<dependency>
-  <groupId>com.github.spoofzu</groupId>
-  <artifactId>DeepViolet</artifactId>
-  <version>5.1.1-SNAPSHOT</version>
-</dependency>
+  <dependency>
+    <groupId>com.github.spoofzu</groupId>
+		<artifactId>DeepViolet</artifactId>
+		<version>5.1.3-SNAPSHOT</version>
+	</dependency>
 ```
 
 ## More Information?
