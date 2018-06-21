@@ -50,9 +50,14 @@ public class DVEngTest {
 
 			System.out.println("DVEng test starting - version string");
 			String sVersion = eng.getDeepVioletStringVersion();
+			int majorversion = eng.getDeepVioletMajorVersion();
+			int minorversion = eng.getDeepVioletMinorVersion();
+			int buildversion = eng.getDeepVioletBuildVersion();
+			String sSnapShot = (eng.isDeepVioletSnapShot() ) ? "-SNAPSHOT" : "";
 			assertTrue(sVersion != null);
 			assertTrue(sVersion.length() > 0);
-			assertTrue(sVersion.indexOf('V') > -1);
+			assertTrue(sVersion.equals(majorversion+"."+minorversion+"."+buildversion+sSnapShot));
+			System.out.println("DVEng version string = "+sVersion);
 			System.out.println("DVEng test complete - version string");
 
 			System.out.println("DVEng test starting - cipher suites");

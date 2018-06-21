@@ -143,10 +143,12 @@ class CipherSuiteUtil {
 	static Map<Integer, CipherSuite> CIPHER_SUITES =
 			new TreeMap<Integer, CipherSuite>();
 	
+	
+	static boolean bCiphersInitialized = false;
 	static {
 
 		// Generate cipher map dynamically based upon Mozilla json data.
-		initCipherMap();
+		//initCipherMap();
         
 	}
 	
@@ -190,11 +192,17 @@ class CipherSuiteUtil {
 		
 	// TODO This needs to go bye bye, abad idea.  I'm thinking a better way to do this is eventually
 	// get to a MVC type architecture.  This would better address the ways deepviolet can be used
-	static synchronized ServerMetadata getServerMetadataInstance( URL url, IDVSession.CIPHER_NAME_CONVENTION cipher_name_convention, MutableDVSession session ) throws Exception {
+	static ServerMetadata getServerMetadataInstance( URL url, IDVSession.CIPHER_NAME_CONVENTION cipher_name_convention, MutableDVSession session, DVBackgroundTask dvtask ) throws Exception {
 		
 		HostData hostdata = new HostData(url);;
 		Boolean compress = false;
-			
+		
+		// Generate cipher map dynamically based upon Mozilla json data.
+		dvtask.setStatusBarMessage("Initializing DV ciphersuite maps.");
+		if( !bCiphersInitialized) initCipherMap();
+		
+		dvtask.setStatusBarMessage("Reviewing server protocols.");
+		
 		String name = url.getHost();
 		int port = ( url.getPort() > 0 ) ? url.getPort() : 443;
 		
@@ -208,6 +216,7 @@ class CipherSuiteUtil {
 				continue;
 			}
 			sv.add(sh.protoVersion);
+			dvtask.setStatusBarMessage("Analysing TLS version "+sh.protoVersion);
 			if (sh.compression == 1) {
 				compress = true;
 				session.setSessionPropertyValue(IDVSession.SESSION_PROPERTIES.DEFLATE_COMPRESSION, "true");
@@ -217,6 +226,7 @@ class CipherSuiteUtil {
 			}
 		}
 		
+		dvtask.setStatusBarMessage("Sending TLS server Hello SSLv2");
 		ServerHelloSSLv2 sh2 = connectV2(isa);
 
 		if (sh2 != null) {
@@ -224,10 +234,13 @@ class CipherSuiteUtil {
 		}
 
 		if (sv.size() == 0) {
+			dvtask.setStatusBarMessage("Server may not be SSL/TLS enabled. host=" + isa);
 			logger.error("Server may not be SSL/TLS enabled. host=" + isa);
 			return null;
 		}
 
+		dvtask.setStatusBarMessage("Normalizing ciphersuite names to "+cipher_name_convention+" specification");
+		
 		Set<Integer> lastSuppCS = null;
 		Map<Integer, Set<Integer>> suppCS = new TreeMap<Integer, Set<Integer>>();
 		Set<String> certID = new TreeSet<String>();
@@ -269,6 +282,8 @@ class CipherSuiteUtil {
 			
 		}
 
+		dvtask.setStatusBarMessage("Starting ciphersuite analysis.");
+		
 		int agMaxStrength = STRONG;
 		int agMinStrength = STRONG;
 		boolean vulnBEAST = false;
@@ -351,6 +366,8 @@ class CipherSuiteUtil {
 		session.setVulnerabilityAssessmentValue(IDVSession.VULNERABILITY_ASSESSMENTS.CRIME_VULNERABLE, Boolean.toString(compress));  // Notes: Check TLS compression enabled, https://en.wikipedia.org/wiki/CRIME 
 		session.setVulnerabilityAssessmentValue(IDVSession.VULNERABILITY_ASSESSMENTS.FREAK_VULNERABLE, Boolean.toString(vulnFREAK)); // Notes: Check ciphers containing, RSA_EXPORT https://censys.io/blog/freak
 		//session.setVulnerabilityAssessmentValue(IDVSession.VULNERABILITY_ASSESSMENTS.ROBOT_VULNERABLE, Boolean.toString(vulnROBOT)); // Notes: Check ciphers starting, TLS_RSA https://robotattack.org/
+	
+		dvtask.setStatusBarMessage("Ciphersuite analysis complete.");
 		
 		return hostdata;
 		

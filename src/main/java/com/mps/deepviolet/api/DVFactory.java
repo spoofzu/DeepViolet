@@ -146,4 +146,19 @@ public class DVFactory {
 	public static final synchronized IDVEng getDVEng(IDVSession session, IDVSession.CIPHER_NAME_CONVENTION cipher_name_convention ) throws DVException {
 		return new DVEng(session, cipher_name_convention);
 	}
+	
+	/**
+	 * Retrieve an instance of IDVOnEng. Use this method to post regular status to your DVBackgroundTask.
+	 * 
+	 * @param session
+	 *            Initialized session from previous call to initializeSession(URL)
+	 *  @param cipher_name_convention Cipher suite name convention.
+	 * @return Engine instance for offline functions
+	 * @throws DVException
+	 *           Thrown on problems initializing host.
+	 * @see #initializeSession(URL)
+	 */
+	public static final synchronized IDVEng getDVEng(IDVSession session, IDVSession.CIPHER_NAME_CONVENTION cipher_name_convention, DVBackgroundTask dvtask ) throws DVException {
+		return new DVEng(session, cipher_name_convention, dvtask);
+	}
 }
