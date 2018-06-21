@@ -39,7 +39,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.target.version>1.8</java.target.version>
         <java.source.version>1.8</java.source.version>
-        <jackson.databind>2.8.2</jackson.databind>
+        <jackson.databind>2.9.6</jackson.databind>
         <json.path>2.2.0</json.path>
         <junit>4.12</junit>
         <mockito.core>1.10.19</mockito.core>
