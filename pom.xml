@@ -54,7 +54,7 @@
         <maven.source.plugin>3.0.1</maven.source.plugin>
         <maven.javadoc.plugin>2.10.3</maven.javadoc.plugin>
         <maven.deploy.plugin>2.8.2</maven.deploy.plugin>
-        <maven.scm.provider.gitexe>1.9.5</maven.scm.provider.gitexe>
+        <maven.scm.provider.gitexe>1.10.0</maven.scm.provider.gitexe>
     </properties>
     <distributionManagement>
         <snapshotRepository>
