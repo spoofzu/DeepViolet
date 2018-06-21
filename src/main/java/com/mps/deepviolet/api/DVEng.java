@@ -3,6 +3,7 @@ package com.mps.deepviolet.api;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.net.ssl.SSLHandshakeException;
 
@@ -28,10 +30,10 @@ class DVEng implements IDVEng {
 	//private HashMap<ENGINE_PROPERTIES,String> map = new HashMap<ENGINE_PROPERTIES,String>();
 	private HashMap<String,String> map = new HashMap<String,String>();
 	
-	private static final int VERSION_MAJOR = 5;  //TODO: Review each release
-	private static final int VERSION_MINOR = 1;  //TODO: Review each release
-	private static final int VERSION_BUILD = 0;  //TODO: Review each release
-	private static final String VERSION_STRING = "V"+VERSION_MAJOR+"."+VERSION_MINOR+"."+VERSION_BUILD;
+	int iVersionMajor = -1; 
+	int iVersionMinor = -1; 
+	int iVersionBuild = -1; 
+	boolean bSnapShot = false;
 	
 	private final String EOL = System.getProperty("line.separator");
 	private final URL url;
@@ -39,19 +41,71 @@ class DVEng implements IDVEng {
 	private MutableDVSession session;
 	private ServerMetadata servmeta;
 	
+	DVEng( IDVSession session,  IDVSession.CIPHER_NAME_CONVENTION cipher_name_convention ) throws DVException {
+		this( session, cipher_name_convention, null );
+	}
+	
 	/* (non-Javadoc)
 	 */
-	DVEng( IDVSession session,  IDVSession.CIPHER_NAME_CONVENTION cipher_name_convention ) throws DVException {
+	DVEng( IDVSession session,  IDVSession.CIPHER_NAME_CONVENTION cipher_name_convention,  DVBackgroundTask dvtask  ) throws DVException {
 		
 		try {
 			this.session = (MutableDVSession)session; //TODO: Ugly bug works
 			this.url = session.getURL();
 			
-			servmeta = CipherSuiteUtil.getServerMetadataInstance(url, IDVSession.CIPHER_NAME_CONVENTION.IANA, this.session);
+			// Update callers task with status or create a dummy task.
+			dvtask = (dvtask == null) ? new DVBackgroundTask() : dvtask;
+			
+			servmeta = CipherSuiteUtil.getServerMetadataInstance(url, cipher_name_convention, this.session, dvtask);
 			if( servmeta == null ) {
 				String msg = "Unable to create DVEng.  ServerMetadata is null";
 				logger.error(msg);
 				throw new DVException(msg);
+			}
+			
+			InputStream is = this.getClass().getClassLoader().getResourceAsStream("dvmaven.properties");
+			Properties p = new Properties();
+			p.load(is);
+			String sVersion = p.getProperty("dvversion");
+			
+			if( sVersion != null && sVersion.length() > 0 ) {
+			
+				// Build the DV version information
+				int f1 = sVersion.indexOf('.');
+				int f2 = sVersion.lastIndexOf('.');
+				int f3 = sVersion.lastIndexOf('-');
+				
+				if (f3 > -1 ) {
+					bSnapShot = true;
+				}
+				
+				if( f1 > 0 && f2 > 0 ) {
+			
+					try {
+						iVersionMajor = Integer.parseInt(sVersion.substring(0,f1));
+					}catch(NumberFormatException e) {
+						logger.debug("Problem with 'dvversion' Maven property value.  dvversion="+sVersion+", f1="+f1+", f2="+f2+", f3="+f3);
+						iVersionMajor = -1;
+					}
+					
+					try {
+						iVersionMinor = Integer.parseInt(sVersion.substring(f1+1,f2));
+					}catch(NumberFormatException e) {
+						logger.debug("Problem with 'dvversion' Maven property value.  dvversion="+sVersion+", f1="+f1+", f2="+f2+", f3="+f3);
+						iVersionMinor = -1;
+					}
+					
+					try {
+						iVersionBuild = Integer.parseInt(sVersion.substring(f2+1,f3));
+					}catch(NumberFormatException e) {
+						logger.debug("Problem with 'dvversion' Maven property value.  dvversion="+sVersion+", f1="+f1+", f2="+f2+", f3="+f3);
+						iVersionBuild = -1;
+					}
+				
+				} else {
+					logger.debug("Problem with 'dvversion' Maven property value.  dvversion="+sVersion+", f1="+f1+", f2="+f2+", f3="+f3);
+				}
+				
 			}
 			
 		} catch( DVException e ) {
@@ -75,28 +129,36 @@ class DVEng implements IDVEng {
 	 * @see com.mps.deepviolet.api.IDVEng#getDeepVioletMajorVersion()
 	 */
 	public final int getDeepVioletMajorVersion() {
-		return VERSION_MAJOR;
+		return iVersionMajor;
 	}
 	
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IDVEng#getDeepVioletMinorVersion()
 	 */
 	public final int getDeepVioletMinorVersion() {
-		return VERSION_MINOR;
+		return iVersionMinor;
 	}
 	
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IDVEng#getDeepVioletBuildVersion()
 	 */
 	public final int getDeepVioletBuildVersion() {
-		return VERSION_BUILD;
+		return iVersionBuild;
 	}
 	
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IDVEng#getDeepVioletStringVersion()
 	 */
 	public final String getDeepVioletStringVersion() {
-		return VERSION_STRING;
+		StringBuffer buff = new StringBuffer();
+		buff.append(iVersionMajor);
+		buff.append('.');
+		buff.append(iVersionMinor);
+		buff.append('.');
+		buff.append(iVersionBuild);
+		String sSnapShot = (bSnapShot) ? "-SNAPSHOT" : "";
+		buff.append(sSnapShot);
+		return buff.toString();
 	}
  
 	/* (non-Javadoc)
@@ -227,6 +289,13 @@ class DVEng implements IDVEng {
 		
 		long sz = (derenccert!=null) ? derenccert.length : 0;
 		return sz;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.mps.deepviolet.api.IDVEng#isDeepVioletSnapShot()
+	 */
+	public boolean isDeepVioletSnapShot() {
+		return bSnapShot;
 	}
 
 //	public String getPropertyValue( String keyname ) throws DVException {

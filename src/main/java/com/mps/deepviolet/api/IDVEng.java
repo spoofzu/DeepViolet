@@ -72,5 +72,10 @@ public interface IDVEng {
 	 */
 	String getDeepVioletStringVersion();
 	
+	/**
+	 * Return Maven SNAPSHOT release status
+	 * @return true, DeepViolet is beta status.  false, DeepViolet is release status.
+	 */
+	boolean isDeepVioletSnapShot();
 	
 }
