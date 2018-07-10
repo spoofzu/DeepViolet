@@ -39,22 +39,22 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.target.version>1.8</java.target.version>
         <java.source.version>1.8</java.source.version>
-        <jackson.databind>2.8.2</jackson.databind>
-        <json.path>2.2.0</json.path>
+        <jackson.databind>2.9.6</jackson.databind>
+        <json.path>2.4.0</json.path>
         <junit>4.12</junit>
-        <mockito.core>1.10.19</mockito.core>
-        <logback.classic>1.1.11</logback.classic>
-        <bcpkix.jdk15on>1.50</bcpkix.jdk15on>
+        <mockito.core>2.19.0</mockito.core>
+        <logback.classic>1.2.3</logback.classic>
+        <bcpkix.jdk15on>1.60</bcpkix.jdk15on>
         <maven.gpg.plugin>1.6</maven.gpg.plugin>
         <maven.clean.plugin>3.0.0</maven.clean.plugin>
-        <maven.compiler.plugin>3.6.0</maven.compiler.plugin>
+        <maven.compiler.plugin>3.7.0</maven.compiler.plugin>
         <maven.release.plugin>2.5.3</maven.release.plugin>
         <maven.jar.plugin>3.0.2</maven.jar.plugin>
         <nexus.staging.maven.plugin>1.6.7</nexus.staging.maven.plugin>
         <maven.source.plugin>3.0.1</maven.source.plugin>
         <maven.javadoc.plugin>2.10.3</maven.javadoc.plugin>
         <maven.deploy.plugin>2.8.2</maven.deploy.plugin>
-        <maven.scm.provider.gitexe>1.9.5</maven.scm.provider.gitexe>
+        <maven.scm.provider.gitexe>1.10.0</maven.scm.provider.gitexe>
     </properties>
     <distributionManagement>
         <snapshotRepository>
