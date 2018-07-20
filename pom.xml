@@ -214,7 +214,6 @@
                             </dependency>
                         </dependencies>
                     </plugin>
-					<!--  COMMENTED OUT FOR NOW.
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
@@ -228,20 +227,15 @@
                             </execution>
                         </executions>
                     </plugin>
-					-->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>${maven.source.plugin}</version>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${maven.javadoc.plugin}</version>
                         <configuration>
                             <encoding>UTF-8</encoding>
                         </configuration>
                         <executions>
                             <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
                                 <id>attach-javadoc</id>
                                 <goals>
                                     <goal>jar</goal>
