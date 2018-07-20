@@ -67,6 +67,7 @@ class DVEng implements IDVEng {
 			Properties p = new Properties();
 			p.load(is);
 			String sVersion = p.getProperty("dvversion");
+			logger.debug("DV Maven version string, dvversion="+sVersion);
 			
 			if( sVersion != null && sVersion.length() > 0 ) {
 			
@@ -83,23 +84,15 @@ class DVEng implements IDVEng {
 			
 					try {
 						iVersionMajor = Integer.parseInt(sVersion.substring(0,f1));
-					}catch(NumberFormatException e) {
-						logger.debug("Problem with 'dvversion' Maven property value.  dvversion="+sVersion+", f1="+f1+", f2="+f2+", f3="+f3);
-						iVersionMajor = -1;
-					}
-					
-					try {
 						iVersionMinor = Integer.parseInt(sVersion.substring(f1+1,f2));
-					}catch(NumberFormatException e) {
-						logger.debug("Problem with 'dvversion' Maven property value.  dvversion="+sVersion+", f1="+f1+", f2="+f2+", f3="+f3);
-						iVersionMinor = -1;
-					}
-					
-					try {
 						iVersionBuild = Integer.parseInt(sVersion.substring(f2+1,f3));
-					}catch(NumberFormatException e) {
-						logger.debug("Problem with 'dvversion' Maven property value.  dvversion="+sVersion+", f1="+f1+", f2="+f2+", f3="+f3);
+					}catch(Exception e) {
+						iVersionMajor = -1;
+						iVersionMinor = -1;
 						iVersionBuild = -1;
+						String msg = "Problem with 'dvversion' Maven property value.  dvversion="+sVersion+", f1="+f1+", f2="+f2+", f3="+f3;
+						logger.debug(msg);
+						throw new DVException(msg);
 					}
 				
 				} else {
