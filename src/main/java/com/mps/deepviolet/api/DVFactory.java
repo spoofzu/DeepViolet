@@ -32,7 +32,6 @@ import com.mps.deepviolet.util.FileUtils;
  * </pre>
  * 
  * @author Milton Smith
- *
  */
 public class DVFactory {
 
@@ -152,7 +151,8 @@ public class DVFactory {
 	 * 
 	 * @param session
 	 *            Initialized session from previous call to initializeSession(URL)
-	 *  @param cipher_name_convention Cipher suite name convention.
+	 * @param cipher_name_convention Cipher suite name convention.
+	 * @param dvtask DVBackgroundTask to update with user displayable status information.
 	 * @return Engine instance for offline functions
 	 * @throws DVException
 	 *           Thrown on problems initializing host.

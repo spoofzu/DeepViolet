@@ -3,7 +3,7 @@
     <groupId>com.github.spoofzu</groupId>
     <artifactId>DeepViolet</artifactId>
     <!-- MANAGED BY TRAVIS CI, DO NOT EDIT VERSION -->
-    <version>5.1.3-SNAPSHOT</version>
+    <version>5.1.4-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>TLS/SSL security introspection API</description>
@@ -214,6 +214,7 @@
                             </dependency>
                         </dependencies>
                     </plugin>
+					<!--  COMMENTED OUT FOR NOW.
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
@@ -227,6 +228,7 @@
                             </execution>
                         </executions>
                     </plugin>
+					-->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
@@ -236,6 +238,10 @@
                         </configuration>
                         <executions>
                             <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
                                 <id>attach-javadoc</id>
                                 <goals>
                                     <goal>jar</goal>
