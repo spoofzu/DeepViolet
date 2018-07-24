@@ -2,8 +2,10 @@
 .classpath
 .project
 .settings
+.versionsBackup
 /target/
 /bin/
 *.log
 pom.xml.releaseBackup
+pom.xml.versionsBackup
 release.properties
