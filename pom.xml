@@ -3,7 +3,7 @@
     <groupId>com.github.spoofzu</groupId>
     <artifactId>DeepViolet</artifactId>
     <!-- MANAGED BY TRAVIS CI, DO NOT EDIT VERSION -->
-    <version>5.1.7</version>
+    <version>5.1.7-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>TLS/SSL security introspection API</description>
@@ -201,10 +201,11 @@
                         <artifactId>maven-release-plugin</artifactId>
                         <version>${maven.release.plugin}</version>
                         <configuration>
-                            <localCheckout>true</localCheckout>
-                            <pushChanges>false</pushChanges>
-                            <mavenExecutorId>forked-path</mavenExecutorId>
-                            <arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments>
+    						<autoVersionSubmodules>true</autoVersionSubmodules>
+    						<useReleaseProfile>false</useReleaseProfile>
+    						<releaseProfiles>release</releaseProfiles>
+    						<goals>deploy</goals>
+                            <!-- <arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments> -->
                         </configuration>
                         <dependencies>
                             <dependency>
