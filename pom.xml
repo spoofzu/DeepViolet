@@ -42,7 +42,7 @@
         <jackson.databind>2.9.6</jackson.databind>
         <json.path>2.4.0</json.path>
         <junit>4.12</junit>
-        <mockito.core>2.19.1</mockito.core>
+        <mockito.core>2.20.0</mockito.core>
         <logback.classic>1.2.3</logback.classic>
         <bcpkix.jdk15on>1.60</bcpkix.jdk15on>
         <maven.gpg.plugin>1.6</maven.gpg.plugin>
