@@ -47,7 +47,7 @@
         <bcpkix.jdk15on>1.60</bcpkix.jdk15on>
         <maven.gpg.plugin>1.6</maven.gpg.plugin>
         <maven.clean.plugin>3.0.0</maven.clean.plugin>
-        <maven.compiler.plugin>3.7.0</maven.compiler.plugin>
+        <maven.compiler.plugin>3.8.0</maven.compiler.plugin>
         <maven.release.plugin>2.5.3</maven.release.plugin>
         <maven.jar.plugin>3.0.2</maven.jar.plugin>
         <nexus.staging.maven.plugin>1.6.7</nexus.staging.maven.plugin>
