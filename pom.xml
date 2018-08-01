@@ -3,7 +3,7 @@
     <groupId>com.github.spoofzu</groupId>
     <artifactId>DeepViolet</artifactId>
     <!-- MANAGED BY TRAVIS CI, DO NOT EDIT VERSION -->
-    <version>5.1.7-SNAPSHOT</version>
+    <version>5.1.10-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>TLS/SSL security introspection API</description>
@@ -42,12 +42,12 @@
         <jackson.databind>2.9.6</jackson.databind>
         <json.path>2.4.0</json.path>
         <junit>4.12</junit>
-        <mockito.core>2.20.0</mockito.core>
+        <mockito.core>2.21.0</mockito.core>
         <logback.classic>1.2.3</logback.classic>
         <bcpkix.jdk15on>1.60</bcpkix.jdk15on>
         <maven.gpg.plugin>1.6</maven.gpg.plugin>
         <maven.clean.plugin>3.0.0</maven.clean.plugin>
-        <maven.compiler.plugin>3.7.0</maven.compiler.plugin>
+        <maven.compiler.plugin>3.8.0</maven.compiler.plugin>
         <maven.release.plugin>2.5.3</maven.release.plugin>
         <maven.jar.plugin>3.0.2</maven.jar.plugin>
         <nexus.staging.maven.plugin>1.6.7</nexus.staging.maven.plugin>
