@@ -74,9 +74,10 @@ class DVEng implements IDVEng {
 				// Build the DV version information
 				int f1 = sVersion.indexOf('.');
 				int f2 = sVersion.lastIndexOf('.');
+				// Corrections to f3 by Jean-Julien Alvado, thank you!
 				int f3 = sVersion.lastIndexOf('-');
-				
-				if (f3 > -1 ) {
+				f3 = (f3<0) ? sVersion.length() : f3;
+				if (f3 == -1 ) {
 					bSnapShot = true;
 				}
 				
