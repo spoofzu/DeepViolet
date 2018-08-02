@@ -20,9 +20,9 @@ DeepViolet is deployed in Maven Central repository.  Include the following depen
 
 ```xml
 <dependency>
-   <groupId>com.github.spoofzu</groupId>
-   <artifactId>DeepViolet</artifactId>
-   <version>5.1.10-SNAPSHOT</version>
+  <groupId>com.github.spoofzu</groupId>
+  <artifactId>DeepViolet</artifactId>
+  <version>5.1.12-SNAPSHOT</version>
 </dependency>
 ```
 
