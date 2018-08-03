@@ -22,7 +22,7 @@ DeepViolet is deployed in Maven Central repository.  Include the following depen
 <dependency>
   <groupId>com.github.spoofzu</groupId>
   <artifactId>DeepViolet</artifactId>
-  <version>5.1.12-SNAPSHOT</version>
+  <version>5.1.16</version>
 </dependency>
 ```
 
