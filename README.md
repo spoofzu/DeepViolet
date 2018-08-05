@@ -16,13 +16,23 @@ Use X.509 certificate metadata in creative ways.  Extend security tooling to inc
 
 ## How do I include DeepViolet API in my projects?
 
-DeepViolet is deployed in Maven Central repository.  Include the following dependency in your pom.xml,
+DeepViolet is deployed in Maven Central repository.  Include the following DeepViolet release dependency in your pom.xml,
 
 ```xml
 <dependency>
   <groupId>com.github.spoofzu</groupId>
   <artifactId>DeepViolet</artifactId>
   <version>5.1.16</version>
+</dependency>
+```
+
+Alternatively, include the latest development build which will someday become the next release build.
+
+```xml
+<dependency>
+  <groupId>com.github.spoofzu</groupId>
+  <artifactId>DeepViolet</artifactId>
+  <version>5.1.17-SNAPSHOT</version>
 </dependency>
 ```
 
