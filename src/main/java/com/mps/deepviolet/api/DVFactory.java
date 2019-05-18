@@ -59,7 +59,11 @@ public class DVFactory {
 			// Creates default working dir if needed for log files.
 			FileUtils.createWorkingDirectory();
 			
-			socket = (SSLSocket) factory.createSocket(url.getHost(), url.getDefaultPort());
+			int sslPort = url.getDefaultPort();
+			if(url.getPort() > 0) {
+				sslPort = url.getPort();
+			}
+			socket = (SSLSocket) factory.createSocket(url.getHost(), sslPort);
 
 			// Add interfaces
 			InetAddress[] addresses = InetAddress.getAllByName(url.getHost());
