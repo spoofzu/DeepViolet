@@ -44,7 +44,7 @@
         <junit>4.12</junit>
         <mockito.core>2.28.2</mockito.core>
         <logback.classic>1.2.3</logback.classic>
-        <bcpkix.jdk15on>1.62</bcpkix.jdk15on>
+        <bcpkix.jdk15on>1.61</bcpkix.jdk15on>
         <maven.gpg.plugin>1.6</maven.gpg.plugin>
         <maven.clean.plugin>3.0.0</maven.clean.plugin>
         <maven.compiler.plugin>3.8.1</maven.compiler.plugin>
