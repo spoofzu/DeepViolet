@@ -2,11 +2,11 @@
 [![Black Hat Arsenal](https://github.com/toolswatch/badges/blob/master/arsenal/europe/2016.svg)](http://www.blackhat.com/eu-16/arsenal.html#milton-smith)
 [![Black Hat Arsenal](https://github.com/toolswatch/badges/blob/master/arsenal/usa/2018.svg)](https://www.blackhat.com/us-18/arsenal/schedule/index.html#deepviolet-ssltls-scanning-api-38-tools-10724)
 
-# *********************************************************************
-# * THIS PROJECT IS ON HOLD AND NOT BEING MAINTAINED.  I'M LEAVING    *
-# * THE PROJECT POSTED FOR THOSE INTERESTED IN THE CODE.  IT WAS A    *
-# * FUN EXPERIMENT.                                                   *
-# *********************************************************************
+*********************************************************************
+* THIS PROJECT IS ON HOLD AND NOT BEING MAINTAINED.  I'M LEAVING    *
+* THE PROJECT POSTED FOR THOSE INTERESTED IN THE CODE.  IT WAS A    *
+* FUN EXPERIMENT.                                                   *
+*********************************************************************
 
 # OWASP DeepViolet TLS/SSL API
 
