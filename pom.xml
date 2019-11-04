@@ -51,7 +51,7 @@
         <maven.release.plugin>2.5.3</maven.release.plugin>
         <maven.jar.plugin>3.0.2</maven.jar.plugin>
         <nexus.staging.maven.plugin>1.6.7</nexus.staging.maven.plugin>
-        <maven.source.plugin>3.1.0</maven.source.plugin>
+        <maven.source.plugin>3.2.0</maven.source.plugin>
         <maven.javadoc.plugin>3.1.1</maven.javadoc.plugin>
         <maven.deploy.plugin>2.8.2</maven.deploy.plugin>
         <maven.scm.provider.gitexe>1.11.2</maven.scm.provider.gitexe>
