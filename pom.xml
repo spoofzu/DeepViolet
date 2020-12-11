@@ -40,7 +40,7 @@
         <java.target.version>1.8</java.target.version>
         <java.source.version>1.8</java.source.version>
         <jackson.databind>2.9.9.1</jackson.databind>
-        <json.path>2.4.0</json.path>
+        <json.path>2.5.0</json.path>
         <junit>4.12</junit>
         <mockito.core>3.0.0</mockito.core>
         <logback.classic>1.2.3</logback.classic>
