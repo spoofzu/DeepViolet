@@ -39,12 +39,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.target.version>1.8</java.target.version>
         <java.source.version>1.8</java.source.version>
-        <jackson.databind>2.9.9.1</jackson.databind>
+        <jackson.databind>2.9.10.8</jackson.databind>
         <json.path>2.4.0</json.path>
         <junit>4.12</junit>
         <mockito.core>3.0.0</mockito.core>
-        <logback.classic>1.2.3</logback.classic>
-        <bcpkix.jdk15on>1.62</bcpkix.jdk15on>
+        <logback.classic>1.2.7</logback.classic>
+        <bcpkix.jdk15on>1.66</bcpkix.jdk15on>
         <maven.gpg.plugin>1.6</maven.gpg.plugin>
         <maven.clean.plugin>3.0.0</maven.clean.plugin>
         <maven.compiler.plugin>3.8.1</maven.compiler.plugin>
