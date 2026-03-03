@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <property name="MSG_FMT_LG" value="%d{yyyy-MM-dd HH:mm:ss} | %5level | %logger{30} | %msg%n" />
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>${MSG_FMT_LG}</pattern>
+    </encoder>
+  </appender>
+
+  <root level="ERROR">
+    <appender-ref ref="STDOUT" />
+  </root>
+
+</configuration>

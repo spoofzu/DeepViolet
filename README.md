@@ -1,47 +1,79 @@
-[![Build Status](https://travis-ci.org/spoofzu/DeepViolet.svg?branch=master)](https://travis-ci.org/spoofzu/DeepViolet)
 [![Black Hat Arsenal](https://github.com/toolswatch/badges/blob/master/arsenal/europe/2016.svg)](http://www.blackhat.com/eu-16/arsenal.html#milton-smith)
 [![Black Hat Arsenal](https://github.com/toolswatch/badges/blob/master/arsenal/usa/2018.svg)](https://www.blackhat.com/us-18/arsenal/schedule/index.html#deepviolet-ssltls-scanning-api-38-tools-10724)
 
-# OWASP DeepViolet TLS/SSL API
+# DeepViolet TLS/SSL API
 
-[OWASP Project Page](https://www.owasp.org/index.php/OWASP_DeepViolet_TLS/SSL_Scanner) |
 [Documentation](docs/DeepViolet.md) |
+[API JavaDoc](docs/javadocs/index.html) |
+[Changes from Upstream](docs/CHANGES.md) |
 [Reference Tools](https://github.com/spoofzu/DeepVioletTools)
 
-DeepViolet is a TLS/SSL scanning API written in Java. To keep DeepViolet easy to use, identify bugs, reference implementations have been developed that consume the API. If you want to see what DeepViolet can do, use it from the command line in your scripts or use the graphical tool from the comfort of your desktop. Both tools can be used to scan HTTPS web servers to check server certificate trust chains, revocation status, check certificates for pending expiration, weak signing algorithms and much more.  Original blog article post describing this project, http://www.securitycurmudgeon.com/2014/07/ssltls-introspection.html
+DeepViolet is a TLS/SSL scanning API written in Java. It provides programmatic introspection of TLS/SSL connections, including certificate chain analysis, cipher suite enumeration, risk scoring, TLS fingerprinting, DNS security checks (CAA, DANE/TLSA), certificate revocation verification (OCSP, CRL, CT), and support for multiple naming conventions (IANA, OpenSSL, GnuTLS, NSS). Protocols SSLv2 through TLS 1.3 are supported. Multi-host scanning with configurable concurrency, cooperative pause/cancel, event-driven monitoring, and flexible target parsing (hostnames, IPs, CIDR, IP ranges) are also available.
 
-## Benefits
+GUI and command-line reference tools that consume this API are available in the [DeepVioletTools](https://github.com/spoofzu/DeepVioletTools) project.
 
-Use X.509 certificate metadata in creative ways.  Extend security tooling to include TLS analysis.  See the [project wiki](https://github.com/spoofzu/DeepViolet/wiki/Features) 
+## Requirements
 
-## How do I include DeepViolet API in my projects?
+- Java 21 or higher
+- Apache Maven 3.6.3 or higher
 
-DeepViolet is deployed in Maven Central repository.  Include the following DeepViolet release dependency in your pom.xml,
+## Quick Start
+
+```bash
+mvn clean verify
+```
+
+## Using in Your Project
+
+Build the JAR:
+
+```bash
+mvn package
+```
+
+The JAR will be in `target/DeepViolet-5.1.18-SNAPSHOT.jar`. Add it to your project as a local dependency in your `pom.xml`:
 
 ```xml
 <dependency>
   <groupId>com.github.spoofzu</groupId>
   <artifactId>DeepViolet</artifactId>
-  <version>5.1.16</version>
+  <version>5.1.18-SNAPSHOT</version>
+  <scope>system</scope>
+  <systemPath>${project.basedir}/lib/DeepViolet-5.1.18-SNAPSHOT.jar</systemPath>
 </dependency>
 ```
 
-Alternatively, include the latest development build which will someday become the next release build.
+## API Validation Tool
 
-```xml
-<dependency>
-  <groupId>com.github.spoofzu</groupId>
-  <artifactId>DeepViolet</artifactId>
-  <version>5.1.17-SNAPSHOT</version>
-</dependency>
+A standalone tool that compares DV API results against openssl for the same server, field-by-field:
+
+```bash
+mvn package -Pvalidate
+java -jar target/DeepViolet-5.1.18-SNAPSHOT-validate.jar google.com
+java -jar target/DeepViolet-5.1.18-SNAPSHOT-validate.jar expired.badssl.com
+java -jar target/DeepViolet-5.1.18-SNAPSHOT-validate.jar --json github.com
 ```
 
-## More Information?
+Compares 17 fields (subjectDN, issuerDN, serialNumber, version, signingAlgorithm, publicKeyAlgorithm, publicKeySize, publicKeyCurve, notValidBefore, notValidAfter, isSelfSigned, sanCount, fingerprint, negotiatedProtocol, negotiatedCipher, chainLength, ocspStapling) with automatic normalization for cross-tool differences. For bad-cert servers, verifies that DV correctly rejects the connection while openssl shows why. Requires openssl installed locally.
 
-See the [project wiki](https://github.com/spoofzu/DeepViolet/wiki) 
+## Documentation
 
-<i>This project leverages the works of other open source community projects and is provided for educational purposes.  Use at your own risk.  See [LICENSE](https://github.com/spoofzu/DeepViolet/blob/master/LICENSE) for further information.</i>
+See [docs/DeepViolet.md](docs/DeepViolet.md) for architecture, features, building, API usage, and contributing guidelines.
+
+## Project History
+
+DeepViolet was previously an OWASP project but is no longer affiliated with OWASP.
 
 ## Acknowledgements
 
-This tool implements ideas, code, and takes inspiration from other projects and leaders like: Qualys SSL Labs and Ivan Ristić, OpenSSL, and Oracle's Java Security Team.  Many thanks negotiating TLS/SSL handshakes and ciphersuite handling adapted from code examples by Thomas Pornin.
+This tool implements ideas, code, and takes inspiration from other projects and leaders like: Qualys SSL Labs, Ivan Ristic, OpenSSL, and Oracle's Java Security Team. Original default cipher suite meta was are derived from [Mozilla Server Side TLS v5.7](https://ssl-config.mozilla.org/guidelines/5.7.json) guidelines. TLS/SSL raw socket adapted from code examples by Thomas Pornin. Significant development contributions by [Claude Code](https://claude.ai/code) from Anthropic.
+
+## License
+
+[Apache License, Version 2.0](LICENSE)
+
+*This project leverages the works of other open source community projects and is provided for educational purposes. Use at your own risk.*
+
+## Disclaimer
+
+The author is an employee of Oracle Corporation. This project is a personal endeavor and is not affiliated with, sponsored by, or endorsed by Oracle. All views and code are the author's own.

@@ -1,6 +1,5 @@
 package com.mps.deepviolet.api;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
@@ -16,8 +15,10 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Security;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.PKIXParameters;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.Base64;
 import java.util.TreeSet;
 
 import javax.net.ssl.HostnameVerifier;
@@ -45,36 +47,20 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import org.bouncycastle.asn1.ASN1Boolean;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.DERApplicationSpecific;
-import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.DERUTF8String;
-import org.bouncycastle.asn1.DERVisibleString;
-import org.bouncycastle.asn1.DLSequence;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.JsonPath;
-import com.mps.deepviolet.api.IDVSession.CIPHER_NAME_CONVENTION;
-import com.mps.deepviolet.util.FileUtils;
+import org.snakeyaml.engine.v2.api.Load;
+import org.snakeyaml.engine.v2.api.LoadSettings;
 
-//import sun.security.provider.certpath.OCSP;
-//import sun.security.provider.certpath.OCSP.RevocationStatus;
+import com.mps.deepviolet.api.tls.ClientHelloConfig;
+import com.mps.deepviolet.api.tls.TlsMetadata;
+import com.mps.deepviolet.api.tls.TlsSocket;
+import com.mps.deepviolet.util.DerParser;
 
 /**
  * Utility class to handle cryptographic functions.  Significant contributions around
- * ciphersuite handling adapted from code examples by <a href="mailto:pornin@bolet.org">Thomas Pornin</a>.
+ * cipher suite handling adapted from code examples by <a href="mailto:pornin@bolet.org">Thomas Pornin</a>.
  * For more information see, <a href="http://tools.ietf.org/html/rfc5246">The Transport Layer Security (TLS) Protocol Version 1.2</a>,
  * <a href="http://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml">Transport Layer Security (TLS) Parameters</a>,
  * <a href="http://www.bolet.org/TestSSLServer/">TestSSLServer</a>
@@ -106,6 +92,9 @@ class CipherSuiteUtil {
 	static final int APPLICATION        = 23;
 	private static final SecureRandom RNG = new SecureRandom();
 
+	private static final int CONNECT_TIMEOUT_MS = 10_000;  // 10 seconds
+	private static final int READ_TIMEOUT_MS = 10_000;      // 10 seconds
+
 	private static final byte[] SSL2_CLIENT_HELLO = {
 		(byte)0x80, (byte)0x2E,  // header (record length)
 		(byte)0x01,              // message type (CLIENT HELLO)
@@ -126,14 +115,6 @@ class CipherSuiteUtil {
 		0x54, 0x54, 0x54, 0x54
 	};
 	
-	private static final byte[] HEARTBEAT = {
-			(byte)0x018,             // message type (HEARTBEAT)
-			(byte)0x03, (byte)0x01,  // tls version
-			(byte)0x00, (byte)0x03,  // length
-			(byte)0x01,              // type (request)
-			(byte)0x40, (byte)0x00   // payload length
-	};
-	
 	static final int UNASSIGNED = -1; // no evaluation in json mapping file
 	static final int CLEAR  = 0; // no encryption
 	static final int WEAK   = 1; // weak encryption: 40-bit key
@@ -144,22 +125,25 @@ class CipherSuiteUtil {
 			new TreeMap<Integer, CipherSuite>();
 	
 	
-	static boolean bCiphersInitialized = false;
-	static {
+	static volatile boolean bCiphersInitialized = false;
+	private static final Object CIPHER_INIT_LOCK = new Object();
+	private static final Object TLS_CHAIN_TESTING_LOCK = new Object();
 
-		// Generate cipher map dynamically based upon Mozilla json data.
-		//initCipherMap();
-        
+	/**
+	 * Thread-safe cipher map initialization using double-checked locking.
+	 */
+	static void ensureCipherMapInitialized() {
+		if (!bCiphersInitialized) {
+			synchronized (CIPHER_INIT_LOCK) {
+				if (!bCiphersInitialized) {
+					initCipherMap();
+				}
+			}
+		}
 	}
-	
-	
 
 	static {
-		
-//        Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
-		
-		Security.addProvider( new BouncyCastleProvider() );
-        
+		// OID mappings for extension parsing
 		OIDMAP.put( "2.5.29.14","SubjectKeyIdentifier");
 		OIDMAP.put( "2.5.29.15","KeyUsage");
 		OIDMAP.put( "2.5.29.16","PrivateKeyUsage");
@@ -190,26 +174,58 @@ class CipherSuiteUtil {
 		
 	}
 		
-	// TODO This needs to go bye bye, abad idea.  I'm thinking a better way to do this is eventually
+	// TODO This needs to go bye bye, a bad idea.  I'm thinking a better way to do this is eventually
 	// get to a MVC type architecture.  This would better address the ways deepviolet can be used
-	static ServerMetadata getServerMetadataInstance( URL url, IDVSession.CIPHER_NAME_CONVENTION cipher_name_convention, MutableDVSession session, DVBackgroundTask dvtask ) throws Exception {
-		
+	/**
+	 * Probe the target server for supported TLS/SSL versions and cipher suites, returning
+	 * the collected metadata.
+	 * @param url target server URL
+	 * @param cipher_name_convention naming convention to use for cipher suite names (IANA, OpenSSL, etc.)
+	 * @param session mutable session to store discovered properties (e.g., compression support)
+	 * @param dvtask background task for status-bar progress updates
+	 * @return ServerMetadata containing protocol versions and cipher suites, or null if the server is not TLS-enabled
+	 * @throws Exception on connection or analysis errors
+	 */
+	static ServerMetadata getServerMetadataInstance( URL url, ISession.CIPHER_NAME_CONVENTION cipher_name_convention, MutableSession session, BackgroundTask dvtask ) throws Exception {
+		return getServerMetadataInstance(url, cipher_name_convention, session, dvtask, null);
+	}
+
+	/**
+	 * Probe the target server for supported TLS/SSL versions and cipher suites, returning
+	 * the collected metadata.  When {@code enabledProtocols} is non-null and non-empty,
+	 * only the specified protocol versions are probed.
+	 * @param url target server URL
+	 * @param cipher_name_convention naming convention to use for cipher suite names (IANA, OpenSSL, etc.)
+	 * @param session mutable session to store discovered properties (e.g., compression support)
+	 * @param dvtask background task for status-bar progress updates
+	 * @param enabledProtocols set of protocol version codes to probe (e.g. 0x0303 for TLS 1.2), or null for all
+	 * @return ServerMetadata containing protocol versions and cipher suites, or null if the server is not TLS-enabled
+	 * @throws Exception on connection or analysis errors
+	 */
+	static ServerMetadata getServerMetadataInstance( URL url, ISession.CIPHER_NAME_CONVENTION cipher_name_convention, MutableSession session, BackgroundTask dvtask, Set<Integer> enabledProtocols ) throws Exception {
+
 		HostData hostdata = new HostData(url);;
 		Boolean compress = false;
-		
+
 		// Generate cipher map dynamically based upon Mozilla json data.
-		dvtask.setStatusBarMessage("Initializing DV ciphersuite maps.");
-		if( !bCiphersInitialized) initCipherMap();
-		
-		dvtask.setStatusBarMessage("Reviewing server protocols.");
-		
+		dvtask.setStatusBarMessage("Initializing DV cipher suite maps");
+		ensureCipherMapInitialized();
+
+		dvtask.setStatusBarMessage("Reviewing server protocols");
+
 		String name = url.getHost();
 		int port = ( url.getPort() > 0 ) ? url.getPort() : 443;
-		
+
 		InetSocketAddress isa = new InetSocketAddress(name, port);
 
 		Set<Integer> sv = new TreeSet<Integer>();
-		for (int v = 0x0300; v <= 0x0303; v ++) {
+		for (int v = 0x0300; v <= 0x0304; v ++) {
+			dvtask.waitIfPaused();
+			if (dvtask.isCancelled()) return null;
+			if (enabledProtocols != null && !enabledProtocols.isEmpty()
+					&& !enabledProtocols.contains(v)) {
+				continue;
+			}
 			CipherSuiteUtilServerHello sh = connect(isa,
 				v, CIPHER_SUITES.keySet());
 			if (sh == null) {
@@ -219,15 +235,22 @@ class CipherSuiteUtil {
 			dvtask.setStatusBarMessage("Analysing TLS version "+sh.protoVersion);
 			if (sh.compression == 1) {
 				compress = true;
-				session.setSessionPropertyValue(IDVSession.SESSION_PROPERTIES.DEFLATE_COMPRESSION, "true");
+				session.setSessionPropertyValue(ISession.SESSION_PROPERTIES.DEFLATE_COMPRESSION, "true");
 				logger.warn("Server vulnerable to CRIME attack.  Compression enabled.");
 			}else{
-				session.setSessionPropertyValue(IDVSession.SESSION_PROPERTIES.DEFLATE_COMPRESSION, "false");
+				session.setSessionPropertyValue(ISession.SESSION_PROPERTIES.DEFLATE_COMPRESSION, "false");
 			}
 		}
-		
+
+		dvtask.waitIfPaused();
+		if (dvtask.isCancelled()) return null;
 		dvtask.setStatusBarMessage("Sending TLS server Hello SSLv2");
-		ServerHelloSSLv2 sh2 = connectV2(isa);
+		// Only probe SSLv2 if no protocol filter or if 0x0200 is in the filter
+		ServerHelloSSLv2 sh2 = null;
+		if (enabledProtocols == null || enabledProtocols.isEmpty()
+				|| enabledProtocols.contains(0x0200)) {
+			sh2 = connectV2(isa);
+		}
 
 		if (sh2 != null) {
 			sv.add(0x0200);
@@ -239,40 +262,27 @@ class CipherSuiteUtil {
 			return null;
 		}
 
-		dvtask.setStatusBarMessage("Normalizing ciphersuite names to "+cipher_name_convention+" specification");
+		dvtask.setStatusBarMessage("Normalizing cipher suite names to "+cipher_name_convention+" specification");
 		
 		Set<Integer> lastSuppCS = null;
 		Map<Integer, Set<Integer>> suppCS = new TreeMap<Integer, Set<Integer>>();
 		Set<String> certID = new TreeSet<String>();
-		boolean vulnFREAK = false;
-		
 		if (sh2 != null) {
 
 			ArrayList<String> listv2 = new ArrayList<String>();
 			String[] tmp = new String[0];
-			
+
 			Set<Integer> vc2 = new TreeSet<Integer>();
 			for (int c : sh2.cipherSuites) {
 				vc2.add(c);
 			}
 			for (int c : vc2) {
-				
+
 				String suitename = cipherSuiteStringV2(c, cipher_name_convention);
-				
-				if( !vulnFREAK ) {
-					if( suitename == null || suitename.length()==0 ) {
-						logger.info("Freak vulnerability analysis skipped due to null ciphersuite name. id=0x" + c );
-					} else {
-						vulnFREAK = cipherSuiteStringV2(c, cipher_name_convention).indexOf("RSA_EXPORT") > -1; 
-						if (vulnFREAK ) {
-							logger.warn("Following ciphersuite vulnerable to FREAK attack, "+suitename);
-						}
-					}
-				}
 				listv2.add( suitename+"(0x"+Integer.toHexString(c)+")" );
 
 			}
-			
+
 			suppCS.put(0x0200, vc2);
 			if (sh2.serverCertName != null) {
 				hostdata.setScalarValue("getServerMetadataInstance",sh2.serverCertHash, sh2.serverCertName);				
@@ -282,176 +292,139 @@ class CipherSuiteUtil {
 			
 		}
 
-		dvtask.setStatusBarMessage("Starting ciphersuite analysis.");
-		
-		int agMaxStrength = STRONG;
-		int agMinStrength = STRONG;
-		boolean vulnBEAST = false;
-		//boolean vulnROBOT = false;
-		
+		dvtask.waitIfPaused();
+		if (dvtask.isCancelled()) return null;
+		dvtask.setStatusBarMessage("Starting cipher suite analysis");
+
 		for (int v : sv) {
-			
+			dvtask.waitIfPaused();
+			if (dvtask.isCancelled()) return null;
+
 			if (v == 0x0200) {
 				continue;
 			}
-			Set<Integer> vsc = supportedSuites(isa, v, certID);
+			Set<Integer> vsc = supportedSuites(isa, v, certID, dvtask);
 			suppCS.put(v, vsc);
-			
+
 			ArrayList<String> listv = new ArrayList<String>();
 			String[] tmp = new String[0];
-						
+
 			for (int c : vsc) {
-				
+
 				String suitename = cipherSuiteString(c, cipher_name_convention);
-				if( suitename == null || suitename.length()==0 ) {
-					logger.info("Freak vulnerability analysis skipped due to null ciphersuite name. id=0x" + c );
-				} else {
-					if( !vulnFREAK ) {
-						vulnFREAK = cipherSuiteString(c, cipher_name_convention).indexOf("RSA_EXPORT") > -1; 
-						if( vulnFREAK ) {
-							logger.warn("Following ciphersuite vulnerable to FREAK attack, "+suitename);
-						}
-					}
-				}
-				
-				//Set<Integer> vsc = suppCS.get(c);
-				agMaxStrength = Math.min(
-					maxStrength(vsc), agMaxStrength);
-				agMinStrength = Math.min(
-					minStrength(vsc), agMinStrength);
-				if (!vulnBEAST) {
-					vulnBEAST = testBEAST(isa, c, vsc);
-					if( vulnBEAST ) {
-						logger.warn("Following ciphersuite vulnerable to BEAST attack, "+suitename);
-					}
-				}
-//				if (!vulnROBOT) {
-//					vulnROBOT = suitename.startsWith("TLS_RSA");
-//					if( vulnROBOT ) {
-//						logger.warn("Following ciphersuite vulnerable to ROBOT attack, "+suitename);
-//					}
-//				}
-				
 				listv.add( suitename+"(0x"+Integer.toHexString(c)+")" );
-			}			
+			}
 
 			hostdata.setVectorValue( "getServerMetadataInstance",versionString(v), listv.toArray(tmp));
-			
+
 		}
-		
-		
-//		// Iterate over supported ciphersuites.
-//		int agMaxStrength = STRONG;
-//		int agMinStrength = STRONG;
-//		boolean vulnBEAST = false;
-//		boolean vulnROBOT = false;
-//		for (int v : sv) {
-//			Set<Integer> vsc = suppCS.get(v);
-//			agMaxStrength = Math.min(
-//				maxStrength(vsc), agMaxStrength);
-//			agMinStrength = Math.min(
-//				minStrength(vsc), agMinStrength);
-//			if (!vulnBEAST) {
-//				vulnBEAST = testBEAST(isa, v, vsc);
-//			}
-//			if (!vulnROBOT) {
-//				vulnROBOT = cipherSuiteString(v, cipher_name_convention).startsWith("TLS_RSA");
-//			}
-//		}
-		
-		//TODO: NEEDS TO BE CHECKED AND TESTED.
-		session.setVulnerabilityAssessmentValue(IDVSession.VULNERABILITY_ASSESSMENTS.MINIMAL_ENCRYPTION_STRENGTH, strengthString(agMinStrength));
-		session.setVulnerabilityAssessmentValue(IDVSession.VULNERABILITY_ASSESSMENTS.ACHIEVABLE_ENCRYPTION_STRENGTH, strengthString(agMaxStrength));
-		session.setVulnerabilityAssessmentValue(IDVSession.VULNERABILITY_ASSESSMENTS.BEAST_VULNERABLE, Boolean.toString(vulnBEAST)); // Notes: Check TLS version <=1.0 and CBC enabled.  https://blog.qualys.com/ssllabs/2013/09/10/is-beast-still-a-threat
-		session.setVulnerabilityAssessmentValue(IDVSession.VULNERABILITY_ASSESSMENTS.CRIME_VULNERABLE, Boolean.toString(compress));  // Notes: Check TLS compression enabled, https://en.wikipedia.org/wiki/CRIME 
-		session.setVulnerabilityAssessmentValue(IDVSession.VULNERABILITY_ASSESSMENTS.FREAK_VULNERABLE, Boolean.toString(vulnFREAK)); // Notes: Check ciphers containing, RSA_EXPORT https://censys.io/blog/freak
-		//session.setVulnerabilityAssessmentValue(IDVSession.VULNERABILITY_ASSESSMENTS.ROBOT_VULNERABLE, Boolean.toString(vulnROBOT)); // Notes: Check ciphers starting, TLS_RSA https://robotattack.org/
-	
-		dvtask.setStatusBarMessage("Ciphersuite analysis complete.");
+
+		dvtask.setStatusBarMessage("Cipher suite analysis complete");
 		
 		return hostdata;
 		
 	}
 	
-	/*
-	 * Original Mozilla JSON file
-	 * server-side-tls-conf-4.0.json = https://statics.tls.security.mozilla.org/server-side-tls-conf-4.0.json
-	 * ciphermap.json = https://github.com/april/tls-table/blob/master/tls-table.py
-	 */
+	@SuppressWarnings("unchecked")
 	private static void initCipherMap() {
-		
-		    String ciphermap = FileUtils.getJsonResourceAsString("ciphermap.json");
-		    Object document = Configuration.defaultConfiguration().jsonProvider().parse(ciphermap);
-		    List<?> ciphermetalist = JsonPath.read(document, "$[?(@.*)]");
-		  
-		    // Note (milton):  A point to consider about the Mozilla json evaluation data and a source
-		    // of confusion for me is that all ciphers listed in modern are also listed in
-		    // intermediate.  All ciphers in intermediate are also listed in old.  To separate
-		    // the evals out properly for DV purposes we add ciphers to a map in the following
-		    // order, modern, intermediate, and then old.  Further once we set the cipher
-		    // evaluation we don't allow the evaluation to be reassigned to a lower level.
-		    HashMap<String, Integer> strengtheval = new HashMap<String, Integer>();
-		    String cipherevaluation = FileUtils.getJsonResourceAsString("server-side-tls-conf-4.0.json");
-		    Object d2 = Configuration.defaultConfiguration().jsonProvider().parse(cipherevaluation);
-		    List<String> mc1 = JsonPath.read(d2, "$.configurations.modern.ciphersuites.*");
-		    for( String ciph: mc1) {
-		    	strengtheval.put(ciph, new Integer(STRONG));
-		    }
-		    //TODO note this does not return just intermediate.ciphersuites.* need to fix
-		    Object d3 = Configuration.defaultConfiguration().jsonProvider().parse(cipherevaluation);
-		    List<String> mc2 = JsonPath.read(d3, "$.configurations.intermediate.ciphersuites.*");
-		    for( String ciph: mc2) {
-		    	if( !strengtheval.containsKey(ciph) ){ // don't remove, see note.
-		    		strengtheval.put(ciph,new Integer(MEDIUM));
-		    	}
-		    }
-		    //TODO note this does not return just intermediate.ciphersuites.* need to fix
-		    Object d4 = Configuration.defaultConfiguration().jsonProvider().parse(cipherevaluation);
-		    List<String> mc3 = JsonPath.read(d4, "$.configurations.old.ciphersuites.*");
-		    for( String ciph: mc3) {
-		    	if( !strengtheval.containsKey(ciph) ){ // don't remove, see note.
-		    		strengtheval.put(ciph,new Integer(WEAK));
-		    	}
-		    }
-		    
-		    Iterator<?> i = ciphermetalist.iterator();
-		    while( i.hasNext() ) {
-		    	Map<?, ?> ci = (Map<?, ?>)i.next();
-		    	//System.out.println("ci="+ci.getClass().getName());
-		    	Iterator<?> keys = ci.keySet().iterator();
-		    	while ( keys.hasNext() ) {
-		    		Object obj = keys.next();
-			    	//System.out.println("obj="+obj.getClass().getName()+" val="+obj.toString());
-			    	Map<?, ?> ch1 = (Map<?, ?>)ci.get(obj.toString());
-			    	//System.out.println("ch1="+ch1.getClass().getName()+" val="+ch1.toString());
-			    	
-			    	List<String> ciphercode = Arrays.asList(obj.toString().split(","));
-		        	String ho = ciphercode.get(0);
-		        	List<String> lo = Arrays.asList(ciphercode.get(1).split("x"));
-		        	String sho = ho;
-		        	String slo = lo.get(1).replaceFirst("^0+(?!$)", "");
-		        	sho = ( sho.equals("0") ) ? "" : sho;
-		        	Integer cc1 = Integer.decode(sho+slo);
-		        	
-		        	Iterator<?> cns = ch1.values().iterator();
-		        	int istrengtheval = -1; //unknown strength
-		        	while( cns.hasNext() ) {
-		        		String key = (String)cns.next();
-		        		if( strengtheval.containsKey(key) ) {
-		        			istrengtheval = ((Integer)strengtheval.get(key)).intValue();
-		        			break;
-		        		}
-		        	}
-		        	logger.debug("Cached Mozilla ciphers, "+obj.toString()+" "+ch1.toString()+" strengtheval="+istrengtheval);
-			    	makeCS(cc1.intValue(),ch1, istrengtheval);
-			    	
-		    	}
-		    }
+		try (InputStream in = CipherSuiteUtil.class.getClassLoader()
+				.getResourceAsStream("ciphermap.yaml")) {
+			if (in == null) {
+				throw new IllegalStateException("ciphermap.yaml not found on classpath");
+			}
+			Map<Integer, CipherSuite> parsed = parseCipherMapYaml(in);
+			CIPHER_SUITES.clear();
+			CIPHER_SUITES.putAll(parsed);
+		} catch (IOException e) {
+			logger.error("Failed to load ciphermap.yaml", e);
+			throw new IllegalStateException("Failed to load ciphermap.yaml", e);
+		}
+		bCiphersInitialized = true;
+	}
 
-		
+	@SuppressWarnings("unchecked")
+	private static Map<Integer, CipherSuite> parseCipherMapYaml(InputStream is) {
+		LoadSettings settings = LoadSettings.builder().build();
+		Load load = new Load(settings);
+		Map<String, Object> root = (Map<String, Object>) load.loadFromInputStream(is);
+		List<Map<String, Object>> cipherSuites = (List<Map<String, Object>>) root.get("cipher_suites");
+		if (cipherSuites == null) {
+			throw new IllegalArgumentException("cipher_suites key not found in YAML");
+		}
+
+		Map<Integer, CipherSuite> result = new TreeMap<>();
+		for (Map<String, Object> suiteObj : cipherSuites) {
+			int suiteId = parseHexId((String) suiteObj.get("id"));
+			int strength = mapStrength((String) suiteObj.get("strength"));
+			Map<String, String> namesObj = (Map<String, String>) suiteObj.get("names");
+			HashMap<String, String> names = new HashMap<>(namesObj);
+			CipherSuite cs = new CipherSuite();
+			cs.suite = suiteId;
+			cs.names = names;
+			cs.strength = strength;
+			result.put(suiteId, cs);
+		}
+		return result;
+	}
+
+	/**
+	 * Replace the cipher map with data from the given stream.
+	 * The stream must contain valid cipher map YAML with a {@code cipher_suites} key.
+	 * Internal state is only modified after the new data is fully parsed and validated.
+	 *
+	 * @param is InputStream containing cipher map YAML
+	 * @throws IllegalArgumentException if the YAML is invalid or empty
+	 */
+	static synchronized void loadCipherMapFromStream(InputStream is) {
+		Map<Integer, CipherSuite> parsed = parseCipherMapYaml(is);
+		if (parsed.isEmpty()) {
+			throw new IllegalArgumentException("Cipher map YAML contains no cipher suites");
+		}
+		CIPHER_SUITES.clear();
+		CIPHER_SUITES.putAll(parsed);
+		bCiphersInitialized = true;
+	}
+
+	/**
+	 * Reset the cipher map to uninitialized state.
+	 * The next operation that needs the cipher map will re-initialize from the classpath resource.
+	 */
+	static synchronized void resetCipherMap() {
+		CIPHER_SUITES.clear();
+		bCiphersInitialized = false;
+	}
+
+	static int parseHexId(String id) {
+		String[] parts = id.split(",");
+		if (parts.length == 2) {
+			int hi = Integer.decode(parts[0].trim());
+			int lo = Integer.decode(parts[1].trim());
+			return (hi << 8) | lo;
+		} else if (parts.length == 3) {
+			int b0 = Integer.decode(parts[0].trim());
+			int b1 = Integer.decode(parts[1].trim());
+			int b2 = Integer.decode(parts[2].trim());
+			return (b0 << 16) | (b1 << 8) | b2;
+		}
+		throw new IllegalArgumentException("Invalid cipher suite ID: " + id);
+	}
+
+	private static int mapStrength(String s) {
+		return switch (s) {
+			case "STRONG" -> STRONG;
+			case "MEDIUM" -> MEDIUM;
+			case "WEAK"   -> WEAK;
+			case "CLEAR"  -> CLEAR;
+			default       -> UNASSIGNED;
+		};
 	}
 
 
+	/**
+	 * Convert a TLS/SSL protocol version number to a human-readable string.
+	 * @param version protocol version as a 16-bit integer (e.g., 0x0303 for TLS 1.2)
+	 * @return human-readable version string (e.g., "TLSv1.2", "SSLv3")
+	 */
 	static String versionString(int version) {
 		if (version == 0x0200) {
 			return "SSLv2";
@@ -464,32 +437,58 @@ class CipherSuiteUtil {
 		}
 	}
 	
-	/*
-	 * Enumerate server cipher suites. This is accomplished by
-	 * repeatedly contacting the server, each time removing from our
-	 * list of supported suites returned by the server.  The cipher
-	 * suites remaining at the end of this operation are unsupported
-	 * by the server.
+	/**
+	 * Enumerate cipher suites supported by the server for a given protocol version.
+	 * Repeatedly sends ClientHello messages, removing each server-selected suite until
+	 * the server rejects all remaining candidates.
+	 * @param isa server address to connect to
+	 * @param version TLS/SSL protocol version to probe (e.g., 0x0303 for TLS 1.2)
+	 * @param serverCertID set to which server certificate identifiers are added
+	 * @param dvtask background task for cooperative cancellation, or null
+	 * @return set of cipher suite IDs supported by the server
 	 */
 	static Set<Integer> supportedSuites(InetSocketAddress isa, int version,
-		Set<String> serverCertID)
+		Set<String> serverCertID, BackgroundTask dvtask)
 	{
-	
+
 		// Notes: the problem with using the past approach, CIPHER_SUITES.keySet(),
 		// is that some servers use ciphers outside those included with the
 		// Mozilla cipher mapings.  As a result DV was missing some ciphers.
 		// The new approach is more comprensive but takes longer.
 		//Set<Integer> cs = new TreeSet<Integer>(CIPHER_SUITES.keySet());
-		
+
 		Set<Integer> rs = new TreeSet<Integer>();
-	
+
+		// Exhaustively scan the IANA-assigned TLS 1.3 cipher suite range (0x1300-0x13FF).
+		// This ensures future cipher suites are discovered even before ciphermap.json is updated.
+		if (version >= 0x0304) {
+			Set<Integer> tls13ciphers = new TreeSet<Integer>();
+			for (int c = 0x1300; c <= 0x13FF; c++) {
+				tls13ciphers.add(c);
+			}
+			for (;;) {
+				if (dvtask != null) dvtask.waitIfPaused();
+				if (dvtask != null && dvtask.isCancelled()) break;
+				CipherSuiteUtilServerHello sh = connect(isa, version, tls13ciphers);
+				if (sh == null) {
+					break;
+				}
+				if (!tls13ciphers.contains(sh.cipherSuite)) {
+					break;
+				}
+				tls13ciphers.remove(sh.cipherSuite);
+				rs.add(sh.cipherSuite);
+			}
+			return rs;
+		}
+
 		int BLK_SIZE = 6000;
 		int CIPHERMAPSZ = 0xFFFF;
 		int i2=0; int i3=1;
 		Set<Integer> scanblk = null;
 		for ( int i=1; i<CIPHERMAPSZ; i+=BLK_SIZE ) {
 
-			scanblk = new TreeSet<Integer>(); 
+			scanblk = new TreeSet<Integer>();
 			while( i2< BLK_SIZE*i3 ) {
 				scanblk.add(i2);
 				i2++;
@@ -502,7 +501,9 @@ class CipherSuiteUtil {
 //			} catch (InterruptedException e) {}
 			
 			for (;;) {
-				//TODO could make this multi-threaded to speed up scanning. 
+				if (dvtask != null) dvtask.waitIfPaused();
+				if (dvtask != null && dvtask.isCancelled()) break;
+				//TODO could make this multi-threaded to speed up scanning.
 				//  although need to be kind to servers.  Don't want too
 				// many connections and create performance problems.
 				CipherSuiteUtilServerHello sh = connect(isa, version, scanblk);
@@ -531,6 +532,11 @@ class CipherSuiteUtil {
 	}
 
 	
+	/**
+	 * Return the minimum encryption strength among the given cipher suites.
+	 * @param supp set of cipher suite IDs to evaluate
+	 * @return minimum strength constant (CLEAR, WEAK, MEDIUM, or STRONG)
+	 */
 	static int minStrength(Set<Integer> supp)
 	{
 		int m = STRONG;
@@ -546,6 +552,11 @@ class CipherSuiteUtil {
 		return m;
 	}
 
+	/**
+	 * Return the maximum encryption strength among the given cipher suites.
+	 * @param supp set of cipher suite IDs to evaluate
+	 * @return maximum strength constant (CLEAR, WEAK, MEDIUM, or STRONG)
+	 */
 	static int maxStrength(Set<Integer> supp)
 	{
 		int m = CLEAR;
@@ -584,8 +595,8 @@ class CipherSuiteUtil {
 //	}
 	
 	/**
-	 * Analysis to determine ciphersuite strength.
-	 * @param protocol Ciphersuite protocol to test.
+	 * Analysis to determine cipher suite strength.
+	 * @param protocol Cipher suite protocol to test.
 	 * @return String indicating strength, CLEAR(no encryption), WEAK, MEDIUM, STRONG. 
 	 */
 	static final String getStrength(String protocol) {
@@ -652,64 +663,35 @@ class CipherSuiteUtil {
 	 * @throws Exception Thrown on problems.
 	 */
 	static final Map<String, List<String>> getHttpResponseHeaders(URL url) throws Exception {
-		
-		HttpsURLConnection conn = null;
-		
-		Map<String, List<String>> result = new HashMap<String, List<String>>();
-		
-		try {
-			
-			enableTLSChainTesting(false);
-		
-	        conn = (HttpsURLConnection)url.openConnection();
-	        
-	        conn.connect();
-	        
-	        result = conn.getHeaderFields();
-			
-		} finally {
-			
-			enableTLSChainTesting(true);
+
+		synchronized (TLS_CHAIN_TESTING_LOCK) {
+			HttpsURLConnection conn = null;
+
+			Map<String, List<String>> result = new HashMap<String, List<String>>();
+
+			try {
+
+				enableTLSChainTesting(false);
+
+				conn = (HttpsURLConnection)url.openConnection();
+				conn.setConnectTimeout(CONNECT_TIMEOUT_MS);
+				conn.setReadTimeout(READ_TIMEOUT_MS);
+
+				conn.connect();
+
+				result = conn.getHeaderFields();
+
+			} finally {
+
+				if (conn != null) conn.disconnect();
+				enableTLSChainTesting(true);
+			}
+
+			return result;
 		}
-		
-		
-        return result;
-        
+
 	}
-	
-//	public static final synchronized ServerMetadata getHttpResponseHeaders(URL url) throws Exception {
-//		
-//		HostData hostdata = null;
-//		
-//		// return cached instance of server TLS data if available and not expired.
-//		if ( hostcache.containsKey( url ) ) {
-//			hostdata = hostcache.get(url);
-//			if( !hostdata.isExpired() )
-//				return hostdata;
-//		}
-//		
-//		// No cached instance of TLS data so create some
-//		hostdata = new HostData(url);
-//		hostcache.put(url, hostdata);	
-//		
-//        HttpsURLConnection conn = (HttpsURLConnection)url.openConnection();
-//        conn.connect();
-//        Map<String, List<String>> headers = conn.getHeaderFields();
-//        
-//        Set<String> k = headers.keySet();
-//        Iterator<String> keys = k.iterator();
-//        
-//        while( keys.hasNext() ) {
-//        	
-//        	String key = keys.next();
-//        	hostdata.setVectorValue(key,(String[])headers.get(key).toArray() );
-//        	
-//        }
-//		
-//        return hostdata;
-//        
-//	}
-	
+
 	/**
 	 * Enable default testing for TLS certificate trust chains.
 	 * @param value true, chain will be tested.  false, chain will not be tested.
@@ -747,32 +729,38 @@ class CipherSuiteUtil {
 	 */
 	static final X509Certificate[] getServerCertificateChain(URL url) throws Exception {
 
-        ArrayList<X509Certificate> list = new ArrayList<X509Certificate>();
-		
-		try {
-			
-			enableTLSChainTesting(false);
-			
-	        HttpsURLConnection conn = (HttpsURLConnection)url.openConnection();
-	        conn.connect();
-	        Certificate[] certs = conn.getServerCertificates();
-	        
-	        for (Certificate cert : certs) {
-	        	
-	            if(cert instanceof X509Certificate) {            	
-	            	list.add( (X509Certificate)cert );           
-	            } else {
-	            	logger.info("Unsupported certificate type.  type="+cert.getClass().getName());
-	            }
-	        }
-	        
-		} finally {
-			
-			enableTLSChainTesting(true);
-			
+		synchronized (TLS_CHAIN_TESTING_LOCK) {
+			ArrayList<X509Certificate> list = new ArrayList<X509Certificate>();
+			HttpsURLConnection conn = null;
+
+			try {
+
+				enableTLSChainTesting(false);
+
+				conn = (HttpsURLConnection)url.openConnection();
+				conn.setConnectTimeout(CONNECT_TIMEOUT_MS);
+				conn.setReadTimeout(READ_TIMEOUT_MS);
+				conn.connect();
+				Certificate[] certs = conn.getServerCertificates();
+
+				for (Certificate cert : certs) {
+
+					if(cert instanceof X509Certificate) {
+						list.add( (X509Certificate)cert );
+					} else {
+						logger.info("Unsupported certificate type.  type="+cert.getClass().getName());
+					}
+				}
+
+			} finally {
+
+				if (conn != null) conn.disconnect();
+				enableTLSChainTesting(true);
+
+			}
+
+			return list.toArray(new X509Certificate[0]);
 		}
-	
-        return list.toArray(new X509Certificate[0]);
 	}
 	
 	/**
@@ -782,16 +770,17 @@ class CipherSuiteUtil {
 	 * @throws Exception Thrown on problems.
 	 */
 	static final X509Certificate[] getJavaRootCertificates() throws Exception {
-		
+
 		//TODO: Maybe be good to consider caching this at some point (at least for a few seconds)
-		
+
 		// Load the JDK's cacerts keystore file
 		String filename = System.getProperty("java.home") + "/lib/security/cacerts".replace('/', File.separatorChar);
     	logger.debug("CACERTS file, "+filename);
-		FileInputStream is = new FileInputStream(filename);
 		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
 		String password = "changeit"; //default password
-		keystore.load(is, password.toCharArray());
+		try (FileInputStream is = new FileInputStream(filename)) {
+			keystore.load(is, password.toCharArray());
+		}
 		
 		// This class retrieves the most-trusted CAs from the keystore
 		PKIXParameters params = new PKIXParameters(keystore);
@@ -842,7 +831,7 @@ class CipherSuiteUtil {
 		
 		for( X509Certificate cert : getJavaRootCertificates() ) {
 			
-			if ( cert.getIssuerDN().getName().equals(IssuerDN) ) {
+			if ( cert.getIssuerX500Principal().getName().equals(IssuerDN) ) {
 				
 				result = true; break;
 			}
@@ -863,24 +852,67 @@ class CipherSuiteUtil {
 	 */
 	static final boolean checkTrustedCertificate( X509Certificate[] certs, URL url) throws KeyStoreException,
 			NoSuchAlgorithmException, UnknownHostException, IOException {
-		
+
 		boolean valid = false;
-		
+
+		int port = url.getPort() > 0 ? url.getPort() : url.getDefaultPort();
         SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-        SSLSocket socket = (SSLSocket)factory.createSocket(url.getHost(), url.getDefaultPort());  
-        SSLSession session = socket.getSession();
-        String keyexchalgo = getKeyExchangeAlgorithm(session);
+        SSLSocket socket = null;
+        SSLSession session;
+        try {
+            Socket rawSocket = new Socket();
+            rawSocket.connect(new InetSocketAddress(url.getHost(), port), CONNECT_TIMEOUT_MS);
+            socket = (SSLSocket) factory.createSocket(rawSocket, url.getHost(), port, true);
+            socket.setSoTimeout(READ_TIMEOUT_MS);
+            socket.startHandshake();
+            session = socket.getSession();
+        } catch (javax.net.ssl.SSLHandshakeException e) {
+            // JSSE handshake failed (expired cert, self-signed, untrusted CA, etc.)
+            // This means the certificate is NOT trusted — return false.
+            logger.debug("JSSE handshake failed for trust check (expected for bad certs): {}", e.getMessage());
+            if (socket != null) try { socket.close(); } catch (IOException ignored) {}
+            return false;
+        }
+
+        // Extract JSSE-negotiated chain for comparison with trust-disabled chain
+        X509Certificate[] jsseChain = null;
+        try {
+            jsseChain = (X509Certificate[]) session.getPeerCertificates();
+        } catch (javax.net.ssl.SSLPeerUnverifiedException e) {
+            logger.warn("Could not retrieve JSSE peer certificates for {}", url);
+        }
+
+        // Compare trust-disabled chain against JSSE-negotiated chain
+        if (jsseChain != null && certs != null) {
+            if (certs.length != jsseChain.length) {
+                logger.warn("Chain length mismatch for {}: trust-disabled={} vs JSSE={}",
+                    url, certs.length, jsseChain.length);
+            } else {
+                for (int i = 0; i < certs.length; i++) {
+                    try {
+                        if (!certFingerprint(certs[i]).equals(certFingerprint(jsseChain[i]))) {
+                            logger.warn("Chain cert [{}] mismatch for {}: {} vs {}", i, url,
+                                certs[i].getSubjectX500Principal(), jsseChain[i].getSubjectX500Principal());
+                        }
+                    } catch (CertificateException e) {
+                        logger.warn("Could not compute fingerprint for chain comparison at index {}", i);
+                    }
+                }
+            }
+        }
+
+        String keyexchalgo = getKeyExchangeAlgorithm(session, certs);
 		try { socket.close(); } catch( IOException e ) {}
-		
+
 		TrustManagerFactory trustManagerFactory =
 			    TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 			trustManagerFactory.init((KeyStore)null);
 			// you could use a non-default KeyStore as your truststore too, instead of null.
 
-			for (TrustManager trustManager: trustManagerFactory.getTrustManagers()) {  
-			    if (trustManager instanceof X509TrustManager) {  
-			        X509TrustManager x509TrustManager = (X509TrustManager)trustManager;  
-			        try { 
+			for (TrustManager trustManager: trustManagerFactory.getTrustManagers()) {
+			    if (trustManager instanceof X509TrustManager) {
+			        X509TrustManager x509TrustManager = (X509TrustManager)trustManager;
+			        try {
 			        	x509TrustManager.checkServerTrusted(certs,keyexchalgo);
 			        	valid = true;
 			        } catch( CertificateException e ) {
@@ -888,9 +920,22 @@ class CipherSuiteUtil {
 			        	logger.error( "url="+url.toString() );
 			        }
 			    }
-			        
+
 			}
 		return valid;
+	}
+
+	/**
+	 * Compute SHA-256 fingerprint of a certificate for chain comparison.
+	 */
+	private static String certFingerprint(X509Certificate cert)
+			throws CertificateException, NoSuchAlgorithmException {
+		try {
+			MessageDigest md = MessageDigest.getInstance("SHA-256");
+			return Base64.getEncoder().encodeToString(md.digest(cert.getEncoded()));
+		} catch (java.security.cert.CertificateEncodingException e) {
+			throw new CertificateException("Failed to encode certificate", e);
+		}
 	}
 	
 	// check OCSP
@@ -928,22 +973,36 @@ class CipherSuiteUtil {
 //    }
 	
 	/**
-	 * Parse out the Cipher's Key Exchange Algorithm
+	 * Parse out the Cipher's Key Exchange Algorithm.
+	 * For TLS 1.3 cipher suites (which don't contain "_WITH"), the auth type
+	 * is derived from the end-entity certificate's public key type.
 	 * @param session Target SSLSession
-	 * @return String TLS key exchange algorithm.
+	 * @param certs Certificate chain (used for TLS 1.3 auth type derivation)
+	 * @return String TLS key exchange algorithm suitable for X509TrustManager.checkServerTrusted()
 	 */
-	private static final String getKeyExchangeAlgorithm( SSLSession session ) {
-		
+	private static final String getKeyExchangeAlgorithm( SSLSession session, X509Certificate[] certs ) {
+
 		String cipher = session.getCipherSuite().toString();
-		
+
 		int i1 = cipher.indexOf('_')+1;
-		
 		int i2 = cipher.indexOf("_WITH");
-		
+
+		// TLS 1.3 cipher suites (e.g., TLS_AES_128_GCM_SHA256) don't include
+		// the key exchange algorithm in the name - it's negotiated separately.
+		// Derive the auth type from the end-entity certificate's public key.
+		if (i2 == -1) {
+			if (certs != null && certs.length > 0) {
+				PublicKey pk = certs[0].getPublicKey();
+				if (pk instanceof ECPublicKey) return "ECDHE_ECDSA";
+				if (pk instanceof RSAPublicKey) return "ECDHE_RSA";
+			}
+			return "UNKNOWN";
+		}
+
 		String keyexch = cipher.substring(i1, i2);
-		
+
 		return keyexch;
-		
+
 	}
 	
 	/**
@@ -957,7 +1016,7 @@ class CipherSuiteUtil {
 		
 		if (cert != null ) {
 			
-			if ( cert.getIssuerDN().equals(cert.getSubjectDN()) )
+			if ( cert.getIssuerX500Principal().equals(cert.getSubjectX500Principal()) )
 				result = true;
 			
 		}
@@ -974,15 +1033,15 @@ class CipherSuiteUtil {
 	    * @throws NoSuchAlgorithmException
 	    */
 	   public static final String signerFingerprint( byte[] der, String signatureAlgorithm ) throws NoSuchAlgorithmException {
-		   
+
 		   MessageDigest sha1 = MessageDigest.getInstance(signatureAlgorithm);
 		   sha1.update( der );
-		   
-		   StringBuffer buff = new StringBuffer();
+
+		   StringBuilder buff = new StringBuilder();
 		   buff.append(byteArrayToHex(sha1.digest()));
-		   
+
 		   return buff.toString();
-		   
+
 	   }	
 	
 //	   /**
@@ -1042,262 +1101,198 @@ class CipherSuiteUtil {
 	    * @return  Human readable String representation of the OID number sequence.  Ex: keyusage
 	    */
 	   static String getOIDKeyName(String oidkey) {
-		   
+
 		   // TODO: Need to figure out a better way to do this.
 		   return (OIDMAP.get(oidkey)!=null) ? OIDMAP.get(oidkey) : oidkey;
 		   
 	   }
 
 	/**
-	 * Convert <code>der</code> encoded data to <code>ASN1Primitive</code>.
-	 * For more information, 
-	 * (<a href="http://stackoverflow.com/questions/2409618/how-do-i-decode-a-der-encoded-string-in-java">StackOverflow: How do I decode a DER encoded string in Java?</a>) 
+	 * Convert <code>der</code> encoded data to <code>DerParser.DerValue</code>.
+	 * For more information,
+	 * (<a href="http://stackoverflow.com/questions/2409618/how-do-i-decode-a-der-encoded-string-in-java">StackOverflow: How do I decode a DER encoded string in Java?</a>)
 	 * @param data byte[] of <code>der</code> encoded data
-	 * @return <code>ASN1Primitive</code> representation of <code>der</code> encoded data
+	 * @return <code>DerParser.DerValue</code> representation of <code>der</code> encoded data
 	 * @throws IOException
 	 */
-	static final ASN1Primitive toDERObject(byte[] data) throws IOException {
-		   
-		ByteArrayInputStream inStream = new ByteArrayInputStream(data);
-		
-		ASN1InputStream asnInputStream = new ASN1InputStream(inStream);
-	    
-	    ASN1Primitive p = asnInputStream.readObject();
-
-	    asnInputStream.close();
-	    
-	    return p;
+	static final DerParser.DerValue toDERObject(byte[] data) throws IOException {
+		return DerParser.parse(data);
 	}
 
-	/**
-	 * Reentrant method to decode ASN1Primiatives.  ASN1Primiatives types handled: <code>DEROctetString</code>,
-	 * <code>DLSequence</code>, <code>DERSequence</code>, <code>DERIA5String</code>, <code>DERBitString</code>,
-	 * <code>ASN1Boolean</code>, <code>ASN1Integer</code>, <code>DERTaggedObject</code>,
-	 * <code>ASN1ObjectIdentifier</code>.  NOTE: this does not decode all OIDs.  For supported
-	 * OIDs please refer to the code.  This is mostly a trial and error process as follows, 1) review logs
-	 * for unsupported OIDs, 2) include code to support new OIDs, 3) explore more web sites, 4) goto step 1
-	 * @param primitive
-	 * @param buff
+		/**
+	 * Reentrant method to decode DerValues. Types handled: OCTET STRING,
+	 * SEQUENCE, OBJECT IDENTIFIER, IA5String, UTF8String, VisibleString,
+	 * PrintableString, BIT STRING, BOOLEAN, INTEGER, SET, and context-specific
+	 * tagged objects.
+	 * @param derValue The DER value to process
+	 * @param buff StringBuilder to append results to
 	 * @throws IOException
 	 */
-	static final void walkASN1Sequence( ASN1Primitive primitive, StringBuffer buff ) throws IOException {
-		
-		
-	    if (primitive instanceof DEROctetString) {
-	    	
-	    	byte[] bytes = ((DEROctetString) primitive).getOctets();
-	    	
-	    	ASN1Primitive p = null;
-	    	
-	    	try {
-	    	
-	    		p = toDERObject(bytes);
-		    	walkASN1Sequence(p, buff);
-	
-	    	} catch (IOException e ) {
-	    	
-	    		buff.append( byteArrayToHex(bytes));
-	    		
-	    	}
-	    	
-	    } else if( primitive instanceof DLSequence ) {
-	    	
-	    	DLSequence dl = (DLSequence)primitive;
-	    	
-	    	for (int i=0; i < dl.size() ; i++ ) {
-	    		
-	    		ASN1Primitive p = dl.getObjectAt(i).toASN1Primitive();
-	    		
-	    		walkASN1Sequence( p, buff );            		
-	    		
-	    	}
-	    	
-	    } else if( primitive instanceof DERSequence ) {
-	    	
-	    	DERSequence ds = (DERSequence)primitive;
-	    	
-	    	for (int i=0; i < ds.size() ; i++ ) {
-	    		
-	    		ASN1Primitive p = ds.getObjectAt(i).toASN1Primitive();
-	    		
-	    		walkASN1Sequence( p, buff );            		
-	    		
-	    	}
-	    	
-	    } else if( primitive instanceof DERApplicationSpecific ) {
-	    	
-	    	//TODO: May be useful to parse differently depending upon tag type in future.
-	    	DERApplicationSpecific app = (DERApplicationSpecific)primitive;
-	    	int tag = app.getApplicationTag();
+	static final void walkASN1Sequence( DerParser.DerValue derValue, StringBuilder buff ) throws IOException {
+		int tag = derValue.getTag();
 
-    		StringBuffer buff2 = new StringBuffer();
-    		buff2.append( "tag="+tag+" ");
-            String hex = CipherSuiteUtil.byteArrayToHex(app.getContents());
-            buff2.append( hex );
-            buff.append(buff2.toString());
+		// OCTET STRING
+		if (tag == DerParser.TAG_OCTET_STRING) {
+			byte[] bytes = derValue.getOctetString();
+			try {
+				DerParser.DerValue inner = DerParser.parse(bytes);
+				walkASN1Sequence(inner, buff);
+			} catch (IOException e) {
+				buff.append(byteArrayToHex(bytes));
+			}
 
-	    // Assistance by https://svn.cesecore.eu/svn/ejbca/branches/Branch_3_11/ejbca/conf/extendedkeyusage.properties
-	    } else if (primitive instanceof ASN1ObjectIdentifier ) {
-	    	
-	    	ASN1ObjectIdentifier i = (ASN1ObjectIdentifier)primitive;
-	    	
-	    	String kn = CipherSuiteUtil.getOIDKeyName(i.toString());
-	    	
-	    	if ( kn.equals("2.5.29.37.0") ) {
-	    		buff.append( "anyextendedkeyusage ");
-	    		
-	    	} else if (kn.equals("1.3.6.1.5.5.7.3.1") ) {
-	    		buff.append( "serverauth ");
-	    		
-	    	} else if (kn.equals("1.3.6.1.5.5.7.3.2") ) {
-	    		buff.append( "clientauth ");
-	    		
-	    	} else if (kn.equals("1.3.6.1.5.5.7.3.3") ) {
-	    		buff.append( "codesigning ");
-	    		
-	    	} else if (kn.equals("1.3.6.1.5.5.7.3.4") ) {
-	    		buff.append( "emailprotection ");
-	    		
-	    	} else if (kn.equals("1.3.6.1.5.5.7.3.8") ) {
-	    		buff.append( "timestamping ");
-	    		
-	    	} else if (kn.equals("1.3.6.1.5.5.7.3.9") ) {
-	    		buff.append( "ocspsigner ");
-	    		
-	    	} else if (kn.equals("1.3.6.1.5.5.7.3.15") ) {
-	    		buff.append( "scvpserver ");
-	    		
-	    	} else if (kn.equals("1.3.6.1.5.5.7.3.16") ) {
-	    		buff.append( "scvpclient ");
-	    		
-	    	} else if (kn.equals("1.3.6.1.5.5.7.3.22") ) {
-	    		buff.append( "eku_pkix_sshserver ");
-	    		
-	    	} else if (kn.equals("1.3.6.1.5.5.7.3.21") ) {
-	    		buff.append( "eku_pkix_sshclient ");
-	   
-	    	} else {	
-	    		    	
-	    		buff.append( CipherSuiteUtil.getOIDKeyName(i.toString()) );
-	    		buff.append( "=" );
-	    	
-	    	}
-	    	
-	    } else if (primitive instanceof DERVisibleString ) {
-	    	
-	    	DERVisibleString vstring = (DERVisibleString)primitive;
-	    	buff.append( vstring.getString() );
-	    	//buff.append( ' ' );
-	    	
-	    } else if (primitive instanceof DERIA5String ) {
-	    	
-	    	DERIA5String ia5string = (DERIA5String)primitive;
-	    	buff.append( ia5string.getString() );
-	    	//buff.append( ' ' );
-	    	
-	    } else if (primitive instanceof DERUTF8String ) {
-	    	
-	    	DERUTF8String utf8string = (DERUTF8String)primitive;
-	    	buff.append( utf8string.toString() );
-	    	//buff.append( ' ' );
-	    	
-	    } else if (primitive instanceof DERBitString ) {
-	    	
-	    	DERBitString bitstring = (DERBitString)primitive;
-	    	int v = bitstring.intValue();
-	    
-		    	
-		    if( (v & 0x1) == 1 )
-		    	buff.append( "digitial_signature ");
-		    
-		    if ((v & 0x2) == 2)
-		    	buff.append( "nonrepudiation ");
-		    	
-		    if ((v & 0x4) == 4)
-		    	buff.append( "keyencipherment ");
+		// SEQUENCE or SET (constructed)
+		} else if (tag == DerParser.TAG_SEQUENCE || tag == DerParser.TAG_SET || derValue.isConstructed()) {
+			List<DerParser.DerValue> elements;
+			if (tag == DerParser.TAG_SET) {
+				elements = derValue.getSet();
+			} else {
+				elements = derValue.getSequence();
+			}
+			for (DerParser.DerValue element : elements) {
+				walkASN1Sequence(element, buff);
+			}
 
-			if ((v & 0x8) == 8)
-		    	buff.append( "dataencipherment ");
+		// OBJECT IDENTIFIER
+		} else if (tag == DerParser.TAG_OBJECT_IDENTIFIER) {
+			String oid = derValue.getObjectIdentifier();
+			String kn = CipherSuiteUtil.getOIDKeyName(oid);
 
-			if ((v & 0x16) == 16)
-		    	buff.append( "keyagreement ");
+			if (kn.equals("2.5.29.37.0")) {
+				buff.append("anyextendedkeyusage ");
+			} else if (kn.equals("1.3.6.1.5.5.7.3.1")) {
+				buff.append("serverauth ");
+			} else if (kn.equals("1.3.6.1.5.5.7.3.2")) {
+				buff.append("clientauth ");
+			} else if (kn.equals("1.3.6.1.5.5.7.3.3")) {
+				buff.append("codesigning ");
+			} else if (kn.equals("1.3.6.1.5.5.7.3.4")) {
+				buff.append("emailprotection ");
+			} else if (kn.equals("1.3.6.1.5.5.7.3.8")) {
+				buff.append("timestamping ");
+			} else if (kn.equals("1.3.6.1.5.5.7.3.9")) {
+				buff.append("ocspsigner ");
+			} else if (kn.equals("1.3.6.1.5.5.7.3.15")) {
+				buff.append("scvpserver ");
+			} else if (kn.equals("1.3.6.1.5.5.7.3.16")) {
+				buff.append("scvpclient ");
+			} else if (kn.equals("1.3.6.1.5.5.7.3.22")) {
+				buff.append("eku_pkix_sshserver ");
+			} else if (kn.equals("1.3.6.1.5.5.7.3.21")) {
+				buff.append("eku_pkix_sshclient ");
+			} else {
+				buff.append(CipherSuiteUtil.getOIDKeyName(oid));
+				buff.append("=");
+			}
 
-			if ((v & 0x32) == 32)
-		    	buff.append( "keycertsign ");
-		    	
-			if ((v & 0x64) == 64)
-		    	buff.append( "crlsign ");
-		    	
-			if ((v & 0x128) == 128)
-		    	buff.append( "encipheronly ");
-		    		
-			if ((v & 0x256) == 256)
-		    	buff.append( "decipherOnly ");
+		// VisibleString
+		} else if (tag == DerParser.TAG_VISIBLE_STRING) {
+			buff.append(derValue.getVisibleString());
 
-	    	
-	    } else if (primitive instanceof ASN1Boolean ) {
-	    	
-	    	ASN1Boolean ans1boolean = (ASN1Boolean)primitive;
-	    	buff.append( ans1boolean.isTrue() ? "TRUE" : "FALSE" );
-	    	//buff.append( ' ' );
-	    	
-	    } else if (primitive instanceof ASN1Integer ) {
-	    	
-	    	ASN1Integer ans1int = (ASN1Integer)primitive;
-	    	buff.append( ans1int.toString() );
-	    	//buff.append( ' ' );
-	    	
-	    } else if (primitive instanceof DERSet ) {
-	    	
-	    	DERSet derset = (DERSet)primitive;
-	    	buff.append( derset.toString() );
-	    	//buff.append( ' ' );
-	    	
-	    // Assistance fm http://stackoverflow.com/questions/16058889/java-bouncy-castle-ocsp-url
-	    } else if (primitive instanceof DERTaggedObject ) {
-	    	
-	    	DERTaggedObject t = (DERTaggedObject)primitive;
-	    	byte[] b = t.getEncoded();
-            int length = b[1];
-	    	
-	    	if( t.getTagNo() == 6 ) { // Several
-	            buff.append( new String(b, 2, length) );
-	            buff.append( " | ");
-	    	} else if( t.getTagNo() == 2 ) { // SubjectAlternativeName
-		        buff.append( new String(b, 2, length) );
-		        buff.append( " | ");
-	    	} else if( t.getTagNo() == 1 ) { // NameContraints
-	    		ASN1Primitive p = t.getObject();
-	    		walkASN1Sequence( p, buff ); 
-	    	} else if( t.getTagNo() == 0 ) { // CRLDistributionPoints	
-	    		ASN1Primitive p = t.getObject();
-	    		walkASN1Sequence( p, buff ); 
-	    	} else if( t.getTagNo() == 4 ) { // AuthorityKeyIdentifier	
-	    		ASN1Primitive p = t.getObject();
-	    		walkASN1Sequence( p, buff ); 
-	    	} else {
-	    		
-	    		StringBuffer buff2 = new StringBuffer();
-	    		
-	    		buff2.append( "type="+t.getTagNo()+" ");
-	            String hex = CipherSuiteUtil.byteArrayToHex(b);
-	            buff2.append( hex );
-	            buff2.append( " | ");
-	    		
-	            buff.append(buff2.toString());
-	            
-	    		logger.info("Unhandled DERTaggedObject type. RAW="+buff2.toString() );
-	    	}
-	    	
-	    } else {
-	    	
-            buff.append( "Unhandled type, see log" );
-            buff.append( " | ");
-	    	
-    		logger.error("Unhandled primitive data type, type="+primitive.getClass().getName() );
-	    	
-	    }
-	    
+		// IA5String
+		} else if (tag == DerParser.TAG_IA5_STRING) {
+			buff.append(derValue.getIA5String());
+
+		// UTF8String
+		} else if (tag == DerParser.TAG_UTF8_STRING) {
+			buff.append(derValue.getUTF8String());
+
+		// PrintableString
+		} else if (tag == DerParser.TAG_PRINTABLE_STRING) {
+			buff.append(derValue.getPrintableString());
+
+		// BIT STRING (KeyUsage)
+		// X.509 KeyUsage bits are numbered from MSB: bit 0 = 0x80, bit 1 = 0x40, etc.
+		} else if (tag == DerParser.TAG_BIT_STRING) {
+			byte[] bits = derValue.getBitString();
+			int byte0 = (bits.length > 0) ? (bits[0] & 0xFF) : 0;
+			int byte1 = (bits.length > 1) ? (bits[1] & 0xFF) : 0;
+
+			// Bit 0 (MSB of byte 0) = digitalSignature
+			if ((byte0 & 0x80) != 0)
+				buff.append("digitalSignature ");
+			// Bit 1 = nonRepudiation (aka contentCommitment)
+			if ((byte0 & 0x40) != 0)
+				buff.append("nonRepudiation ");
+			// Bit 2 = keyEncipherment
+			if ((byte0 & 0x20) != 0)
+				buff.append("keyEncipherment ");
+			// Bit 3 = dataEncipherment
+			if ((byte0 & 0x10) != 0)
+				buff.append("dataEncipherment ");
+			// Bit 4 = keyAgreement
+			if ((byte0 & 0x08) != 0)
+				buff.append("keyAgreement ");
+			// Bit 5 = keyCertSign
+			if ((byte0 & 0x04) != 0)
+				buff.append("keyCertSign ");
+			// Bit 6 = cRLSign
+			if ((byte0 & 0x02) != 0)
+				buff.append("cRLSign ");
+			// Bit 7 = encipherOnly
+			if ((byte0 & 0x01) != 0)
+				buff.append("encipherOnly ");
+			// Bit 8 (MSB of byte 1) = decipherOnly
+			if ((byte1 & 0x80) != 0)
+				buff.append("decipherOnly ");
+
+		// BOOLEAN
+		} else if (tag == DerParser.TAG_BOOLEAN) {
+			buff.append(derValue.getBoolean() ? "TRUE" : "FALSE");
+
+		// INTEGER
+		} else if (tag == DerParser.TAG_INTEGER) {
+			buff.append(derValue.getInteger().toString());
+
+		// ENUMERATED
+		} else if (tag == DerParser.TAG_ENUMERATED) {
+			buff.append(derValue.getEnumValue());
+
+		// NULL - just skip it, nothing to output
+		} else if (tag == DerParser.TAG_NULL) {
+			// NULL has no content, skip
+
+		// Context-specific tagged objects
+		} else if (derValue.isContextSpecific()) {
+			int tagNo = derValue.getContextTag();
+			byte[] rawValue = derValue.getValue();
+
+			if (tagNo == 6) { // URI
+				buff.append(new String(rawValue, java.nio.charset.StandardCharsets.UTF_8));
+				buff.append(" | ");
+			} else if (tagNo == 2) { // SubjectAlternativeName (dNSName)
+				buff.append(new String(rawValue, java.nio.charset.StandardCharsets.UTF_8));
+				buff.append(" | ");
+			} else if (tagNo == 1 || tagNo == 0 || tagNo == 4) {
+				// NameConstraints, CRLDistributionPoints, AuthorityKeyIdentifier
+				if (derValue.isConstructed()) {
+					List<DerParser.DerValue> elements = derValue.getTaggedSequence();
+					for (DerParser.DerValue element : elements) {
+						walkASN1Sequence(element, buff);
+					}
+				} else {
+					try {
+						DerParser.DerValue inner = DerParser.parse(rawValue);
+						walkASN1Sequence(inner, buff);
+					} catch (IOException e) {
+						buff.append(byteArrayToHex(rawValue));
+					}
+				}
+			} else {
+				StringBuilder buff2 = new StringBuilder();
+				buff2.append("type=").append(tagNo).append(" ");
+				String hex = CipherSuiteUtil.byteArrayToHex(rawValue);
+				buff2.append(hex);
+				buff2.append(" | ");
+				buff.append(buff2.toString());
+				logger.info("Unhandled ASN1TaggedObject type. RAW=" + buff2.toString());
+			}
+
+		} else {
+			buff.append("Unhandled type, see log");
+			buff.append(" | ");
+			logger.error("Unhandled primitive data type, tag=0x" + Integer.toHexString(tag));
+		}
 	}
 
 	/**
@@ -1309,9 +1304,9 @@ class CipherSuiteUtil {
 	 * @throws IOException
 	 */
 	static final String getExtensionValue(X509Certificate X509Certificate, String oid) throws IOException {
-		
-		StringBuffer buff = new StringBuffer();
-		
+
+		StringBuilder buff = new StringBuilder();
+
 		buff.append('[');
 		
 	    byte[] extensionValue = X509Certificate.getExtensionValue(oid);
@@ -1337,34 +1332,92 @@ class CipherSuiteUtil {
 	}
 	   
 
-	//************************************************************
-	//************************************************************
-	//************************************************************
-	//************************************************************
-	//************************************************************
-	
-	/*
-	 * Connect to the server, send a ClientHello, and decode the
-	 * response (ServerHello). On error, null is returned.
+	/**
+	 * Connect to the server using {@link TlsSocket} and return handshake metadata.
+	 * This is the preferred connection method for new code.
+	 * @param isa server address and port
+	 * @param version TLS protocol version to advertise
+	 * @param cipherSuites cipher suite IDs to offer in the ClientHello
+	 * @param hostname SNI hostname for the TLS handshake
+	 * @return handshake metadata, or null if the connection failed
+	 */
+	static TlsMetadata connectDVTls(InetSocketAddress isa, int version,
+			Collection<Integer> cipherSuites, String hostname) {
+		try {
+			ClientHelloConfig config = new ClientHelloConfig()
+					.setTlsVersion(version)
+					.setCipherSuites(new ArrayList<>(cipherSuites))
+					.setIncludeStatusRequest(true);
+
+			if (version >= 0x0304) {
+				config.setIncludeKeyShare(true)
+					  .setSupportedVersions(Arrays.asList(version, 0x0303, 0x0302, 0x0301));
+			} else {
+				config.setSupportedVersions(Arrays.asList(version));
+			}
+
+			TlsSocket socket = new TlsSocket(hostname, isa.getPort());
+			socket.setClientHelloConfig(config);
+			socket.setConnectTimeoutMs(5000);
+			socket.setReadTimeoutMs(10000);
+
+			try {
+				TlsMetadata metadata = socket.performHandshake();
+				if (metadata.isConnectionSucceeded()) {
+					return metadata;
+				}
+			} finally {
+				socket.close();
+			}
+		} catch (Exception e) {
+			// Connection failed
+			logger.debug("TlsSocket connection failed: {}", e.getMessage());
+		}
+		return null;
+	}
+
+	/**
+	 * Send a ClientHello and decode the ServerHello response, using the host from the address for SNI.
+	 * @param isa server address
+	 * @param version TLS/SSL version to advertise
+	 * @param cipherSuites cipher suite IDs to offer
+	 * @return parsed ServerHello, or null on error
 	 */
 	static CipherSuiteUtilServerHello connect(InetSocketAddress isa,
 		int version, Collection<Integer> cipherSuites)
+	{
+		return connect(isa, version, cipherSuites, isa.getHostName());
+	}
+
+	/**
+	 * Send a ClientHello with the specified SNI hostname and decode the ServerHello response.
+	 * @param isa server address
+	 * @param version TLS/SSL version to advertise
+	 * @param cipherSuites cipher suite IDs to offer
+	 * @param hostname SNI hostname to include in the ClientHello extension
+	 * @return parsed ServerHello, or null on error
+	 */
+	static CipherSuiteUtilServerHello connect(InetSocketAddress isa,
+		int version, Collection<Integer> cipherSuites, String hostname)
 	{
 		Socket s = null;
 		try {
 			s = new Socket();
 			try {
-				s.connect(isa);
+				s.connect(isa, CONNECT_TIMEOUT_MS);
+				s.setSoTimeout(READ_TIMEOUT_MS);
 			} catch (IOException ioe) {
 				logger.error("could not connect to "
 					+ isa + ": " + ioe.toString());
 				return null;
 			}
-			byte[] ch = makeClientHello(version, cipherSuites);
+			// For TLS 1.3, still advertise TLS 1.2 in the record layer
+			int recordVersion = (version >= 0x0304) ? 0x0303 : version;
+			byte[] ch = makeClientHello(version, cipherSuites, hostname);
 			OutputRecord orec = new OutputRecord(
 				s.getOutputStream());
 			orec.setType(HANDSHAKE);
-			orec.setVersion(version);
+			orec.setVersion(recordVersion);
 			orec.write(ch);
 			orec.flush();
 			return new CipherSuiteUtilServerHello(s.getInputStream());
@@ -1380,9 +1433,10 @@ class CipherSuiteUtil {
 		return null;
 	}
 	
-	/*
-	 * Connect to the server, send a SSLv2 CLIENT HELLO, and decode
-	 * the response (SERVER HELLO). On error, null is returned.
+	/**
+	 * Send an SSLv2 CLIENT HELLO and decode the SSLv2 SERVER HELLO response.
+	 * @param isa server address
+	 * @return parsed SSLv2 ServerHello, or null on error
 	 */
 	static ServerHelloSSLv2 connectV2(InetSocketAddress isa)
 	{
@@ -1390,7 +1444,8 @@ class CipherSuiteUtil {
 		try {
 			s = new Socket();
 			try {
-				s.connect(isa);
+				s.connect(isa, CONNECT_TIMEOUT_MS);
+				s.setSoTimeout(READ_TIMEOUT_MS);
 			} catch (IOException ioe) {
 				logger.error("could not connect to "
 					+ isa + ": " + ioe.toString());
@@ -1410,12 +1465,26 @@ class CipherSuiteUtil {
 		return null;
 	}
 	
+	/**
+	 * Read exactly {@code buf.length} bytes from the input stream into the buffer.
+	 * @param in input stream to read from
+	 * @param buf destination buffer
+	 * @throws IOException if the stream ends before the buffer is filled
+	 */
 	static void readFully(InputStream in, byte[] buf)
 			throws IOException
 		{
 			readFully(in, buf, 0, buf.length);
 		}
 
+	/**
+	 * Read exactly {@code len} bytes from the input stream into the buffer at the given offset.
+	 * @param in input stream to read from
+	 * @param buf destination buffer
+	 * @param off offset in the buffer to start writing
+	 * @param len number of bytes to read
+	 * @throws IOException if the stream ends before all bytes are read
+	 */
 	static void readFully(InputStream in, byte[] buf, int off, int len)
 		throws IOException
 	{
@@ -1494,12 +1563,21 @@ class CipherSuiteUtil {
 	}
 
 	
+	/** Encode a 16-bit value in big-endian order into a byte array. */
 	static final void enc16be(int val, byte[] buf, int off)
 	{
 		buf[off] = (byte)(val >>> 8);
 		buf[off + 1] = (byte)val;
 	}
 
+	/** Encode a 16-bit value in big-endian order to an output stream. */
+	static final void enc16be(int val, ByteArrayOutputStream out)
+	{
+		out.write(val >>> 8);
+		out.write(val);
+	}
+
+	/** Encode a 24-bit value in big-endian order into a byte array. */
 	static final void enc24be(int val, byte[] buf, int off)
 	{
 		buf[off] = (byte)(val >>> 16);
@@ -1507,6 +1585,7 @@ class CipherSuiteUtil {
 		buf[off + 2] = (byte)val;
 	}
 
+	/** Encode a 32-bit value in big-endian order into a byte array. */
 	static final void enc32be(int val, byte[] buf, int off)
 	{
 		buf[off] = (byte)(val >>> 24);
@@ -1515,12 +1594,14 @@ class CipherSuiteUtil {
 		buf[off + 3] = (byte)val;
 	}
 
+	/** Decode a 16-bit big-endian value from a byte array. */
 	static final int dec16be(byte[] buf, int off)
 	{
 		return ((buf[off] & 0xFF) << 8)
 			| (buf[off + 1] & 0xFF);
 	}
 
+	/** Decode a 24-bit big-endian value from a byte array. */
 	static final int dec24be(byte[] buf, int off)
 	{
 		return ((buf[off] & 0xFF) << 16)
@@ -1528,6 +1609,7 @@ class CipherSuiteUtil {
 			| (buf[off + 2] & 0xFF);
 	}
 
+	/** Decode a 32-bit big-endian value from a byte array. */
 	static final int dec32be(byte[] buf, int off)
 	{
 		return ((buf[off] & 0xFF) << 24)
@@ -1536,15 +1618,23 @@ class CipherSuiteUtil {
 			| (buf[off + 3] & 0xFF);
 	}
 
-	/*
-	 * Compute the SHA-1 hash of some bytes, returning the hash
-	 * value in hexadecimal.
+	/**
+	 * Compute the SHA-1 hash of a byte array and return it as a lowercase hex string.
+	 * @param buf bytes to hash
+	 * @return SHA-1 hash in hexadecimal
 	 */
 	static String doSHA1(byte[] buf)
 	{
 		return doSHA1(buf, 0, buf.length);
 	}
 
+	/**
+	 * Compute the SHA-1 hash of a byte range and return it as a lowercase hex string.
+	 * @param buf source byte array
+	 * @param off starting offset
+	 * @param len number of bytes to hash
+	 * @return SHA-1 hash in hexadecimal
+	 */
 	static String doSHA1(byte[] buf, int off, int len)
 	{
 		try {
@@ -1561,22 +1651,35 @@ class CipherSuiteUtil {
 		}
 	}
 	
-	/*
-	 * Build a ClientHello message, with the specified maximum
-	 * supported version, and list of cipher suites.
+	/**
+	 * Build a TLS ClientHello message with the specified version, cipher suites, and SNI hostname.
+	 * @param version maximum TLS version to advertise
+	 * @param cipherSuites cipher suite IDs to include
+	 * @param hostname SNI hostname (may be null to omit the extension)
+	 * @return encoded ClientHello message bytes
 	 */
 	static byte[] makeClientHello(int version,
-		Collection<Integer> cipherSuites)
+		Collection<Integer> cipherSuites, String hostname)
 	{
 		try {
-			return makeClientHello0(version, cipherSuites);
+			return makeClientHello0(version, cipherSuites, hostname);
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe);
 		}
 	}
 
+	/**
+	 * Internal implementation that assembles the raw ClientHello byte sequence.
+	 * Includes SNI, supported_versions, signature_algorithms, supported_groups,
+	 * key_share (TLS 1.3), and ec_point_formats extensions.
+	 * @param version maximum TLS version to advertise
+	 * @param cipherSuites cipher suite IDs to include
+	 * @param hostname SNI hostname (may be null)
+	 * @return encoded ClientHello message bytes
+	 * @throws IOException on stream write errors
+	 */
 	static byte[] makeClientHello0(int version,
-		Collection<Integer> cipherSuites)
+		Collection<Integer> cipherSuites, String hostname)
 		throws IOException
 	{
 		ByteArrayOutputStream b = new ByteArrayOutputStream();
@@ -1594,9 +1697,12 @@ class CipherSuiteUtil {
 
 		/*
 		 * The maximum version that we intend to support.
+		 * For TLS 1.3, we still use 0x0303 (TLS 1.2) here
+		 * and indicate TLS 1.3 via supported_versions extension.
 		 */
-		b.write(version >>> 8);
-		b.write(version);
+		int legacyVersion = (version >= 0x0304) ? 0x0303 : version;
+		b.write(legacyVersion >>> 8);
+		b.write(legacyVersion);
 
 		/*
 		 * The client random has length 32 bytes, but begins with
@@ -1629,17 +1735,147 @@ class CipherSuiteUtil {
 		b.write(cs);
 
 		/*
-		 * Compression methods: we claim to support Deflate (1)
-		 * and the standard no-compression (0), with Deflate
-		 * being preferred.
+		 * Compression methods: for TLS 1.3 (RFC 8446), MUST be exactly
+		 * one byte set to 0x00. For older versions, we also claim
+		 * to support Deflate (1) for CRIME attack detection.
 		 */
-		b.write(2);
-		b.write(1);
-		b.write(0);
+		if (version >= 0x0304) {
+			b.write(1);  // 1 compression method
+			b.write(0);  // null compression only (TLS 1.3 requirement)
+		} else {
+			b.write(2);
+			b.write(1);
+			b.write(0);
+		}
 
 		/*
-		 * If we had extensions to add, they would go here.
+		 * TLS Extensions - required by modern servers.
 		 */
+		ByteArrayOutputStream extensions = new ByteArrayOutputStream();
+
+		// SNI (Server Name Indication) extension - type 0x0000
+		// Required by most modern servers for virtual hosting
+		if (hostname != null && hostname.length() > 0) {
+			byte[] hostnameBytes = hostname.getBytes("ASCII");
+			int sniDataLen = hostnameBytes.length + 5; // 2 (list len) + 1 (type) + 2 (name len) + hostname
+			extensions.write(0x00); // extension type high byte
+			extensions.write(0x00); // extension type low byte (SNI = 0)
+			enc16be(sniDataLen, extensions);
+			enc16be(hostnameBytes.length + 3, extensions); // server name list length
+			extensions.write(0x00); // name type: host_name (0)
+			enc16be(hostnameBytes.length, extensions);
+			extensions.write(hostnameBytes);
+		}
+
+		// supported_versions extension - type 0x002b (43)
+		// Required for TLS 1.3 negotiation
+		extensions.write(0x00); // extension type high byte
+		extensions.write(0x2b); // extension type low byte (supported_versions = 43)
+		// For TLS 1.3: list all versions we want to try
+		// For older versions: just list that version
+		if (version >= 0x0304) {
+			// TLS 1.3 - list TLS 1.3, 1.2, 1.1, 1.0
+			extensions.write(0x00); // extension length high byte
+			extensions.write(0x09); // extension length low byte (1 + 4*2 = 9)
+			extensions.write(0x08); // versions length (4 versions * 2 bytes)
+			extensions.write(0x03); extensions.write(0x04); // TLS 1.3
+			extensions.write(0x03); extensions.write(0x03); // TLS 1.2
+			extensions.write(0x03); extensions.write(0x02); // TLS 1.1
+			extensions.write(0x03); extensions.write(0x01); // TLS 1.0
+		} else {
+			// Older version - just list requested version
+			extensions.write(0x00); // extension length high byte
+			extensions.write(0x03); // extension length low byte
+			extensions.write(0x02); // versions length
+			extensions.write(version >>> 8);
+			extensions.write(version);
+		}
+
+		// signature_algorithms extension - type 0x000d (13)
+		// Required by many servers, especially for TLS 1.2+
+		extensions.write(0x00); // extension type high byte
+		extensions.write(0x0d); // extension type low byte (signature_algorithms = 13)
+		extensions.write(0x00); // extension length high byte
+		extensions.write(0x14); // extension length low byte (20 bytes)
+		extensions.write(0x00); // algorithms length high byte
+		extensions.write(0x12); // algorithms length low byte (18 bytes = 9 algorithms)
+		// RSA-PSS algorithms (TLS 1.3)
+		extensions.write(0x08); extensions.write(0x04); // rsa_pss_rsae_sha256
+		extensions.write(0x08); extensions.write(0x05); // rsa_pss_rsae_sha384
+		extensions.write(0x08); extensions.write(0x06); // rsa_pss_rsae_sha512
+		// ECDSA algorithms
+		extensions.write(0x04); extensions.write(0x03); // ecdsa_secp256r1_sha256
+		extensions.write(0x05); extensions.write(0x03); // ecdsa_secp384r1_sha384
+		extensions.write(0x06); extensions.write(0x03); // ecdsa_secp521r1_sha512
+		// RSA PKCS#1 algorithms (legacy)
+		extensions.write(0x04); extensions.write(0x01); // rsa_pkcs1_sha256
+		extensions.write(0x05); extensions.write(0x01); // rsa_pkcs1_sha384
+		extensions.write(0x06); extensions.write(0x01); // rsa_pkcs1_sha512
+
+		// supported_groups extension - type 0x000a (10)
+		// Required for key exchange, especially ECDHE
+		extensions.write(0x00); // extension type high byte
+		extensions.write(0x0a); // extension type low byte (supported_groups = 10)
+		extensions.write(0x00); // extension length high byte
+		extensions.write(0x08); // extension length low byte
+		extensions.write(0x00); // groups length high byte
+		extensions.write(0x06); // groups length low byte (3 groups * 2 bytes)
+		extensions.write(0x00); extensions.write(0x17); // secp256r1
+		extensions.write(0x00); extensions.write(0x18); // secp384r1
+		extensions.write(0x00); extensions.write(0x19); // secp521r1
+
+		// key_share extension - type 0x0033 (51)
+		// Required for TLS 1.3: provide ephemeral ECDH key share
+		if (version >= 0x0304) {
+			try {
+				java.security.KeyPairGenerator kpg = java.security.KeyPairGenerator.getInstance("EC");
+				kpg.initialize(new java.security.spec.ECGenParameterSpec("secp256r1"));
+				java.security.KeyPair kp = kpg.generateKeyPair();
+				java.security.interfaces.ECPublicKey ecPub = (java.security.interfaces.ECPublicKey) kp.getPublic();
+				// Encode as uncompressed point: 04 || x || y (65 bytes for secp256r1)
+				byte[] x = ecPub.getW().getAffineX().toByteArray();
+				byte[] y = ecPub.getW().getAffineY().toByteArray();
+				byte[] point = new byte[65];
+				point[0] = 0x04;
+				// Copy x (right-aligned, 32 bytes)
+				int xOff = x.length > 32 ? x.length - 32 : 0;
+				int xLen = Math.min(x.length, 32);
+				System.arraycopy(x, xOff, point, 1 + (32 - xLen), xLen);
+				// Copy y (right-aligned, 32 bytes)
+				int yOff = y.length > 32 ? y.length - 32 : 0;
+				int yLen = Math.min(y.length, 32);
+				System.arraycopy(y, yOff, point, 33 + (32 - yLen), yLen);
+
+				// key_share extension structure:
+				// 2 bytes: client_shares length
+				// 2 bytes: named group (0x0017 = secp256r1)
+				// 2 bytes: key_exchange length (65)
+				// 65 bytes: key_exchange data
+				int keyShareDataLen = 2 + 2 + 2 + point.length; // 71
+				extensions.write(0x00); // extension type high byte
+				extensions.write(0x33); // extension type low byte (key_share = 51)
+				enc16be(keyShareDataLen, extensions); // extension data length
+				enc16be(2 + 2 + point.length, extensions); // client_shares length (69)
+				extensions.write(0x00); extensions.write(0x17); // named group: secp256r1
+				enc16be(point.length, extensions); // key_exchange length
+				extensions.write(point);
+			} catch (Exception e) {
+				logger.warn("Failed to generate key_share for TLS 1.3", e);
+			}
+		}
+
+		// ec_point_formats extension - type 0x000b (11)
+		extensions.write(0x00); // extension type high byte
+		extensions.write(0x0b); // extension type low byte (ec_point_formats = 11)
+		extensions.write(0x00); // extension length high byte
+		extensions.write(0x02); // extension length low byte
+		extensions.write(0x01); // formats length
+		extensions.write(0x00); // uncompressed
+
+		// Write extensions to main buffer
+		byte[] extBytes = extensions.toByteArray();
+		enc16be(extBytes.length, b);
+		b.write(extBytes);
 
 		/*
 		 * We now get the message as a blob. The message length
@@ -1650,6 +1886,11 @@ class CipherSuiteUtil {
 		return msg;
 	}
 	
+	/**
+	 * Convert a strength constant to a human-readable description.
+	 * @param strength one of UNASSIGNED, CLEAR, WEAK, MEDIUM, or STRONG
+	 * @return descriptive string (e.g., "strong encryption (96-bit or more)")
+	 */
 	static final String strengthString(int strength)
 	{
 		switch (strength) {
@@ -1665,37 +1906,45 @@ class CipherSuiteUtil {
 
 
 	
-	static final String cipherSuiteString(int suite, IDVSession.CIPHER_NAME_CONVENTION cipher_name_convention)
+	/**
+	 * Look up the name of a cipher suite by its numeric ID, using the given naming convention.
+	 * @param suite cipher suite ID
+	 * @param cipher_name_convention naming convention (IANA, OpenSSL, etc.)
+	 * @return cipher suite name, or "TLS_UNIDENTIFIED(0xXXXX)" if not found
+	 */
+	static final String cipherSuiteString(int suite, ISession.CIPHER_NAME_CONVENTION cipher_name_convention)
 	{
+		ensureCipherMapInitialized();
 		CipherSuite cs = CIPHER_SUITES.get(suite);
-		String ciphername = String.format("UNKNOWN_SUITE:%04X", suite);
+		String ciphername = String.format("TLS_UNIDENTIFIED(0x%04X)", suite);
 		
-		//Need to map Enum name to String name of the ciphersuite since that's way it's stored in JSON.
+		//Need to map Enum name to String name of the cipher suite since that's way it's stored in JSON.
 		if( cs != null ) {
 			ciphername = (String)cs.names.get(cipher_name_convention.toString());
 		}
 		return ciphername;
 	}
 
-	static final String cipherSuiteStringV2(int suite, IDVSession.CIPHER_NAME_CONVENTION cipher_name_convention)
+	/**
+	 * Look up the name of an SSLv2 cipher suite by its numeric ID, using the given naming convention.
+	 * @param suite SSLv2 cipher suite ID (3-byte encoding)
+	 * @param cipher_name_convention naming convention (IANA, OpenSSL, etc.)
+	 * @return cipher suite name, or "TLS_UNIDENTIFIED(0xXX,XX,XX)" if not found
+	 */
+	static final String cipherSuiteStringV2(int suite, ISession.CIPHER_NAME_CONVENTION cipher_name_convention)
 	{
 		CipherSuite cs = CIPHER_SUITES.get(suite);
-		String ciphername = String.format("UNKNOWN_SUITE:%02X,%02X,%02X",
+		String ciphername = String.format("TLS_UNIDENTIFIED(0x%02X,%02X,%02X)",
 				suite >> 16, (suite >> 8) & 0xFF, suite & 0XFF);
 		
-		//Need to map Enum name to String name of the ciphersuite since that's way it's stored in JSON.
+		//Need to map Enum name to String name of the cipher suite since that's way it's stored in JSON.
 		if (cs != null) {
 			ciphername = (String)cs.names.get(cipher_name_convention.toString());
 		}
 		return ciphername; 
 	}
 
-	//*****************************************************************
-	//*****************************************************************
 	//todo need to fix this asap
-	//*****************************************************************
-	//*****************************************************************
-	
 	private static final void makeCS(int suite, Map names, int strength)
 	{
 		CipherSuite cs = new CipherSuite();
@@ -1704,109 +1953,7 @@ class CipherSuiteUtil {
 //		cs.isCBC = isCBC;
 		cs.strength = strength;
 		CIPHER_SUITES.put(suite, cs);
-		
-
-//		/*
-//		 * Consistency test: the strength and CBC status can normally
-//		 * be inferred from the name itself.
-//		 */
-//		boolean inferredCBC = name.contains("_CBC_");
-//		int inferredStrength;
-//		if (name.contains("_NULL_")) {
-//			inferredStrength = CLEAR;
-//		} else if (name.contains("DES40") || name.contains("_40_")
-//			|| name.contains("EXPORT40"))
-//		{
-//			inferredStrength = WEAK;
-//		} else if ((name.contains("_DES_") || name.contains("DES_64"))
-//			&& !name.contains("DES_192"))
-//		{
-//			inferredStrength = MEDIUM;
-//		} else {
-//			inferredStrength = STRONG;
-//		}
-//		if (inferredStrength != strength || inferredCBC != isCBC) {
-//			throw new RuntimeException(
-//				"wrong classification: " + name);
-//		}
 	}
-
-//	private static final void N(int suite, String name)
-//	{
-//		makeCS(suite, name, false, CLEAR);
-//	}
-//
-//	private static final void S4(int suite, String name)
-//	{
-//		makeCS(suite, name, false, WEAK);
-//	}
-//
-//	private static final void S8(int suite, String name)
-//	{
-//		makeCS(suite, name, false, STRONG);
-//	}
-//
-//	private static final void B4(int suite, String name)
-//	{
-//		makeCS(suite, name, true, WEAK);
-//	}
-//
-//	private static final void B5(int suite, String name)
-//	{
-//		makeCS(suite, name, true, MEDIUM);
-//	}
-//
-//	private static final void B8(int suite, String name)
-//	{
-//		makeCS(suite, name, true, STRONG);
-//	}
-	
-	static boolean testBEAST(InetSocketAddress isa,
-			int version, Set<Integer> supp)
-		{
-			/*
-			 * TLS 1.1+ is not vulnerable to BEAST.
-			 * We do not test SSLv2 either.
-			 */
-			if (version < 0x0300 || version > 0x0301) {
-				return false;
-			}
-
-			/*
-			 * BEAST attack works if the server allows the client to
-			 * use a CBC cipher. Existing clients also supports RC4,
-			 * so we consider that a server protects the clients if
-			 * it chooses RC4 over CBC streams when given the choice.
-			 * We only consider strong cipher suites here.
-			 */
-			List<Integer> strongCBC = new ArrayList<Integer>();
-			List<Integer> strongStream = new ArrayList<Integer>();
-			for (int suite : supp) {
-				CipherSuite cs = CIPHER_SUITES.get(suite);
-				if (cs == null) {
-					continue;
-				}
-				if (cs.strength < STRONG) {
-					continue;
-				}
-//				if (cs.isCBC) {
-//					strongCBC.add(suite);
-//				} else {
-//					strongStream.add(suite);
-//				}
-			}
-			if (strongCBC.size() == 0) {
-				return false;
-			}
-			if (strongStream.size() == 0) {
-				return true;
-			}
-			List<Integer> ns = new ArrayList<Integer>(strongCBC);
-			ns.addAll(strongStream);
-			CipherSuiteUtilServerHello sh = connect(isa, version, ns);
-			return !strongStream.contains(sh.cipherSuite);
-		}
-
 	
 }
 

@@ -3,6 +3,10 @@ package com.mps.deepviolet.api;
 import java.net.URL;
 import java.util.List;
 
+/**
+ * Interface for accessing server metadata organized by feature and key.
+ * Supports scalar (String) and vector (String[]) values with cache expiration.
+ */
 interface ServerMetadata {
 
 	public URL getHost();

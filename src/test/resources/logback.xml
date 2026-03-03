@@ -6,23 +6,22 @@
        <pattern>%msg%n</pattern>
       </encoder>
   </appender>
-  
+
    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-    <!--  ${dv_user_directory} is OS dependent and set by DeepViolet -->
-   	<file>${dv_user_directory}deepviolet.log</file>
+   	<file>target/deepviolet.log</file>
     <encoder>
       <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level [%file:%line] - %msg%n</pattern>
     </encoder>
   </appender>
-     
+
    <!-- sink logback messages for now, noisy -->
    <logger name="ch.qos.logback" level="ERROR" additivity="false">
    		 <appender-ref ref="FILE" />
    </logger>
-     
-  <root level="${dv_user_level}">
+
+  <root level="INFO">
     <appender-ref ref="STDOUT" />
     <appender-ref ref="FILE" />
   </root>
-  
+
 </configuration>

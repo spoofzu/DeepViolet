@@ -1,49 +1,43 @@
 package com.mps.deepviolet.api;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.IOException;
-import java.util.HashMap;
+import java.io.InputStream;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.snakeyaml.engine.v2.api.Load;
+import org.snakeyaml.engine.v2.api.LoadSettings;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mps.deepviolet.api.JsonLdrCipherMap;
-import com.mps.deepviolet.api.JsonLdrConfiguration;
-import com.mps.deepviolet.api.JsonLdrMozillaCerts;
 import com.mps.deepviolet.util.FileUtils;
 
 public class FileUtilsTest {
 
 	@Test
-	public void testReadCiphermapFromJSON() throws JsonParseException, JsonMappingException, IOException {
-		JsonLdrCipherMap map = FileUtils.readCiphermapFromJSON("./src/main/resources/ciphermap.json");
-		assertNotNull(map);
-		JsonLdrMozillaCerts certs = FileUtils.readMozillaCertsFromJSON("./src/main/resources/server-side-tls-conf-4.0.json");
-		assertNotNull(certs);
+	public void testGetWorkingDirectoryNotEmpty() {
+		String dir = FileUtils.getWorkingDirectory();
+		assertNotNull(dir);
+		assertFalse(dir.isEmpty());
+		assertTrue(dir.contains("DeepViolet"));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
-	public void testWriteMozillaJSON() throws JsonProcessingException {
-		JsonLdrMozillaCerts certs = new JsonLdrMozillaCerts();
-		certs.setHref("http://labla");
-		Map<String, JsonLdrConfiguration> configs = new HashMap<>();
-		JsonLdrConfiguration config1 = new JsonLdrConfiguration();
-		config1.setOpenssl_ciphersuites("lot of ebc and so on");
-		configs.put("moden", config1);
-		JsonLdrConfiguration config2 = new JsonLdrConfiguration();
-		config2.setOpenssl_ciphersuites("lot of ebc and cbc and so on");
-		configs.put("mdedium", config2);
-		certs.setConfigurations(configs);
-		ObjectMapper mapper = new ObjectMapper();
-		String jsonInString = mapper.writeValueAsString(certs);
-		jsonInString = mapper.writeValueAsString(certs);
-		System.out.println(jsonInString);
+	public void testCiphermapYamlOnClasspath() {
+		try (InputStream is = getClass().getClassLoader().getResourceAsStream("ciphermap.yaml")) {
+			assertNotNull(is, "ciphermap.yaml should be on classpath");
 
+			LoadSettings settings = LoadSettings.builder().build();
+			Load load = new Load(settings);
+			Map<String, Object> root = (Map<String, Object>) load.loadFromInputStream(is);
+
+			assertTrue(root.containsKey("metadata"), "YAML should have metadata");
+			assertTrue(root.containsKey("cipher_suites"), "YAML should have cipher_suites");
+
+			Map<String, Object> metadata = (Map<String, Object>) root.get("metadata");
+			assertEquals("1.0", metadata.get("version"));
+		} catch (Exception e) {
+			fail("Failed to load ciphermap.yaml: " + e.getMessage());
+		}
 	}
-
 }
