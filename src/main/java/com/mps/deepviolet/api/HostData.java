@@ -7,6 +7,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Cache of server metadata keyed by feature and property name. Stores both scalar
+ * (String) and vector (String[]) values with a 15-minute TTL for cache expiration.
+ */
 class HostData implements ServerMetadata {
 	
 	private HashMap<String, HashMap<String, Object>> featuremap = new HashMap<String, HashMap<String, Object>>();
@@ -174,11 +178,11 @@ class HostData implements ServerMetadata {
 	}
 	
 	public String toString() {
-		
-		StringBuffer buff = new StringBuffer(2000);
-		
-		StringBuffer scalar = new StringBuffer();
-		StringBuffer vector = new StringBuffer();
+
+		StringBuilder buff = new StringBuilder(2000);
+
+		StringBuilder scalar = new StringBuilder();
+		StringBuilder vector = new StringBuilder();
 	
 		Iterator<String> fi = featuremap.keySet().iterator();
 		

@@ -3,7 +3,7 @@ package com.mps.deepviolet.api;
 import java.io.IOException;
 import java.io.InputStream;
 
-/*
+/**
  * A custom stream which expects SSL/TLS records (no encryption)
  * and rebuilds the encoded data stream. Incoming records MUST
  * have the expected type (e.g. "handshake"); alert messages

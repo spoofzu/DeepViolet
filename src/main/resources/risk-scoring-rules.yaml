@@ -1,0 +1,880 @@
+# DeepViolet TLS Risk Scoring Rules
+#
+# Average-based scoring model (v3.0):
+#   Each rule has a normalized score (0.0-1.0). When rules match, their scores
+#   are averaged. The average is converted to a 0-100 scale, then capped by
+#   a severity floor derived from the highest-scoring matched rule.
+#
+# Each rule has a stable identifier (id) in the format SYS-NNNNNNN (system rules)
+# or USR-NNNNNNN (user-defined rules).
+# These IDs are permanent — they should never be reassigned to a different rule.
+# IDs are organized by category (each category starts at a multiple of 10000)
+# and increment by 100 within a category to allow inserting new rules.
+# When adding new rules, use the next available ID for the category noted below.
+#
+# Available variables:
+#   session.*        - TLS session properties (negotiated_protocol, compression_enabled, etc.)
+#   cert.*           - Certificate properties (key_algorithm, key_size, days_until_expiration, etc.)
+#   revocation.*     - Revocation status (ocsp_status, crl_status, sct_count, etc.)
+#   protocols        - Set of handshake protocol strings (e.g., "TLSv1.2", "TLSv1.3")
+#   ciphers          - List of cipher maps with {name, strength, protocol}
+#
+# Functions:
+#   count(list)                      - Count elements in a list
+#   count(list, field op value)      - Count elements where field matches condition
+#   contains(str, substr)            - Check if string contains substring
+#   starts_with(str, prefix)         - Check if string starts with prefix
+#   upper(str), lower(str)           - Case conversion
+#   header(name)                     - Get HTTP response header value (case-insensitive)
+#   header_present(name)             - Check if HTTP response header exists
+#   parse_max_age(hsts_value)        - Extract max-age seconds from HSTS header value
+#
+# Operators: ==, !=, <, >, <=, >=, and, or, not, contains, not contains
+# Literals: "string", 123, true, false, null
+#
+# Rule fields:
+#   id            - Stable identifier (SYS-NNNNNNN or USR-NNNNNNN)
+#   description   - Human-readable description
+#   enabled       - Whether this rule is active (true or false, default: true)
+#   score         - Normalized severity score (0.0-1.0) when the rule fires
+#   when          - Condition expression
+#   when_inconclusive - Optional: expression that marks the deduction as inconclusive
+#   inconclusive  - Optional: if true, always mark deduction as inconclusive
+#   scope         - Optional: structured scope metadata
+#     layer       - Service/protocol layer: tls, certificate, revocation, http, dns, server
+#     protocols   - List of TLS versions affected: SSLv2, SSLv3, TLSv1.0, TLSv1.1, TLSv1.2, TLSv1.3
+#     aspect      - Specific mechanism being checked (freeform, e.g., renegotiation, ocsp, hsts)
+
+metadata:
+  version: "3.0"
+  description: "DeepViolet TLS Risk Scoring Rules (average-based model)"
+  # Next available rule IDs (per category):
+  #   PROTOCOLS:        SYS-0001100
+  #   CIPHER_SUITES:    SYS-0011700
+  #   CERTIFICATE:      SYS-0021700
+  #   REVOCATION:       SYS-0030700
+  #   SECURITY_HEADERS: SYS-0041100
+  #   DNS_SECURITY:     SYS-0050300
+  #   OTHER:            SYS-0060700
+
+severity_mapping:
+  - { severity: CRITICAL, min_score: 0.8, floor: 65 }
+  - { severity: HIGH,     min_score: 0.5, floor: 75 }
+  - { severity: MEDIUM,   min_score: 0.2, floor: 85 }
+  - { severity: LOW,      min_score: 0.01, floor: 100 }
+  - { severity: INFO,     min_score: 0.0, floor: 100 }
+
+grade_mapping:
+  - { grade: A_PLUS,  min_score: 95, risk_level: LOW }
+  - { grade: A,       min_score: 90, risk_level: LOW }
+  - { grade: B,       min_score: 80, risk_level: MEDIUM }
+  - { grade: C,       min_score: 70, risk_level: HIGH }
+  - { grade: D,       min_score: 60, risk_level: CRITICAL }
+  - { grade: F,       min_score: 0,  risk_level: CRITICAL }
+
+categories:
+
+  # ============================================================
+  # PROTOCOLS
+  # ============================================================
+  PROTOCOLS:
+    display_name: "Protocols & Connections"
+    rules:
+      sslv2_supported:
+        id: SYS-0000100
+        description: "SSLv2 supported"
+        enabled: true
+        score: 1.0
+        when: protocols contains "SSLv2"
+        scope:
+          layer: tls
+          protocols: [SSLv2]
+          aspect: protocol_support
+
+      sslv3_supported:
+        id: SYS-0000200
+        description: "SSLv3 supported"
+        enabled: true
+        score: 0.9
+        when: protocols contains "SSLv3"
+        scope:
+          layer: tls
+          protocols: [SSLv3]
+          aspect: protocol_support
+
+      tls10_supported:
+        id: SYS-0000300
+        description: "TLS 1.0 supported"
+        enabled: true
+        score: 0.6
+        when: protocols contains "TLSv1.0"
+        scope:
+          layer: tls
+          protocols: [TLSv1.0]
+          aspect: protocol_support
+
+      tls11_supported:
+        id: SYS-0000400
+        description: "TLS 1.1 supported"
+        enabled: true
+        score: 0.5
+        when: protocols contains "TLSv1.1"
+        scope:
+          layer: tls
+          protocols: [TLSv1.1]
+          aspect: protocol_support
+
+      tls13_not_supported:
+        id: SYS-0000500
+        description: "TLS 1.3 not supported"
+        enabled: true
+        score: 0.5
+        when: protocols not contains "TLSv1.3"
+        scope:
+          layer: tls
+          protocols: [TLSv1.3]
+          aspect: protocol_support
+
+      tls12_negotiated_not_13:
+        id: SYS-0000600
+        description: "TLS 1.2 negotiated instead of 1.3"
+        enabled: true
+        score: 0.2
+        # Only penalize when TLS 1.3 is available but 1.2 was negotiated
+        when: >
+          protocols contains "TLSv1.3"
+          and contains(session.negotiated_protocol, "TLSv1.2")
+        scope:
+          layer: tls
+          protocols: [TLSv1.2, TLSv1.3]
+          aspect: protocol_negotiation
+
+      insecure_renegotiation:
+        id: SYS-0000700
+        description: "Secure renegotiation not supported on TLS 1.2 (renegotiation_info absent)"
+        enabled: true
+        score: 0.7
+        when: >
+          session.tls_metadata_available == true
+          and session.renegotiation_info_present == false
+          and not contains(session.negotiated_protocol, "TLSv1.3")
+        when_inconclusive: session.tls_metadata_available != true
+        scope:
+          layer: tls
+          protocols: [TLSv1.2]
+          aspect: renegotiation
+
+      tls13_early_data_accepted:
+        id: SYS-0000800
+        description: "TLS 1.3 early data (0-RTT) accepted — replay attack risk"
+        enabled: true
+        score: 0.4
+        when: >
+          session.tls_metadata_available == true
+          and session.early_data_accepted == true
+        scope:
+          layer: tls
+          protocols: [TLSv1.3]
+          aspect: early_data
+
+      no_alpn:
+        id: SYS-0000900
+        description: "ALPN not negotiated"
+        enabled: true
+        score: 0.1
+        when: >
+          session.tls_metadata_available == true
+          and session.alpn_negotiated == null
+        scope:
+          layer: tls
+          aspect: alpn
+
+      no_fallback_scsv:
+        id: SYS-0001000
+        description: "Server does not support TLS_FALLBACK_SCSV"
+        enabled: true
+        score: 0.3
+        when: session.fallback_scsv_supported == false
+        when_inconclusive: session.fallback_scsv_supported == null
+        scope:
+          layer: tls
+          aspect: fallback_scsv
+
+  # ============================================================
+  # CIPHER_SUITES
+  # ============================================================
+  CIPHER_SUITES:
+    display_name: "Cipher Suites"
+    rules:
+      clear_ciphers_present:
+        id: SYS-0010100
+        description: "NULL/CLEAR ciphers offered (no encryption)"
+        enabled: true
+        score: 0.9
+        when: count(ciphers, strength == "CLEAR") > 0
+        scope:
+          layer: tls
+          aspect: cipher_strength
+
+      many_weak_ciphers:
+        id: SYS-0010200
+        description: "6 or more WEAK ciphers offered"
+        enabled: true
+        score: 0.7
+        when: count(ciphers, strength == "WEAK") >= 6
+        scope:
+          layer: tls
+          aspect: cipher_strength
+
+      some_weak_ciphers:
+        id: SYS-0010300
+        description: "1-5 WEAK ciphers offered"
+        enabled: true
+        score: 0.3
+        # Only fire if there are weak ciphers but fewer than the "many" threshold
+        when: >
+          count(ciphers, strength == "WEAK") > 0
+          and count(ciphers, strength == "WEAK") < 6
+        scope:
+          layer: tls
+          aspect: cipher_strength
+
+      no_strong_ciphers:
+        id: SYS-0010400
+        description: "No STRONG ciphers available"
+        enabled: true
+        score: 0.6
+        when: count(ciphers) > 0 and count(ciphers, strength == "STRONG") == 0
+        scope:
+          layer: tls
+          aspect: cipher_strength
+
+      negotiated_weak:
+        id: SYS-0010500
+        description: "Negotiated cipher is WEAK"
+        enabled: true
+        score: 0.6
+        when: >
+          session.negotiated_cipher_suite != null
+          and session.negotiated_cipher_strength == "WEAK"
+        scope:
+          layer: tls
+          aspect: cipher_strength
+
+      negotiated_medium:
+        id: SYS-0010600
+        description: "Negotiated cipher is MEDIUM"
+        enabled: true
+        score: 0.2
+        when: >
+          session.negotiated_cipher_suite != null
+          and session.negotiated_cipher_strength == "MEDIUM"
+        scope:
+          layer: tls
+          aspect: cipher_strength
+
+      rc4_ciphers_present:
+        id: SYS-0010700
+        description: "RC4 ciphers offered (broken stream cipher)"
+        enabled: true
+        score: 0.8
+        when: count(ciphers, name contains "RC4") > 0
+        scope:
+          layer: tls
+          aspect: cipher_strength
+
+      des_ciphers_present:
+        id: SYS-0010800
+        description: "DES ciphers offered (weak block cipher)"
+        enabled: true
+        score: 0.7
+        when: count(ciphers, name contains "_DES_") > 0
+        scope:
+          layer: tls
+          aspect: cipher_strength
+
+      export_ciphers_present:
+        id: SYS-0010900
+        description: "EXPORT ciphers offered (intentionally weakened)"
+        enabled: true
+        score: 0.9
+        when: count(ciphers, name contains "EXPORT") > 0
+        scope:
+          layer: tls
+          aspect: cipher_strength
+
+      cbc_mode_only:
+        id: SYS-0011000
+        description: "Only CBC mode ciphers available (no AEAD)"
+        enabled: true
+        score: 0.3
+        when: >
+          count(ciphers) > 0
+          and count(ciphers, name contains "GCM") == 0
+          and count(ciphers, name contains "CCM") == 0
+          and count(ciphers, name contains "CHACHA20") == 0
+        scope:
+          layer: tls
+          aspect: aead
+
+      no_forward_secrecy:
+        id: SYS-0011100
+        description: "No forward secrecy ciphers available (TLS 1.2 and below)"
+        enabled: true
+        score: 0.6
+        # TLS 1.3 always provides PFS; only check when TLS 1.2 ciphers are present
+        when: >
+          count(ciphers, protocol == "TLSv1.2") > 0
+          and count(ciphers, name contains "ECDHE") == 0
+          and count(ciphers, name contains "DHE") == 0
+        scope:
+          layer: tls
+          protocols: [TLSv1.2]
+          aspect: forward_secrecy
+
+      negotiated_no_pfs:
+        id: SYS-0011200
+        description: "Negotiated cipher lacks perfect forward secrecy"
+        enabled: true
+        score: 0.5
+        # TLS 1.3 always provides PFS; only check TLS 1.2 and below
+        when: >
+          session.negotiated_cipher_suite != null
+          and not contains(session.negotiated_protocol, "TLSv1.3")
+          and not contains(session.negotiated_cipher_suite, "ECDHE")
+          and not contains(session.negotiated_cipher_suite, "DHE")
+        scope:
+          layer: tls
+          protocols: [TLSv1.2]
+          aspect: forward_secrecy
+
+      negotiated_no_aead:
+        id: SYS-0011300
+        description: "Negotiated cipher is not AEAD mode"
+        enabled: true
+        score: 0.3
+        # TLS 1.3 ciphers are all AEAD; only check TLS 1.2 and below
+        when: >
+          session.negotiated_cipher_suite != null
+          and not contains(session.negotiated_protocol, "TLSv1.3")
+          and not contains(session.negotiated_cipher_suite, "GCM")
+          and not contains(session.negotiated_cipher_suite, "CCM")
+          and not contains(session.negotiated_cipher_suite, "CHACHA20")
+        scope:
+          layer: tls
+          protocols: [TLSv1.2]
+          aspect: aead
+
+      weak_dh_params:
+        id: SYS-0011400
+        description: "DH prime less than 2048 bits"
+        enabled: true
+        score: 0.6
+        when: >
+          session.tls_metadata_available == true
+          and session.kex_type == "DHE"
+          and session.dh_param_size > 0
+          and session.dh_param_size < 2048
+        when_inconclusive: >
+          session.tls_metadata_available != true
+          and count(ciphers, name contains "DHE") > 0
+        scope:
+          layer: tls
+          protocols: [TLSv1.2]
+          aspect: dh_params
+
+      very_weak_dh_params:
+        id: SYS-0011500
+        description: "DH prime less than 1024 bits — Logjam vulnerable"
+        enabled: true
+        score: 0.9
+        when: >
+          session.tls_metadata_available == true
+          and session.kex_type == "DHE"
+          and session.dh_param_size > 0
+          and session.dh_param_size < 1024
+        scope:
+          layer: tls
+          protocols: [TLSv1.2]
+          aspect: dh_params
+
+      honors_client_cipher_preference:
+        id: SYS-0011600
+        description: "Server honors client cipher preference order"
+        enabled: true
+        score: 0.3
+        when: session.honors_client_cipher_preference == true
+        when_inconclusive: session.honors_client_cipher_preference == null
+        scope:
+          layer: tls
+          aspect: cipher_preference
+
+  # ============================================================
+  # CERTIFICATE
+  # ============================================================
+  CERTIFICATE:
+    display_name: "Certificate & Chain"
+    rules:
+      cert_expired:
+        id: SYS-0020100
+        description: "Certificate expired"
+        enabled: true
+        score: 1.0
+        when: cert.validity_state == "EXPIRED"
+        scope:
+          layer: certificate
+          aspect: validity
+
+      cert_not_yet_valid:
+        id: SYS-0020200
+        description: "Certificate not yet valid"
+        enabled: true
+        score: 1.0
+        when: cert.validity_state == "NOT_YET_VALID"
+        scope:
+          layer: certificate
+          aspect: validity
+
+      cert_untrusted:
+        id: SYS-0020300
+        description: "Certificate not trusted"
+        enabled: true
+        score: 0.9
+        when: cert.trust_state == "UNTRUSTED"
+        scope:
+          layer: certificate
+          aspect: trust
+
+      cert_trust_unknown:
+        id: SYS-0020400
+        description: "Certificate trust state unknown"
+        enabled: true
+        score: 0.5
+        when: cert.trust_state == "UNKNOWN"
+        scope:
+          layer: certificate
+          aspect: trust
+
+      cert_self_signed:
+        id: SYS-0020500
+        description: "Self-signed certificate (not a trusted root)"
+        enabled: true
+        score: 0.7
+        when: cert.self_signed == true and cert.java_root == false
+        scope:
+          layer: certificate
+          aspect: trust
+
+      rsa_key_too_small:
+        id: SYS-0020600
+        description: "RSA key less than 2048 bits"
+        enabled: true
+        score: 0.6
+        when: >
+          cert.key_algorithm == "RSA"
+          and cert.key_size > 0
+          and cert.key_size < 2048
+        scope:
+          layer: certificate
+          aspect: key_strength
+
+      ec_key_too_small:
+        id: SYS-0020700
+        description: "EC key less than 256 bits"
+        enabled: true
+        score: 0.6
+        when: >
+          (cert.key_algorithm == "EC" or cert.key_algorithm == "ECDSA")
+          and cert.key_size > 0
+          and cert.key_size < 256
+        scope:
+          layer: certificate
+          aspect: key_strength
+
+      weak_signature_algo:
+        id: SYS-0020800
+        description: "Weak signature algorithm (SHA-1 or MD5)"
+        enabled: true
+        score: 0.3
+        when: >
+          cert.signing_algorithm != null
+          and (contains(upper(cert.signing_algorithm), "SHA1")
+               or contains(upper(cert.signing_algorithm), "SHA-1")
+               or contains(upper(cert.signing_algorithm), "MD5"))
+        scope:
+          layer: certificate
+          aspect: signature_algorithm
+
+      expires_soon_30:
+        id: SYS-0020900
+        description: "Certificate expires in less than 30 days"
+        enabled: true
+        score: 0.8
+        when: cert.days_until_expiration >= 0 and cert.days_until_expiration < 30
+        scope:
+          layer: certificate
+          aspect: validity
+
+      expires_soon_90:
+        id: SYS-0021000
+        description: "Certificate expires in less than 90 days"
+        enabled: true
+        score: 0.4
+        # Only fire for 30-89 day range (expires_soon_30 covers < 30)
+        when: cert.days_until_expiration >= 30 and cert.days_until_expiration < 90
+        scope:
+          layer: certificate
+          aspect: validity
+
+      short_chain:
+        id: SYS-0021100
+        description: "No intermediate certificates in chain"
+        enabled: true
+        score: 0.2
+        when: cert.chain_length == 1
+        scope:
+          layer: certificate
+          aspect: chain
+
+      wildcard_certificate:
+        id: SYS-0021200
+        description: "Wildcard certificate in use"
+        enabled: true
+        score: 0.1
+        when: cert.has_wildcard_san == true
+        scope:
+          layer: certificate
+          aspect: wildcard
+
+      long_validity_period:
+        id: SYS-0021300
+        description: "Certificate validity exceeds 398 days"
+        enabled: true
+        score: 0.2
+        when: cert.days_until_expiration > 398
+        scope:
+          layer: certificate
+          aspect: validity
+
+      cert_version_old:
+        id: SYS-0021400
+        description: "Certificate version less than 3 (X.509v3)"
+        enabled: true
+        score: 0.3
+        when: cert.version < 3
+        scope:
+          layer: certificate
+          aspect: version
+
+      md5_signature:
+        id: SYS-0021500
+        description: "Certificate uses MD5 signature algorithm"
+        enabled: true
+        score: 0.8
+        when: contains(lower(cert.signing_algorithm), "md5")
+        scope:
+          layer: certificate
+          aspect: signature_algorithm
+
+      md2_signature:
+        id: SYS-0021600
+        description: "Certificate uses MD2 signature algorithm"
+        enabled: true
+        score: 0.9
+        when: contains(lower(cert.signing_algorithm), "md2")
+        scope:
+          layer: certificate
+          aspect: signature_algorithm
+
+  # ============================================================
+  # REVOCATION
+  # ============================================================
+  REVOCATION:
+    display_name: "Revocation & Transparency"
+    rules:
+      cert_revoked:
+        id: SYS-0030100
+        description: "Certificate is revoked"
+        enabled: true
+        score: 1.0
+        when: >
+          revocation.available == true
+          and (revocation.ocsp_status == "REVOKED" or revocation.crl_status == "REVOKED")
+        scope:
+          layer: revocation
+          aspect: ocsp
+
+      no_ocsp_stapling:
+        id: SYS-0030200
+        description: "OCSP stapling not present"
+        enabled: true
+        score: 0.3
+        when: revocation.available == true and revocation.ocsp_stapling_present == false
+        when_inconclusive: not revocation.available
+        scope:
+          layer: revocation
+          aspect: ocsp
+
+      no_must_staple:
+        id: SYS-0030300
+        description: "Must-Staple extension not present"
+        enabled: true
+        score: 0.1
+        when: revocation.available == true and revocation.must_staple_present == false
+        when_inconclusive: not revocation.available
+        scope:
+          layer: revocation
+          aspect: ocsp
+
+      no_scts:
+        id: SYS-0030400
+        description: "No Certificate Transparency SCTs found"
+        enabled: true
+        score: 0.3
+        when: revocation.available == true and revocation.sct_count == 0
+        when_inconclusive: not revocation.available
+        scope:
+          layer: revocation
+          aspect: sct
+
+      low_sct_count:
+        id: SYS-0030500
+        description: "Only 1 SCT found (2+ recommended)"
+        enabled: true
+        score: 0.1
+        when: >
+          revocation.available == true
+          and revocation.sct_count > 0
+          and revocation.sct_count < 2
+        scope:
+          layer: revocation
+          aspect: sct
+
+      revocation_check_errors:
+        id: SYS-0030600
+        description: "Both OCSP and CRL checks failed"
+        enabled: true
+        score: 0.5
+        inconclusive: true
+        when: >
+          revocation.available == true
+          and revocation.ocsp_status == "ERROR"
+          and revocation.crl_status == "ERROR"
+        scope:
+          layer: revocation
+          aspect: ocsp
+
+  # ============================================================
+  # SECURITY_HEADERS
+  # ============================================================
+  SECURITY_HEADERS:
+    display_name: "Security Headers"
+    rules:
+      no_hsts:
+        id: SYS-0040100
+        description: "Strict-Transport-Security header missing"
+        enabled: true
+        score: 0.6
+        when: session.headers_available and header("Strict-Transport-Security") == null
+        when_inconclusive: not session.headers_available
+        scope:
+          layer: http
+          aspect: hsts
+
+      hsts_short_max_age:
+        id: SYS-0040200
+        description: "HSTS max-age less than 1 year"
+        enabled: true
+        score: 0.2
+        when: >
+          header("Strict-Transport-Security") != null
+          and parse_max_age(header("Strict-Transport-Security")) >= 0
+          and parse_max_age(header("Strict-Transport-Security")) < 31536000
+        scope:
+          layer: http
+          aspect: hsts
+
+      hsts_no_subdomains:
+        id: SYS-0040300
+        description: "HSTS missing includeSubDomains"
+        enabled: true
+        score: 0.1
+        when: >
+          header("Strict-Transport-Security") != null
+          and not contains(lower(header("Strict-Transport-Security")), "includesubdomains")
+        scope:
+          layer: http
+          aspect: hsts
+
+      no_content_type_options:
+        id: SYS-0040400
+        description: "X-Content-Type-Options header missing"
+        enabled: true
+        score: 0.1
+        when: session.headers_available and header("X-Content-Type-Options") == null
+        when_inconclusive: not session.headers_available
+        scope:
+          layer: http
+          aspect: content_type_options
+
+      no_frame_options:
+        id: SYS-0040500
+        description: "X-Frame-Options header missing"
+        enabled: true
+        score: 0.05
+        when: session.headers_available and header("X-Frame-Options") == null
+        when_inconclusive: not session.headers_available
+        scope:
+          layer: http
+          aspect: frame_options
+
+      no_csp:
+        id: SYS-0040600
+        description: "Content-Security-Policy header missing"
+        enabled: true
+        score: 0.1
+        when: session.headers_available and header("Content-Security-Policy") == null
+        when_inconclusive: not session.headers_available
+        scope:
+          layer: http
+          aspect: csp
+
+      no_permissions_policy:
+        id: SYS-0040700
+        description: "Permissions-Policy header missing"
+        enabled: true
+        score: 0.1
+        when: session.headers_available and not header_present("Permissions-Policy")
+        when_inconclusive: not session.headers_available
+        scope:
+          layer: http
+          aspect: permissions_policy
+
+      no_referrer_policy:
+        id: SYS-0040800
+        description: "Referrer-Policy header missing"
+        enabled: true
+        score: 0.1
+        when: session.headers_available and not header_present("Referrer-Policy")
+        when_inconclusive: not session.headers_available
+        scope:
+          layer: http
+          aspect: referrer_policy
+
+      no_coop:
+        id: SYS-0040900
+        description: "Cross-Origin-Opener-Policy header missing"
+        enabled: true
+        score: 0.1
+        when: session.headers_available and not header_present("Cross-Origin-Opener-Policy")
+        when_inconclusive: not session.headers_available
+        scope:
+          layer: http
+          aspect: coop
+
+      hsts_no_preload:
+        id: SYS-0041000
+        description: "HSTS header missing preload directive"
+        enabled: true
+        score: 0.1
+        when: >
+          header("Strict-Transport-Security") != null
+          and not contains(lower(header("Strict-Transport-Security")), "preload")
+        scope:
+          layer: http
+          aspect: hsts
+
+  # ============================================================
+  # DNS_SECURITY
+  # ============================================================
+  DNS_SECURITY:
+    display_name: "DNS Security"
+    rules:
+      no_caa_records:
+        id: SYS-0050100
+        description: "No CAA records (any CA can issue certificates)"
+        enabled: true
+        score: 0.3
+        when: dns.available == true and dns.has_caa_records == false
+        when_inconclusive: dns.available != true
+        scope:
+          layer: dns
+          aspect: caa
+
+      no_dane_tlsa:
+        id: SYS-0050200
+        description: "No DANE/TLSA records"
+        enabled: true
+        score: 0.1
+        when: dns.available == true and dns.has_tlsa_records == false
+        when_inconclusive: dns.available != true
+        scope:
+          layer: dns
+          aspect: dane
+
+  # ============================================================
+  # OTHER
+  # ============================================================
+  OTHER:
+    display_name: "Other"
+    rules:
+      compression_enabled:
+        id: SYS-0060100
+        description: "TLS compression enabled (CRIME vulnerability)"
+        enabled: true
+        score: 0.5
+        when: session.compression_enabled == true
+        scope:
+          layer: tls
+          aspect: compression
+
+      client_auth_required:
+        id: SYS-0060200
+        description: "Client authentication required"
+        enabled: true
+        score: 0.05
+        when: session.client_auth_required == true
+        scope:
+          layer: tls
+          aspect: client_auth
+
+      fingerprint_unavailable:
+        id: SYS-0060300
+        description: "TLS fingerprint unavailable"
+        enabled: true
+        score: 0.05
+        inconclusive: true
+        when: session.fingerprint == null
+        scope:
+          layer: tls
+          aspect: fingerprint
+
+      san_exposure_high:
+        id: SYS-0060400
+        description: "Certificate covers 21+ SANs (significant attack surface disclosure)"
+        enabled: true
+        score: 0.6
+        when: cert.san_count >= 21
+        scope:
+          layer: certificate
+          aspect: san_exposure
+
+      san_exposure_medium:
+        id: SYS-0060500
+        description: "Certificate covers 6-20 SANs (moderate attack surface disclosure)"
+        enabled: true
+        score: 0.3
+        when: cert.san_count >= 6 and cert.san_count < 21
+        scope:
+          layer: certificate
+          aspect: san_exposure
+
+      san_exposure_low:
+        id: SYS-0060600
+        description: "Certificate covers 2-5 SANs (minor attack surface disclosure)"
+        enabled: true
+        score: 0.1
+        when: cert.san_count >= 2 and cert.san_count < 6
+        scope:
+          layer: certificate
+          aspect: san_exposure

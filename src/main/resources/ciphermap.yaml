@@ -1,0 +1,2722 @@
+# DeepViolet Cipher Suite Map
+#
+# Defines cipher suite IDs, naming conventions (IANA, OpenSSL, GnuTLS, NSS),
+# strength evaluations, and supported TLS versions.
+#
+# Strength levels:
+#   STRONG      - Recommended ciphers (AES-256-GCM, ChaCha20, etc.)
+#   MEDIUM      - Acceptable ciphers (AES-128-GCM, etc.)
+#   WEAK        - Deprecated ciphers (RC4, DES, export-grade, etc.)
+#   CLEAR       - No encryption (NULL ciphers)
+#   UNASSIGNED  - No evaluation available
+
+metadata:
+  version: "1.0"
+  description: "DeepViolet unified cipher suite map"
+  last_updated: "2026-02-11"
+
+cipher_suites:
+  - id: "0x00,0x00"
+    names:
+      IANA: "TLS_NULL_WITH_NULL_NULL"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_NULL_WITH_NULL_NULL"
+    strength: CLEAR
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x01"
+    names:
+      IANA: "TLS_RSA_WITH_NULL_MD5"
+      OpenSSL: ""
+      GnuTLS: "TLS_RSA_NULL_MD5"
+      NSS: "TLS_RSA_WITH_NULL_MD5"
+    strength: CLEAR
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x02"
+    names:
+      IANA: "TLS_RSA_WITH_NULL_SHA"
+      OpenSSL: ""
+      GnuTLS: "TLS_RSA_NULL_SHA1"
+      NSS: "TLS_RSA_WITH_NULL_SHA"
+    strength: CLEAR
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x03"
+    names:
+      IANA: "TLS_RSA_EXPORT_WITH_RC4_40_MD5"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_RSA_EXPORT_WITH_RC4_40_MD5"
+    strength: WEAK
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x04"
+    names:
+      IANA: "TLS_RSA_WITH_RC4_128_MD5"
+      OpenSSL: ""
+      GnuTLS: "TLS_RSA_ARCFOUR_128_MD5"
+      NSS: "TLS_RSA_WITH_RC4_128_MD5"
+    strength: WEAK
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x05"
+    names:
+      IANA: "TLS_RSA_WITH_RC4_128_SHA"
+      OpenSSL: ""
+      GnuTLS: "TLS_RSA_ARCFOUR_128_SHA1"
+      NSS: "TLS_RSA_WITH_RC4_128_SHA"
+    strength: WEAK
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x06"
+    names:
+      IANA: "TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5"
+    strength: WEAK
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x07"
+    names:
+      IANA: "TLS_RSA_WITH_IDEA_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_RSA_WITH_IDEA_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x08"
+    names:
+      IANA: "TLS_RSA_EXPORT_WITH_DES40_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_RSA_EXPORT_WITH_DES40_CBC_SHA"
+    strength: WEAK
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x09"
+    names:
+      IANA: "TLS_RSA_WITH_DES_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_RSA_WITH_DES_CBC_SHA"
+    strength: WEAK
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x0A"
+    names:
+      IANA: "TLS_RSA_WITH_3DES_EDE_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: "TLS_RSA_3DES_EDE_CBC_SHA1"
+      NSS: "TLS_RSA_WITH_3DES_EDE_CBC_SHA"
+    strength: WEAK
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x0B"
+    names:
+      IANA: "TLS_DH_DSS_EXPORT_WITH_DES40_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_DH_DSS_EXPORT_WITH_DES40_CBC_SHA"
+    strength: WEAK
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x0C"
+    names:
+      IANA: "TLS_DH_DSS_WITH_DES_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_DH_DSS_WITH_DES_CBC_SHA"
+    strength: WEAK
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x0D"
+    names:
+      IANA: "TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x0E"
+    names:
+      IANA: "TLS_DH_RSA_EXPORT_WITH_DES40_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_DH_RSA_EXPORT_WITH_DES40_CBC_SHA"
+    strength: WEAK
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x0F"
+    names:
+      IANA: "TLS_DH_RSA_WITH_DES_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_DH_RSA_WITH_DES_CBC_SHA"
+    strength: WEAK
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x10"
+    names:
+      IANA: "TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x11"
+    names:
+      IANA: "TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA"
+    strength: WEAK
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x12"
+    names:
+      IANA: "TLS_DHE_DSS_WITH_DES_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_DHE_DSS_WITH_DES_CBC_SHA"
+    strength: WEAK
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x13"
+    names:
+      IANA: "TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: "TLS_DHE_DSS_3DES_EDE_CBC_SHA1"
+      NSS: "TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x14"
+    names:
+      IANA: "TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA"
+    strength: WEAK
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x15"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_DES_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_DHE_RSA_WITH_DES_CBC_SHA"
+    strength: WEAK
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x16"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: "TLS_DHE_RSA_3DES_EDE_CBC_SHA1"
+      NSS: "TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x17"
+    names:
+      IANA: "TLS_DH_anon_EXPORT_WITH_RC4_40_MD5"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_DH_anon_EXPORT_WITH_RC4_40_MD5"
+    strength: WEAK
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x18"
+    names:
+      IANA: "TLS_DH_anon_WITH_RC4_128_MD5"
+      OpenSSL: ""
+      GnuTLS: "TLS_DH_ANON_ARCFOUR_128_MD5"
+      NSS: "TLS_DH_anon_WITH_RC4_128_MD5"
+    strength: WEAK
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x19"
+    names:
+      IANA: "TLS_DH_anon_EXPORT_WITH_DES40_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_DH_anon_EXPORT_WITH_DES40_CBC_SHA"
+    strength: WEAK
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x1A"
+    names:
+      IANA: "TLS_DH_anon_WITH_DES_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_DH_anon_WITH_DES_CBC_SHA"
+    strength: WEAK
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x1B"
+    names:
+      IANA: "TLS_DH_anon_WITH_3DES_EDE_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: "TLS_DH_ANON_3DES_EDE_CBC_SHA1"
+      NSS: "TLS_DH_anon_WITH_3DES_EDE_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x1E"
+    names:
+      IANA: "TLS_KRB5_WITH_DES_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x1F"
+    names:
+      IANA: "TLS_KRB5_WITH_3DES_EDE_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x20"
+    names:
+      IANA: "TLS_KRB5_WITH_RC4_128_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x21"
+    names:
+      IANA: "TLS_KRB5_WITH_IDEA_CBC_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x22"
+    names:
+      IANA: "TLS_KRB5_WITH_DES_CBC_MD5"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x23"
+    names:
+      IANA: "TLS_KRB5_WITH_3DES_EDE_CBC_MD5"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x24"
+    names:
+      IANA: "TLS_KRB5_WITH_RC4_128_MD5"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x25"
+    names:
+      IANA: "TLS_KRB5_WITH_IDEA_CBC_MD5"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x26"
+    names:
+      IANA: "TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x27"
+    names:
+      IANA: "TLS_KRB5_EXPORT_WITH_RC2_CBC_40_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x28"
+    names:
+      IANA: "TLS_KRB5_EXPORT_WITH_RC4_40_SHA"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x29"
+    names:
+      IANA: "TLS_KRB5_EXPORT_WITH_DES_CBC_40_MD5"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x2A"
+    names:
+      IANA: "TLS_KRB5_EXPORT_WITH_RC2_CBC_40_MD5"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x2B"
+    names:
+      IANA: "TLS_KRB5_EXPORT_WITH_RC4_40_MD5"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x2C"
+    names:
+      IANA: "TLS_PSK_WITH_NULL_SHA"
+      OpenSSL: "PSK-NULL-SHA"
+      GnuTLS: "TLS_PSK_NULL_SHA1"
+      NSS: ""
+    strength: CLEAR
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x2D"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_NULL_SHA"
+      OpenSSL: "DHE-PSK-NULL-SHA"
+      GnuTLS: "TLS_DHE_PSK_NULL_SHA1"
+      NSS: ""
+    strength: CLEAR
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x2E"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_NULL_SHA"
+      OpenSSL: "RSA-PSK-NULL-SHA"
+      GnuTLS: "TLS_RSA_PSK_NULL_SHA1"
+      NSS: ""
+    strength: CLEAR
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x2F"
+    names:
+      IANA: "TLS_RSA_WITH_AES_128_CBC_SHA"
+      OpenSSL: "AES128-SHA"
+      GnuTLS: "TLS_RSA_AES_128_CBC_SHA1"
+      NSS: "TLS_RSA_WITH_AES_128_CBC_SHA"
+    strength: WEAK
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x30"
+    names:
+      IANA: "TLS_DH_DSS_WITH_AES_128_CBC_SHA"
+      OpenSSL: "DH-DSS-AES128-SHA"
+      GnuTLS: ""
+      NSS: "TLS_DH_DSS_WITH_AES_128_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x31"
+    names:
+      IANA: "TLS_DH_RSA_WITH_AES_128_CBC_SHA"
+      OpenSSL: "DH-RSA-AES128-SHA"
+      GnuTLS: ""
+      NSS: "TLS_DH_RSA_WITH_AES_128_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x32"
+    names:
+      IANA: "TLS_DHE_DSS_WITH_AES_128_CBC_SHA"
+      OpenSSL: "DHE-DSS-AES128-SHA"
+      GnuTLS: "TLS_DHE_DSS_AES_128_CBC_SHA1"
+      NSS: "TLS_DHE_DSS_WITH_AES_128_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x33"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_AES_128_CBC_SHA"
+      OpenSSL: "DHE-RSA-AES128-SHA"
+      GnuTLS: "TLS_DHE_RSA_AES_128_CBC_SHA1"
+      NSS: "TLS_DHE_RSA_WITH_AES_128_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x34"
+    names:
+      IANA: "TLS_DH_anon_WITH_AES_128_CBC_SHA"
+      OpenSSL: "ADH-AES128-SHA"
+      GnuTLS: "TLS_DH_ANON_AES_128_CBC_SHA1"
+      NSS: "TLS_DH_anon_WITH_AES_128_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x35"
+    names:
+      IANA: "TLS_RSA_WITH_AES_256_CBC_SHA"
+      OpenSSL: "AES256-SHA"
+      GnuTLS: "TLS_RSA_AES_256_CBC_SHA1"
+      NSS: "TLS_RSA_WITH_AES_256_CBC_SHA"
+    strength: WEAK
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x36"
+    names:
+      IANA: "TLS_DH_DSS_WITH_AES_256_CBC_SHA"
+      OpenSSL: "DH-DSS-AES256-SHA"
+      GnuTLS: ""
+      NSS: "TLS_DH_DSS_WITH_AES_256_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x37"
+    names:
+      IANA: "TLS_DH_RSA_WITH_AES_256_CBC_SHA"
+      OpenSSL: "DH-RSA-AES256-SHA"
+      GnuTLS: ""
+      NSS: "TLS_DH_RSA_WITH_AES_256_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x38"
+    names:
+      IANA: "TLS_DHE_DSS_WITH_AES_256_CBC_SHA"
+      OpenSSL: "DHE-DSS-AES256-SHA"
+      GnuTLS: "TLS_DHE_DSS_AES_256_CBC_SHA1"
+      NSS: "TLS_DHE_DSS_WITH_AES_256_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x39"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_AES_256_CBC_SHA"
+      OpenSSL: "DHE-RSA-AES256-SHA"
+      GnuTLS: "TLS_DHE_RSA_AES_256_CBC_SHA1"
+      NSS: "TLS_DHE_RSA_WITH_AES_256_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x3A"
+    names:
+      IANA: "TLS_DH_anon_WITH_AES_256_CBC_SHA"
+      OpenSSL: "ADH-AES256-SHA"
+      GnuTLS: "TLS_DH_ANON_AES_256_CBC_SHA1"
+      NSS: "TLS_DH_anon_WITH_AES_256_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x3B"
+    names:
+      IANA: "TLS_RSA_WITH_NULL_SHA256"
+      OpenSSL: "NULL-SHA256"
+      GnuTLS: "TLS_RSA_NULL_SHA256"
+      NSS: "TLS_RSA_WITH_NULL_SHA256"
+    strength: CLEAR
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x3C"
+    names:
+      IANA: "TLS_RSA_WITH_AES_128_CBC_SHA256"
+      OpenSSL: "AES128-SHA256"
+      GnuTLS: "TLS_RSA_AES_128_CBC_SHA256"
+      NSS: "TLS_RSA_WITH_AES_128_CBC_SHA256"
+    strength: WEAK
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x3D"
+    names:
+      IANA: "TLS_RSA_WITH_AES_256_CBC_SHA256"
+      OpenSSL: "AES256-SHA256"
+      GnuTLS: "TLS_RSA_AES_256_CBC_SHA256"
+      NSS: "TLS_RSA_WITH_AES_256_CBC_SHA256"
+    strength: WEAK
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x3E"
+    names:
+      IANA: "TLS_DH_DSS_WITH_AES_128_CBC_SHA256"
+      OpenSSL: "DH-DSS-AES128-SHA256"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x3F"
+    names:
+      IANA: "TLS_DH_RSA_WITH_AES_128_CBC_SHA256"
+      OpenSSL: "DH-RSA-AES128-SHA256"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x40"
+    names:
+      IANA: "TLS_DHE_DSS_WITH_AES_128_CBC_SHA256"
+      OpenSSL: "DHE-DSS-AES128-SHA256"
+      GnuTLS: "TLS_DHE_DSS_AES_128_CBC_SHA256"
+      NSS: "TLS_DHE_DSS_WITH_AES_128_CBC_SHA256"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x41"
+    names:
+      IANA: "TLS_RSA_WITH_CAMELLIA_128_CBC_SHA"
+      OpenSSL: "CAMELLIA128-SHA"
+      GnuTLS: "TLS_RSA_CAMELLIA_128_CBC_SHA1"
+      NSS: "TLS_RSA_WITH_CAMELLIA_128_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x42"
+    names:
+      IANA: "TLS_DH_DSS_WITH_CAMELLIA_128_CBC_SHA"
+      OpenSSL: "DH-DSS-CAMELLIA128-SHA"
+      GnuTLS: ""
+      NSS: "TLS_DH_DSS_WITH_CAMELLIA_128_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x43"
+    names:
+      IANA: "TLS_DH_RSA_WITH_CAMELLIA_128_CBC_SHA"
+      OpenSSL: "DH-RSA-CAMELLIA128-SHA"
+      GnuTLS: ""
+      NSS: "TLS_DH_RSA_WITH_CAMELLIA_128_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x44"
+    names:
+      IANA: "TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA"
+      OpenSSL: "DHE-DSS-CAMELLIA128-SHA"
+      GnuTLS: "TLS_DHE_DSS_CAMELLIA_128_CBC_SHA1"
+      NSS: "TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x45"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA"
+      OpenSSL: "DHE-RSA-CAMELLIA128-SHA"
+      GnuTLS: "TLS_DHE_RSA_CAMELLIA_128_CBC_SHA1"
+      NSS: "TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x46"
+    names:
+      IANA: "TLS_DH_anon_WITH_CAMELLIA_128_CBC_SHA"
+      OpenSSL: "ADH-CAMELLIA128-SHA"
+      GnuTLS: "TLS_DH_ANON_CAMELLIA_128_CBC_SHA1"
+      NSS: "TLS_DH_anon_WITH_CAMELLIA_128_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  - id: "0x00,0x67"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256"
+      OpenSSL: "DHE-RSA-AES128-SHA256"
+      GnuTLS: "TLS_DHE_RSA_AES_128_CBC_SHA256"
+      NSS: "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256"
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x68"
+    names:
+      IANA: "TLS_DH_DSS_WITH_AES_256_CBC_SHA256"
+      OpenSSL: "DH-DSS-AES256-SHA256"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x69"
+    names:
+      IANA: "TLS_DH_RSA_WITH_AES_256_CBC_SHA256"
+      OpenSSL: "DH-RSA-AES256-SHA256"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x6A"
+    names:
+      IANA: "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256"
+      OpenSSL: "DHE-DSS-AES256-SHA256"
+      GnuTLS: "TLS_DHE_DSS_AES_256_CBC_SHA256"
+      NSS: "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x6B"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256"
+      OpenSSL: "DHE-RSA-AES256-SHA256"
+      GnuTLS: "TLS_DHE_RSA_AES_256_CBC_SHA256"
+      NSS: "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256"
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x6C"
+    names:
+      IANA: "TLS_DH_anon_WITH_AES_128_CBC_SHA256"
+      OpenSSL: "ADH-AES128-SHA256"
+      GnuTLS: "TLS_DH_ANON_AES_128_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x6D"
+    names:
+      IANA: "TLS_DH_anon_WITH_AES_256_CBC_SHA256"
+      OpenSSL: "ADH-AES256-SHA256"
+      GnuTLS: "TLS_DH_ANON_AES_256_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x84"
+    names:
+      IANA: "TLS_RSA_WITH_CAMELLIA_256_CBC_SHA"
+      OpenSSL: "CAMELLIA256-SHA"
+      GnuTLS: "TLS_RSA_CAMELLIA_256_CBC_SHA1"
+      NSS: "TLS_RSA_WITH_CAMELLIA_256_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x85"
+    names:
+      IANA: "TLS_DH_DSS_WITH_CAMELLIA_256_CBC_SHA"
+      OpenSSL: "DH-DSS-CAMELLIA256-SHA"
+      GnuTLS: ""
+      NSS: "TLS_DH_DSS_WITH_CAMELLIA_256_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x86"
+    names:
+      IANA: "TLS_DH_RSA_WITH_CAMELLIA_256_CBC_SHA"
+      OpenSSL: "DH-RSA-CAMELLIA256-SHA"
+      GnuTLS: ""
+      NSS: "TLS_DH_RSA_WITH_CAMELLIA_256_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x87"
+    names:
+      IANA: "TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA"
+      OpenSSL: "DHE-DSS-CAMELLIA256-SHA"
+      GnuTLS: "TLS_DHE_DSS_CAMELLIA_256_CBC_SHA1"
+      NSS: "TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x88"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA"
+      OpenSSL: "DHE-RSA-CAMELLIA256-SHA"
+      GnuTLS: "TLS_DHE_RSA_CAMELLIA_256_CBC_SHA1"
+      NSS: "TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x89"
+    names:
+      IANA: "TLS_DH_anon_WITH_CAMELLIA_256_CBC_SHA"
+      OpenSSL: "ADH-CAMELLIA256-SHA"
+      GnuTLS: "TLS_DH_ANON_CAMELLIA_256_CBC_SHA1"
+      NSS: "TLS_DH_anon_WITH_CAMELLIA_256_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x8A"
+    names:
+      IANA: "TLS_PSK_WITH_RC4_128_SHA"
+      OpenSSL: "PSK-RC4-SHA"
+      GnuTLS: "TLS_PSK_ARCFOUR_128_SHA1"
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x8B"
+    names:
+      IANA: "TLS_PSK_WITH_3DES_EDE_CBC_SHA"
+      OpenSSL: "PSK-3DES-EDE-CBC-SHA"
+      GnuTLS: "TLS_PSK_3DES_EDE_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x8C"
+    names:
+      IANA: "TLS_PSK_WITH_AES_128_CBC_SHA"
+      OpenSSL: "PSK-AES128-CBC-SHA"
+      GnuTLS: "TLS_PSK_AES_128_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x8D"
+    names:
+      IANA: "TLS_PSK_WITH_AES_256_CBC_SHA"
+      OpenSSL: "PSK-AES256-CBC-SHA"
+      GnuTLS: "TLS_PSK_AES_256_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x8E"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_RC4_128_SHA"
+      OpenSSL: "DHE-PSK-RC4-SHA"
+      GnuTLS: "TLS_DHE_PSK_ARCFOUR_128_SHA1"
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x8F"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_3DES_EDE_CBC_SHA"
+      OpenSSL: "DHE-PSK-3DES-EDE-CBC-SHA"
+      GnuTLS: "TLS_DHE_PSK_3DES_EDE_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x90"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_AES_128_CBC_SHA"
+      OpenSSL: "DHE-PSK-AES128-CBC-SHA"
+      GnuTLS: "TLS_DHE_PSK_AES_128_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x91"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_AES_256_CBC_SHA"
+      OpenSSL: "DHE-PSK-AES256-CBC-SHA"
+      GnuTLS: "TLS_DHE_PSK_AES_256_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x92"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_RC4_128_SHA"
+      OpenSSL: "RSA-PSK-RC4-SHA"
+      GnuTLS: "TLS_RSA_PSK_ARCFOUR_128_SHA1"
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x93"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_3DES_EDE_CBC_SHA"
+      OpenSSL: "RSA-PSK-3DES-EDE-CBC-SHA"
+      GnuTLS: "TLS_RSA_PSK_3DES_EDE_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x94"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_AES_128_CBC_SHA"
+      OpenSSL: "RSA-PSK-AES128-CBC-SHA"
+      GnuTLS: "TLS_RSA_PSK_AES_128_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x95"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_AES_256_CBC_SHA"
+      OpenSSL: "RSA-PSK-AES256-CBC-SHA"
+      GnuTLS: "TLS_RSA_PSK_AES_256_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x96"
+    names:
+      IANA: "TLS_RSA_WITH_SEED_CBC_SHA"
+      OpenSSL: "SEED-SHA"
+      GnuTLS: ""
+      NSS: "TLS_RSA_WITH_SEED_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x97"
+    names:
+      IANA: "TLS_DH_DSS_WITH_SEED_CBC_SHA"
+      OpenSSL: "DH-DSS-SEED-SHA"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x98"
+    names:
+      IANA: "TLS_DH_RSA_WITH_SEED_CBC_SHA"
+      OpenSSL: "DH-RSA-SEED-SHA"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x99"
+    names:
+      IANA: "TLS_DHE_DSS_WITH_SEED_CBC_SHA"
+      OpenSSL: "DHE-DSS-SEED-SHA"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x9A"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_SEED_CBC_SHA"
+      OpenSSL: "DHE-RSA-SEED-SHA"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x9B"
+    names:
+      IANA: "TLS_DH_anon_WITH_SEED_CBC_SHA"
+      OpenSSL: "ADH-SEED-SHA"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x9C"
+    names:
+      IANA: "TLS_RSA_WITH_AES_128_GCM_SHA256"
+      OpenSSL: "AES128-GCM-SHA256"
+      GnuTLS: "TLS_RSA_AES_128_GCM_SHA256"
+      NSS: "TLS_RSA_WITH_AES_128_GCM_SHA256"
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x9D"
+    names:
+      IANA: "TLS_RSA_WITH_AES_256_GCM_SHA384"
+      OpenSSL: "AES256-GCM-SHA384"
+      GnuTLS: "TLS_RSA_AES_256_GCM_SHA384"
+      NSS: "TLS_RSA_WITH_AES_256_GCM_SHA384"
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x9E"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256"
+      OpenSSL: "DHE-RSA-AES128-GCM-SHA256"
+      GnuTLS: "TLS_DHE_RSA_AES_128_GCM_SHA256"
+      NSS: "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256"
+    strength: MEDIUM
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0x9F"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384"
+      OpenSSL: "DHE-RSA-AES256-GCM-SHA384"
+      GnuTLS: "TLS_DHE_RSA_AES_256_GCM_SHA384"
+      NSS: "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384"
+    strength: MEDIUM
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xA0"
+    names:
+      IANA: "TLS_DH_RSA_WITH_AES_128_GCM_SHA256"
+      OpenSSL: "DH-RSA-AES128-GCM-SHA256"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xA1"
+    names:
+      IANA: "TLS_DH_RSA_WITH_AES_256_GCM_SHA384"
+      OpenSSL: "DH-RSA-AES256-GCM-SHA384"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xA2"
+    names:
+      IANA: "TLS_DHE_DSS_WITH_AES_128_GCM_SHA256"
+      OpenSSL: "DHE-DSS-AES128-GCM-SHA256"
+      GnuTLS: "TLS_DHE_DSS_AES_128_GCM_SHA256"
+      NSS: "TLS_DHE_DSS_WITH_AES_128_GCM_SHA256"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xA3"
+    names:
+      IANA: "TLS_DHE_DSS_WITH_AES_256_GCM_SHA384"
+      OpenSSL: "DHE-DSS-AES256-GCM-SHA384"
+      GnuTLS: "TLS_DHE_DSS_AES_256_GCM_SHA384"
+      NSS: "TLS_DHE_DSS_WITH_AES_256_GCM_SHA384"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xA4"
+    names:
+      IANA: "TLS_DH_DSS_WITH_AES_128_GCM_SHA256"
+      OpenSSL: "DH-DSS-AES128-GCM-SHA256"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xA5"
+    names:
+      IANA: "TLS_DH_DSS_WITH_AES_256_GCM_SHA384"
+      OpenSSL: "DH-DSS-AES256-GCM-SHA384"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xA6"
+    names:
+      IANA: "TLS_DH_anon_WITH_AES_128_GCM_SHA256"
+      OpenSSL: "ADH-AES128-GCM-SHA256"
+      GnuTLS: "TLS_DH_ANON_AES_128_GCM_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xA7"
+    names:
+      IANA: "TLS_DH_anon_WITH_AES_256_GCM_SHA384"
+      OpenSSL: "ADH-AES256-GCM-SHA384"
+      GnuTLS: "TLS_DH_ANON_AES_256_GCM_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xA8"
+    names:
+      IANA: "TLS_PSK_WITH_AES_128_GCM_SHA256"
+      OpenSSL: "PSK-AES128-GCM-SHA256"
+      GnuTLS: "TLS_PSK_AES_128_GCM_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xA9"
+    names:
+      IANA: "TLS_PSK_WITH_AES_256_GCM_SHA384"
+      OpenSSL: "PSK-AES256-GCM-SHA384"
+      GnuTLS: "TLS_PSK_AES_256_GCM_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xAA"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_AES_128_GCM_SHA256"
+      OpenSSL: "DHE-PSK-AES128-GCM-SHA256"
+      GnuTLS: "TLS_DHE_PSK_AES_128_GCM_SHA256"
+      NSS: "TLS_DHE_PSK_WITH_AES_128_GCM_SHA256"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xAB"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_AES_256_GCM_SHA384"
+      OpenSSL: "DHE-PSK-AES256-GCM-SHA384"
+      GnuTLS: "TLS_DHE_PSK_AES_256_GCM_SHA384"
+      NSS: "TLS_DHE_PSK_WITH_AES_256_GCM_SHA384"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xAC"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_AES_128_GCM_SHA256"
+      OpenSSL: "RSA-PSK-AES128-GCM-SHA256"
+      GnuTLS: "TLS_RSA_PSK_AES_128_GCM_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xAD"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_AES_256_GCM_SHA384"
+      OpenSSL: "RSA-PSK-AES256-GCM-SHA384"
+      GnuTLS: "TLS_RSA_PSK_AES_256_GCM_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xAE"
+    names:
+      IANA: "TLS_PSK_WITH_AES_128_CBC_SHA256"
+      OpenSSL: "PSK-AES128-CBC-SHA256"
+      GnuTLS: "TLS_PSK_AES_128_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xAF"
+    names:
+      IANA: "TLS_PSK_WITH_AES_256_CBC_SHA384"
+      OpenSSL: "PSK-AES256-CBC-SHA384"
+      GnuTLS: "TLS_PSK_AES_256_CBC_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xB0"
+    names:
+      IANA: "TLS_PSK_WITH_NULL_SHA256"
+      OpenSSL: "PSK-NULL-SHA256"
+      GnuTLS: "TLS_PSK_NULL_SHA256"
+      NSS: ""
+    strength: CLEAR
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xB1"
+    names:
+      IANA: "TLS_PSK_WITH_NULL_SHA384"
+      OpenSSL: "PSK-NULL-SHA384"
+      GnuTLS: "TLS_PSK_NULL_SHA384"
+      NSS: ""
+    strength: CLEAR
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xB2"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_AES_128_CBC_SHA256"
+      OpenSSL: "DHE-PSK-AES128-CBC-SHA256"
+      GnuTLS: "TLS_DHE_PSK_AES_128_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xB3"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_AES_256_CBC_SHA384"
+      OpenSSL: "DHE-PSK-AES256-CBC-SHA384"
+      GnuTLS: "TLS_DHE_PSK_AES_256_CBC_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xB4"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_NULL_SHA256"
+      OpenSSL: "DHE-PSK-NULL-SHA256"
+      GnuTLS: "TLS_DHE_PSK_NULL_SHA256"
+      NSS: ""
+    strength: CLEAR
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xB5"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_NULL_SHA384"
+      OpenSSL: "DHE-PSK-NULL-SHA384"
+      GnuTLS: "TLS_DHE_PSK_NULL_SHA384"
+      NSS: ""
+    strength: CLEAR
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xB6"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_AES_128_CBC_SHA256"
+      OpenSSL: "RSA-PSK-AES128-CBC-SHA256"
+      GnuTLS: "TLS_RSA_PSK_AES_128_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xB7"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_AES_256_CBC_SHA384"
+      OpenSSL: "RSA-PSK-AES256-CBC-SHA384"
+      GnuTLS: "TLS_RSA_PSK_AES_256_CBC_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xB8"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_NULL_SHA256"
+      OpenSSL: "RSA-PSK-NULL-SHA256"
+      GnuTLS: "TLS_RSA_PSK_NULL_SHA256"
+      NSS: ""
+    strength: CLEAR
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xB9"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_NULL_SHA384"
+      OpenSSL: "RSA-PSK-NULL-SHA384"
+      GnuTLS: "TLS_RSA_PSK_NULL_SHA384"
+      NSS: ""
+    strength: CLEAR
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xBA"
+    names:
+      IANA: "TLS_RSA_WITH_CAMELLIA_128_CBC_SHA256"
+      OpenSSL: "CAMELLIA128-SHA256"
+      GnuTLS: "TLS_RSA_CAMELLIA_128_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xBB"
+    names:
+      IANA: "TLS_DH_DSS_WITH_CAMELLIA_128_CBC_SHA256"
+      OpenSSL: "DH-DSS-CAMELLIA128-SHA256"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xBC"
+    names:
+      IANA: "TLS_DH_RSA_WITH_CAMELLIA_128_CBC_SHA256"
+      OpenSSL: "DH-RSA-CAMELLIA128-SHA256"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xBD"
+    names:
+      IANA: "TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA256"
+      OpenSSL: "DHE-DSS-CAMELLIA128-SHA256"
+      GnuTLS: "TLS_DHE_DSS_CAMELLIA_128_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xBE"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA256"
+      OpenSSL: "DHE-RSA-CAMELLIA128-SHA256"
+      GnuTLS: "TLS_DHE_RSA_CAMELLIA_128_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xBF"
+    names:
+      IANA: "TLS_DH_anon_WITH_CAMELLIA_128_CBC_SHA256"
+      OpenSSL: "ADH-CAMELLIA128-SHA256"
+      GnuTLS: "TLS_DH_ANON_CAMELLIA_128_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xC0"
+    names:
+      IANA: "TLS_RSA_WITH_CAMELLIA_256_CBC_SHA256"
+      OpenSSL: "CAMELLIA256-SHA256"
+      GnuTLS: "TLS_RSA_CAMELLIA_256_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xC1"
+    names:
+      IANA: "TLS_DH_DSS_WITH_CAMELLIA_256_CBC_SHA256"
+      OpenSSL: "DH-DSS-CAMELLIA256-SHA256"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xC2"
+    names:
+      IANA: "TLS_DH_RSA_WITH_CAMELLIA_256_CBC_SHA256"
+      OpenSSL: "DH-RSA-CAMELLIA256-SHA256"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xC3"
+    names:
+      IANA: "TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA256"
+      OpenSSL: "DHE-DSS-CAMELLIA256-SHA256"
+      GnuTLS: "TLS_DHE_DSS_CAMELLIA_256_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xC4"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA256"
+      OpenSSL: "DHE-RSA-CAMELLIA256-SHA256"
+      GnuTLS: "TLS_DHE_RSA_CAMELLIA_256_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xC5"
+    names:
+      IANA: "TLS_DH_anon_WITH_CAMELLIA_256_CBC_SHA256"
+      OpenSSL: "ADH-CAMELLIA256-SHA256"
+      GnuTLS: "TLS_DH_ANON_CAMELLIA_256_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x00,0xFF"
+    names:
+      IANA: "TLS_EMPTY_RENEGOTIATION_INFO_SCSV"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_EMPTY_RENEGOTIATION_INFO_SCSV"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x13,0x01"
+    names:
+      IANA: "TLS_AES_128_GCM_SHA256"
+      OpenSSL: "TLS_AES_128_GCM_SHA256"
+      GnuTLS: "TLS_AES_128_GCM_SHA256"
+      NSS: "TLS_AES_128_GCM_SHA256"
+    strength: STRONG
+    tls_versions: ["TLSv1.3"]
+  - id: "0x13,0x02"
+    names:
+      IANA: "TLS_AES_256_GCM_SHA384"
+      OpenSSL: "TLS_AES_256_GCM_SHA384"
+      GnuTLS: "TLS_AES_256_GCM_SHA384"
+      NSS: "TLS_AES_256_GCM_SHA384"
+    strength: STRONG
+    tls_versions: ["TLSv1.3"]
+  - id: "0x13,0x03"
+    names:
+      IANA: "TLS_CHACHA20_POLY1305_SHA256"
+      OpenSSL: "TLS_CHACHA20_POLY1305_SHA256"
+      GnuTLS: "TLS_CHACHA20_POLY1305_SHA256"
+      NSS: "TLS_CHACHA20_POLY1305_SHA256"
+    strength: STRONG
+    tls_versions: ["TLSv1.3"]
+  - id: "0x13,0x04"
+    names:
+      IANA: "TLS_AES_128_CCM_SHA256"
+      OpenSSL: "TLS_AES_128_CCM_SHA256"
+      GnuTLS: "TLS_AES_128_CCM_SHA256"
+      NSS: "TLS_AES_128_CCM_SHA256"
+    strength: STRONG
+    tls_versions: ["TLSv1.3"]
+  - id: "0x13,0x05"
+    names:
+      IANA: "TLS_AES_128_CCM_8_SHA256"
+      OpenSSL: "TLS_AES_128_CCM_8_SHA256"
+      GnuTLS: "TLS_AES_128_CCM_8_SHA256"
+      NSS: "TLS_AES_128_CCM_8_SHA256"
+    strength: STRONG
+    tls_versions: ["TLSv1.3"]
+  - id: "0x56,0x00"
+    names:
+      IANA: "TLS_FALLBACK_SCSV"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: "TLS_FALLBACK_SCSV"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x01"
+    names:
+      IANA: "TLS_ECDH_ECDSA_WITH_NULL_SHA"
+      OpenSSL: "ECDH-ECDSA-NULL-SHA"
+      GnuTLS: ""
+      NSS: "TLS_ECDH_ECDSA_WITH_NULL_SHA"
+    strength: CLEAR
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x02"
+    names:
+      IANA: "TLS_ECDH_ECDSA_WITH_RC4_128_SHA"
+      OpenSSL: "ECDH-ECDSA-RC4-SHA"
+      GnuTLS: ""
+      NSS: "TLS_ECDH_ECDSA_WITH_RC4_128_SHA"
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x03"
+    names:
+      IANA: "TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA"
+      OpenSSL: "ECDH-ECDSA-DES-CBC3-SHA"
+      GnuTLS: ""
+      NSS: "TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x04"
+    names:
+      IANA: "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA"
+      OpenSSL: "ECDH-ECDSA-AES128-SHA"
+      GnuTLS: ""
+      NSS: "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x05"
+    names:
+      IANA: "TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA"
+      OpenSSL: "ECDH-ECDSA-AES256-SHA"
+      GnuTLS: ""
+      NSS: "TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x06"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_NULL_SHA"
+      OpenSSL: "ECDHE-ECDSA-NULL-SHA"
+      GnuTLS: "TLS_ECDHE_ECDSA_NULL_SHA1"
+      NSS: "TLS_ECDHE_ECDSA_WITH_NULL_SHA"
+    strength: CLEAR
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x07"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_RC4_128_SHA"
+      OpenSSL: "ECDHE-ECDSA-RC4-SHA"
+      GnuTLS: "TLS_ECDHE_ECDSA_ARCFOUR_128_SHA1"
+      NSS: "TLS_ECDHE_ECDSA_WITH_RC4_128_SHA"
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x08"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA"
+      OpenSSL: "ECDHE-ECDSA-DES-CBC3-SHA"
+      GnuTLS: "TLS_ECDHE_ECDSA_3DES_EDE_CBC_SHA1"
+      NSS: "TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x09"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA"
+      OpenSSL: "ECDHE-ECDSA-AES128-SHA"
+      GnuTLS: "TLS_ECDHE_ECDSA_AES_128_CBC_SHA1"
+      NSS: "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA"
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x0A"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA"
+      OpenSSL: "ECDHE-ECDSA-AES256-SHA"
+      GnuTLS: "TLS_ECDHE_ECDSA_AES_256_CBC_SHA1"
+      NSS: "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA"
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x0B"
+    names:
+      IANA: "TLS_ECDH_RSA_WITH_NULL_SHA"
+      OpenSSL: "ECDH-RSA-NULL-SHA"
+      GnuTLS: ""
+      NSS: "TLS_ECDH_RSA_WITH_NULL_SHA"
+    strength: CLEAR
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x0C"
+    names:
+      IANA: "TLS_ECDH_RSA_WITH_RC4_128_SHA"
+      OpenSSL: "ECDH-RSA-RC4-SHA"
+      GnuTLS: ""
+      NSS: "TLS_ECDH_RSA_WITH_RC4_128_SHA"
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x0D"
+    names:
+      IANA: "TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA"
+      OpenSSL: "ECDH-RSA-DES-CBC3-SHA"
+      GnuTLS: ""
+      NSS: "TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x0E"
+    names:
+      IANA: "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA"
+      OpenSSL: "ECDH-RSA-AES128-SHA"
+      GnuTLS: ""
+      NSS: "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x0F"
+    names:
+      IANA: "TLS_ECDH_RSA_WITH_AES_256_CBC_SHA"
+      OpenSSL: "ECDH-RSA-AES256-SHA"
+      GnuTLS: ""
+      NSS: "TLS_ECDH_RSA_WITH_AES_256_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x10"
+    names:
+      IANA: "TLS_ECDHE_RSA_WITH_NULL_SHA"
+      OpenSSL: "ECDHE-RSA-NULL-SHA"
+      GnuTLS: "TLS_ECDHE_RSA_NULL_SHA1"
+      NSS: "TLS_ECDHE_RSA_WITH_NULL_SHA"
+    strength: CLEAR
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x11"
+    names:
+      IANA: "TLS_ECDHE_RSA_WITH_RC4_128_SHA"
+      OpenSSL: "ECDHE-RSA-RC4-SHA"
+      GnuTLS: "TLS_ECDHE_RSA_ARCFOUR_128_SHA1"
+      NSS: "TLS_ECDHE_RSA_WITH_RC4_128_SHA"
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x12"
+    names:
+      IANA: "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA"
+      OpenSSL: "ECDHE-RSA-DES-CBC3-SHA"
+      GnuTLS: "TLS_ECDHE_RSA_3DES_EDE_CBC_SHA1"
+      NSS: "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x13"
+    names:
+      IANA: "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"
+      OpenSSL: "ECDHE-RSA-AES128-SHA"
+      GnuTLS: "TLS_ECDHE_RSA_AES_128_CBC_SHA1"
+      NSS: "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x14"
+    names:
+      IANA: "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA"
+      OpenSSL: "ECDHE-RSA-AES256-SHA"
+      GnuTLS: "TLS_ECDHE_RSA_AES_256_CBC_SHA1"
+      NSS: "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA"
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x15"
+    names:
+      IANA: "TLS_ECDH_anon_WITH_NULL_SHA"
+      OpenSSL: "AECDH-NULL-SHA"
+      GnuTLS: "TLS_ECDH_ANON_NULL_SHA1"
+      NSS: "TLS_ECDH_anon_WITH_NULL_SHA"
+    strength: CLEAR
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x16"
+    names:
+      IANA: "TLS_ECDH_anon_WITH_RC4_128_SHA"
+      OpenSSL: "AECDH-RC4-SHA"
+      GnuTLS: "TLS_ECDH_ANON_ARCFOUR_128_SHA1"
+      NSS: "TLS_ECDH_anon_WITH_RC4_128_SHA"
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x17"
+    names:
+      IANA: "TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA"
+      OpenSSL: "AECDH-DES-CBC3-SHA"
+      GnuTLS: "TLS_ECDH_ANON_3DES_EDE_CBC_SHA1"
+      NSS: "TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x18"
+    names:
+      IANA: "TLS_ECDH_anon_WITH_AES_128_CBC_SHA"
+      OpenSSL: "AECDH-AES128-SHA"
+      GnuTLS: "TLS_ECDH_ANON_AES_128_CBC_SHA1"
+      NSS: "TLS_ECDH_anon_WITH_AES_128_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x19"
+    names:
+      IANA: "TLS_ECDH_anon_WITH_AES_256_CBC_SHA"
+      OpenSSL: "AECDH-AES256-SHA"
+      GnuTLS: "TLS_ECDH_ANON_AES_256_CBC_SHA1"
+      NSS: "TLS_ECDH_anon_WITH_AES_256_CBC_SHA"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x1A"
+    names:
+      IANA: "TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA"
+      OpenSSL: "SRP-3DES-EDE-CBC-SHA"
+      GnuTLS: "TLS_SRP_SHA_3DES_EDE_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x1B"
+    names:
+      IANA: "TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA"
+      OpenSSL: "SRP-RSA-3DES-EDE-CBC-SHA"
+      GnuTLS: "TLS_SRP_SHA_RSA_3DES_EDE_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x1C"
+    names:
+      IANA: "TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA"
+      OpenSSL: "SRP-DSS-3DES-EDE-CBC-SHA"
+      GnuTLS: "TLS_SRP_SHA_DSS_3DES_EDE_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x1D"
+    names:
+      IANA: "TLS_SRP_SHA_WITH_AES_128_CBC_SHA"
+      OpenSSL: "SRP-AES-128-CBC-SHA"
+      GnuTLS: "TLS_SRP_SHA_AES_128_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x1E"
+    names:
+      IANA: "TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA"
+      OpenSSL: "SRP-RSA-AES-128-CBC-SHA"
+      GnuTLS: "TLS_SRP_SHA_RSA_AES_128_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x1F"
+    names:
+      IANA: "TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA"
+      OpenSSL: "SRP-DSS-AES-128-CBC-SHA"
+      GnuTLS: "TLS_SRP_SHA_DSS_AES_128_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x20"
+    names:
+      IANA: "TLS_SRP_SHA_WITH_AES_256_CBC_SHA"
+      OpenSSL: "SRP-AES-256-CBC-SHA"
+      GnuTLS: "TLS_SRP_SHA_AES_256_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x21"
+    names:
+      IANA: "TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA"
+      OpenSSL: "SRP-RSA-AES-256-CBC-SHA"
+      GnuTLS: "TLS_SRP_SHA_RSA_AES_256_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x22"
+    names:
+      IANA: "TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA"
+      OpenSSL: "SRP-DSS-AES-256-CBC-SHA"
+      GnuTLS: "TLS_SRP_SHA_DSS_AES_256_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x23"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256"
+      OpenSSL: "ECDHE-ECDSA-AES128-SHA256"
+      GnuTLS: "TLS_ECDHE_ECDSA_AES_128_CBC_SHA256"
+      NSS: "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256"
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x24"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"
+      OpenSSL: "ECDHE-ECDSA-AES256-SHA384"
+      GnuTLS: "TLS_ECDHE_ECDSA_AES_256_CBC_SHA384"
+      NSS: "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x25"
+    names:
+      IANA: "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256"
+      OpenSSL: "ECDH-ECDSA-AES128-SHA256"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x26"
+    names:
+      IANA: "TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384"
+      OpenSSL: "ECDH-ECDSA-AES256-SHA384"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x27"
+    names:
+      IANA: "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256"
+      OpenSSL: "ECDHE-RSA-AES128-SHA256"
+      GnuTLS: "TLS_ECDHE_RSA_AES_128_CBC_SHA256"
+      NSS: "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256"
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x28"
+    names:
+      IANA: "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"
+      OpenSSL: "ECDHE-RSA-AES256-SHA384"
+      GnuTLS: "TLS_ECDHE_RSA_AES_256_CBC_SHA384"
+      NSS: "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x29"
+    names:
+      IANA: "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256"
+      OpenSSL: "ECDH-RSA-AES128-SHA256"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x2A"
+    names:
+      IANA: "TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384"
+      OpenSSL: "ECDH-RSA-AES256-SHA384"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x2B"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+      OpenSSL: "ECDHE-ECDSA-AES128-GCM-SHA256"
+      GnuTLS: "TLS_ECDHE_ECDSA_AES_128_GCM_SHA256"
+      NSS: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+    strength: MEDIUM
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x2C"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+      OpenSSL: "ECDHE-ECDSA-AES256-GCM-SHA384"
+      GnuTLS: "TLS_ECDHE_ECDSA_AES_256_GCM_SHA384"
+      NSS: "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+    strength: MEDIUM
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x2D"
+    names:
+      IANA: "TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256"
+      OpenSSL: "ECDH-ECDSA-AES128-GCM-SHA256"
+      GnuTLS: ""
+      NSS: "TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x2E"
+    names:
+      IANA: "TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384"
+      OpenSSL: "ECDH-ECDSA-AES256-GCM-SHA384"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x2F"
+    names:
+      IANA: "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+      OpenSSL: "ECDHE-RSA-AES128-GCM-SHA256"
+      GnuTLS: "TLS_ECDHE_RSA_AES_128_GCM_SHA256"
+      NSS: "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+    strength: MEDIUM
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x30"
+    names:
+      IANA: "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+      OpenSSL: "ECDHE-RSA-AES256-GCM-SHA384"
+      GnuTLS: "TLS_ECDHE_RSA_AES_256_GCM_SHA384"
+      NSS: "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+    strength: MEDIUM
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x31"
+    names:
+      IANA: "TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256"
+      OpenSSL: "ECDH-RSA-AES128-GCM-SHA256"
+      GnuTLS: ""
+      NSS: "TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x32"
+    names:
+      IANA: "TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384"
+      OpenSSL: "ECDH-RSA-AES256-GCM-SHA384"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x33"
+    names:
+      IANA: "TLS_ECDHE_PSK_WITH_RC4_128_SHA"
+      OpenSSL: "ECDHE-PSK-RC4-SHA"
+      GnuTLS: "TLS_ECDHE_PSK_ARCFOUR_128_SHA1"
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x34"
+    names:
+      IANA: "TLS_ECDHE_PSK_WITH_3DES_EDE_CBC_SHA"
+      OpenSSL: "ECDHE-PSK-3DES-EDE-CBC-SHA"
+      GnuTLS: "TLS_ECDHE_PSK_3DES_EDE_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x35"
+    names:
+      IANA: "TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA"
+      OpenSSL: "ECDHE-PSK-AES128-CBC-SHA"
+      GnuTLS: "TLS_ECDHE_PSK_AES_128_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x36"
+    names:
+      IANA: "TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA"
+      OpenSSL: "ECDHE-PSK-AES256-CBC-SHA"
+      GnuTLS: "TLS_ECDHE_PSK_AES_256_CBC_SHA1"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x37"
+    names:
+      IANA: "TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256"
+      OpenSSL: "ECDHE-PSK-AES128-CBC-SHA256"
+      GnuTLS: "TLS_ECDHE_PSK_AES_128_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x38"
+    names:
+      IANA: "TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA384"
+      OpenSSL: "ECDHE-PSK-AES256-CBC-SHA384"
+      GnuTLS: "TLS_ECDHE_PSK_AES_256_CBC_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x39"
+    names:
+      IANA: "TLS_ECDHE_PSK_WITH_NULL_SHA"
+      OpenSSL: "ECDHE-PSK-NULL-SHA"
+      GnuTLS: "TLS_ECDHE_PSK_NULL_SHA1"
+      NSS: ""
+    strength: CLEAR
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x3A"
+    names:
+      IANA: "TLS_ECDHE_PSK_WITH_NULL_SHA256"
+      OpenSSL: "ECDHE-PSK-NULL-SHA256"
+      GnuTLS: "TLS_ECDHE_PSK_NULL_SHA256"
+      NSS: ""
+    strength: CLEAR
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x3B"
+    names:
+      IANA: "TLS_ECDHE_PSK_WITH_NULL_SHA384"
+      OpenSSL: "ECDHE-PSK-NULL-SHA384"
+      GnuTLS: "TLS_ECDHE_PSK_NULL_SHA384"
+      NSS: ""
+    strength: CLEAR
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x3C"
+    names:
+      IANA: "TLS_RSA_WITH_ARIA_128_CBC_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x3D"
+    names:
+      IANA: "TLS_RSA_WITH_ARIA_256_CBC_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x3E"
+    names:
+      IANA: "TLS_DH_DSS_WITH_ARIA_128_CBC_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x3F"
+    names:
+      IANA: "TLS_DH_DSS_WITH_ARIA_256_CBC_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x40"
+    names:
+      IANA: "TLS_DH_RSA_WITH_ARIA_128_CBC_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x41"
+    names:
+      IANA: "TLS_DH_RSA_WITH_ARIA_256_CBC_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x42"
+    names:
+      IANA: "TLS_DHE_DSS_WITH_ARIA_128_CBC_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x43"
+    names:
+      IANA: "TLS_DHE_DSS_WITH_ARIA_256_CBC_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x44"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_ARIA_128_CBC_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x45"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_ARIA_256_CBC_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x46"
+    names:
+      IANA: "TLS_DH_anon_WITH_ARIA_128_CBC_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x47"
+    names:
+      IANA: "TLS_DH_anon_WITH_ARIA_256_CBC_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x48"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_ARIA_128_CBC_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x49"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_ARIA_256_CBC_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x4A"
+    names:
+      IANA: "TLS_ECDH_ECDSA_WITH_ARIA_128_CBC_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x4B"
+    names:
+      IANA: "TLS_ECDH_ECDSA_WITH_ARIA_256_CBC_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x4C"
+    names:
+      IANA: "TLS_ECDHE_RSA_WITH_ARIA_128_CBC_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x4D"
+    names:
+      IANA: "TLS_ECDHE_RSA_WITH_ARIA_256_CBC_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x4E"
+    names:
+      IANA: "TLS_ECDH_RSA_WITH_ARIA_128_CBC_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x4F"
+    names:
+      IANA: "TLS_ECDH_RSA_WITH_ARIA_256_CBC_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x50"
+    names:
+      IANA: "TLS_RSA_WITH_ARIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x51"
+    names:
+      IANA: "TLS_RSA_WITH_ARIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x52"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_ARIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x53"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_ARIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x54"
+    names:
+      IANA: "TLS_DH_RSA_WITH_ARIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x55"
+    names:
+      IANA: "TLS_DH_RSA_WITH_ARIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x56"
+    names:
+      IANA: "TLS_DHE_DSS_WITH_ARIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x57"
+    names:
+      IANA: "TLS_DHE_DSS_WITH_ARIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x58"
+    names:
+      IANA: "TLS_DH_DSS_WITH_ARIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x59"
+    names:
+      IANA: "TLS_DH_DSS_WITH_ARIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x5A"
+    names:
+      IANA: "TLS_DH_anon_WITH_ARIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x5B"
+    names:
+      IANA: "TLS_DH_anon_WITH_ARIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x5C"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_ARIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x5D"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_ARIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x5E"
+    names:
+      IANA: "TLS_ECDH_ECDSA_WITH_ARIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x5F"
+    names:
+      IANA: "TLS_ECDH_ECDSA_WITH_ARIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x60"
+    names:
+      IANA: "TLS_ECDHE_RSA_WITH_ARIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x61"
+    names:
+      IANA: "TLS_ECDHE_RSA_WITH_ARIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x62"
+    names:
+      IANA: "TLS_ECDH_RSA_WITH_ARIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x63"
+    names:
+      IANA: "TLS_ECDH_RSA_WITH_ARIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x64"
+    names:
+      IANA: "TLS_PSK_WITH_ARIA_128_CBC_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x65"
+    names:
+      IANA: "TLS_PSK_WITH_ARIA_256_CBC_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x66"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_ARIA_128_CBC_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x67"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_ARIA_256_CBC_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x68"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_ARIA_128_CBC_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x69"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_ARIA_256_CBC_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x6A"
+    names:
+      IANA: "TLS_PSK_WITH_ARIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x6B"
+    names:
+      IANA: "TLS_PSK_WITH_ARIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x6C"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_ARIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x6D"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_ARIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x6E"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_ARIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x6F"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_ARIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x70"
+    names:
+      IANA: "TLS_ECDHE_PSK_WITH_ARIA_128_CBC_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x71"
+    names:
+      IANA: "TLS_ECDHE_PSK_WITH_ARIA_256_CBC_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x72"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_CBC_SHA256"
+      OpenSSL: "ECDHE-ECDSA-CAMELLIA128-SHA256"
+      GnuTLS: "TLS_ECDHE_ECDSA_CAMELLIA_128_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x73"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_CBC_SHA384"
+      OpenSSL: "ECDHE-ECDSA-CAMELLIA256-SHA384"
+      GnuTLS: "TLS_ECDHE_ECDSA_CAMELLIA_256_CBC_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x74"
+    names:
+      IANA: "TLS_ECDH_ECDSA_WITH_CAMELLIA_128_CBC_SHA256"
+      OpenSSL: "ECDH-ECDSA-CAMELLIA128-SHA256"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x75"
+    names:
+      IANA: "TLS_ECDH_ECDSA_WITH_CAMELLIA_256_CBC_SHA384"
+      OpenSSL: "ECDH-ECDSA-CAMELLIA256-SHA384"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x76"
+    names:
+      IANA: "TLS_ECDHE_RSA_WITH_CAMELLIA_128_CBC_SHA256"
+      OpenSSL: "ECDHE-RSA-CAMELLIA128-SHA256"
+      GnuTLS: "TLS_ECDHE_RSA_CAMELLIA_128_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x77"
+    names:
+      IANA: "TLS_ECDHE_RSA_WITH_CAMELLIA_256_CBC_SHA384"
+      OpenSSL: "ECDHE-RSA-CAMELLIA256-SHA384"
+      GnuTLS: "TLS_ECDHE_RSA_CAMELLIA_256_CBC_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x78"
+    names:
+      IANA: "TLS_ECDH_RSA_WITH_CAMELLIA_128_CBC_SHA256"
+      OpenSSL: "ECDH-RSA-CAMELLIA128-SHA256"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x79"
+    names:
+      IANA: "TLS_ECDH_RSA_WITH_CAMELLIA_256_CBC_SHA384"
+      OpenSSL: "ECDH-RSA-CAMELLIA256-SHA384"
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x7A"
+    names:
+      IANA: "TLS_RSA_WITH_CAMELLIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: "TLS_RSA_CAMELLIA_128_GCM_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x7B"
+    names:
+      IANA: "TLS_RSA_WITH_CAMELLIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: "TLS_RSA_CAMELLIA_256_GCM_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x7C"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_CAMELLIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: "TLS_DHE_RSA_CAMELLIA_128_GCM_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x7D"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_CAMELLIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: "TLS_DHE_RSA_CAMELLIA_256_GCM_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x7E"
+    names:
+      IANA: "TLS_DH_RSA_WITH_CAMELLIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x7F"
+    names:
+      IANA: "TLS_DH_RSA_WITH_CAMELLIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x80"
+    names:
+      IANA: "TLS_DHE_DSS_WITH_CAMELLIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: "TLS_DHE_DSS_CAMELLIA_128_GCM_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x81"
+    names:
+      IANA: "TLS_DHE_DSS_WITH_CAMELLIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: "TLS_DHE_DSS_CAMELLIA_256_GCM_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x82"
+    names:
+      IANA: "TLS_DH_DSS_WITH_CAMELLIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x83"
+    names:
+      IANA: "TLS_DH_DSS_WITH_CAMELLIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x84"
+    names:
+      IANA: "TLS_DH_anon_WITH_CAMELLIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: "TLS_DH_ANON_CAMELLIA_128_GCM_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x85"
+    names:
+      IANA: "TLS_DH_anon_WITH_CAMELLIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: "TLS_DH_ANON_CAMELLIA_256_GCM_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x86"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: "TLS_ECDHE_ECDSA_CAMELLIA_128_GCM_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x87"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: "TLS_ECDHE_ECDSA_CAMELLIA_256_GCM_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x88"
+    names:
+      IANA: "TLS_ECDH_ECDSA_WITH_CAMELLIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x89"
+    names:
+      IANA: "TLS_ECDH_ECDSA_WITH_CAMELLIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x8A"
+    names:
+      IANA: "TLS_ECDHE_RSA_WITH_CAMELLIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: "TLS_ECDHE_RSA_CAMELLIA_128_GCM_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x8B"
+    names:
+      IANA: "TLS_ECDHE_RSA_WITH_CAMELLIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: "TLS_ECDHE_RSA_CAMELLIA_256_GCM_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x8C"
+    names:
+      IANA: "TLS_ECDH_RSA_WITH_CAMELLIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x8D"
+    names:
+      IANA: "TLS_ECDH_RSA_WITH_CAMELLIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x8E"
+    names:
+      IANA: "TLS_PSK_WITH_CAMELLIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: "TLS_PSK_CAMELLIA_128_GCM_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x8F"
+    names:
+      IANA: "TLS_PSK_WITH_CAMELLIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: "TLS_PSK_CAMELLIA_256_GCM_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x90"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_CAMELLIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: "TLS_DHE_PSK_CAMELLIA_128_GCM_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x91"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_CAMELLIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: "TLS_DHE_PSK_CAMELLIA_256_GCM_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x92"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_CAMELLIA_128_GCM_SHA256"
+      OpenSSL: ""
+      GnuTLS: "TLS_RSA_PSK_CAMELLIA_128_GCM_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x93"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_CAMELLIA_256_GCM_SHA384"
+      OpenSSL: ""
+      GnuTLS: "TLS_RSA_PSK_CAMELLIA_256_GCM_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x94"
+    names:
+      IANA: "TLS_PSK_WITH_CAMELLIA_128_CBC_SHA256"
+      OpenSSL: "PSK-CAMELLIA128-SHA256"
+      GnuTLS: "TLS_PSK_CAMELLIA_128_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x95"
+    names:
+      IANA: "TLS_PSK_WITH_CAMELLIA_256_CBC_SHA384"
+      OpenSSL: "PSK-CAMELLIA256-SHA384"
+      GnuTLS: "TLS_PSK_CAMELLIA_256_CBC_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x96"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_CAMELLIA_128_CBC_SHA256"
+      OpenSSL: "DHE-PSK-CAMELLIA128-SHA256"
+      GnuTLS: "TLS_DHE_PSK_CAMELLIA_128_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x97"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_CAMELLIA_256_CBC_SHA384"
+      OpenSSL: "DHE-PSK-CAMELLIA256-SHA384"
+      GnuTLS: "TLS_DHE_PSK_CAMELLIA_256_CBC_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x98"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_CAMELLIA_128_CBC_SHA256"
+      OpenSSL: "RSA-PSK-CAMELLIA128-SHA256"
+      GnuTLS: "TLS_RSA_PSK_CAMELLIA_128_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x99"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_CAMELLIA_256_CBC_SHA384"
+      OpenSSL: "RSA-PSK-CAMELLIA256-SHA384"
+      GnuTLS: "TLS_RSA_PSK_CAMELLIA_256_CBC_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x9A"
+    names:
+      IANA: "TLS_ECDHE_PSK_WITH_CAMELLIA_128_CBC_SHA256"
+      OpenSSL: "ECDHE-PSK-CAMELLIA128-SHA256"
+      GnuTLS: "TLS_ECDHE_PSK_CAMELLIA_128_CBC_SHA256"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x9B"
+    names:
+      IANA: "TLS_ECDHE_PSK_WITH_CAMELLIA_256_CBC_SHA384"
+      OpenSSL: "ECDHE-PSK-CAMELLIA256-SHA384"
+      GnuTLS: "TLS_ECDHE_PSK_CAMELLIA_256_CBC_SHA384"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x9C"
+    names:
+      IANA: "TLS_RSA_WITH_AES_128_CCM"
+      OpenSSL: "AES128-CCM"
+      GnuTLS: "TLS_RSA_AES_128_CCM"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x9D"
+    names:
+      IANA: "TLS_RSA_WITH_AES_256_CCM"
+      OpenSSL: "AES256-CCM"
+      GnuTLS: "TLS_RSA_AES_256_CCM"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x9E"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_AES_128_CCM"
+      OpenSSL: "DHE-RSA-AES128-CCM"
+      GnuTLS: "TLS_DHE_RSA_AES_128_CCM"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0x9F"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_AES_256_CCM"
+      OpenSSL: "DHE-RSA-AES256-CCM"
+      GnuTLS: "TLS_DHE_RSA_AES_256_CCM"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0xA0"
+    names:
+      IANA: "TLS_RSA_WITH_AES_128_CCM_8"
+      OpenSSL: "AES128-CCM8"
+      GnuTLS: "TLS_RSA_AES_128_CCM_8"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0xA1"
+    names:
+      IANA: "TLS_RSA_WITH_AES_256_CCM_8"
+      OpenSSL: "AES256-CCM8"
+      GnuTLS: "TLS_RSA_AES_256_CCM_8"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0xA2"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_AES_128_CCM_8"
+      OpenSSL: "DHE-RSA-AES128-CCM8"
+      GnuTLS: "TLS_DHE_RSA_AES_128_CCM_8"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0xA3"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_AES_256_CCM_8"
+      OpenSSL: "DHE-RSA-AES256-CCM8"
+      GnuTLS: "TLS_DHE_RSA_AES_256_CCM_8"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0xA4"
+    names:
+      IANA: "TLS_PSK_WITH_AES_128_CCM"
+      OpenSSL: "PSK-AES128-CCM"
+      GnuTLS: "TLS_PSK_AES_128_CCM"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0xA5"
+    names:
+      IANA: "TLS_PSK_WITH_AES_256_CCM"
+      OpenSSL: "PSK-AES256-CCM"
+      GnuTLS: "TLS_PSK_AES_256_CCM"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0xA6"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_AES_128_CCM"
+      OpenSSL: "DHE-PSK-AES128-CCM"
+      GnuTLS: "TLS_DHE_PSK_AES_128_CCM"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0xA7"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_AES_256_CCM"
+      OpenSSL: "DHE-PSK-AES256-CCM"
+      GnuTLS: "TLS_DHE_PSK_AES_256_CCM"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0xA8"
+    names:
+      IANA: "TLS_PSK_WITH_AES_128_CCM_8"
+      OpenSSL: "PSK-AES128-CCM8"
+      GnuTLS: "TLS_PSK_AES_128_CCM_8"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0xA9"
+    names:
+      IANA: "TLS_PSK_WITH_AES_256_CCM_8"
+      OpenSSL: "PSK-AES256-CCM8"
+      GnuTLS: "TLS_PSK_AES_256_CCM_8"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0xAA"
+    names:
+      IANA: "TLS_PSK_DHE_WITH_AES_128_CCM_8"
+      OpenSSL: "DHE-PSK-AES128-CCM8"
+      GnuTLS: "TLS_DHE_PSK_AES_128_CCM_8"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0xAB"
+    names:
+      IANA: "TLS_PSK_DHE_WITH_AES_256_CCM_8"
+      OpenSSL: "DHE-PSK-AES256-CCM8"
+      GnuTLS: "TLS_DHE_PSK_AES_256_CCM_8"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0xAC"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_AES_128_CCM"
+      OpenSSL: "ECDHE-ECDSA-AES128-CCM"
+      GnuTLS: "TLS_ECDHE_ECDSA_AES_128_CCM"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0xAD"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_AES_256_CCM"
+      OpenSSL: "ECDHE-ECDSA-AES256-CCM"
+      GnuTLS: "TLS_ECDHE_ECDSA_AES_256_CCM"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0xAE"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8"
+      OpenSSL: "ECDHE-ECDSA-AES128-CCM8"
+      GnuTLS: "TLS_ECDHE_ECDSA_AES_128_CCM_8"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xC0,0xAF"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_AES_256_CCM_8"
+      OpenSSL: "ECDHE-ECDSA-AES256-CCM8"
+      GnuTLS: "TLS_ECDHE_ECDSA_AES_256_CCM_8"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xCC,0xA8"
+    names:
+      IANA: "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+      OpenSSL: "ECDHE-RSA-CHACHA20-POLY1305"
+      GnuTLS: "TLS_ECDHE_RSA_CHACHA20_POLY1305"
+      NSS: "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+    strength: MEDIUM
+    tls_versions: ["TLSv1.2"]
+  - id: "0xCC,0xA9"
+    names:
+      IANA: "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256"
+      OpenSSL: "ECDHE-ECDSA-CHACHA20-POLY1305"
+      GnuTLS: "TLS_ECDHE_ECDSA_CHACHA20_POLY1305"
+      NSS: "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256"
+    strength: MEDIUM
+    tls_versions: ["TLSv1.2"]
+  - id: "0xCC,0xAA"
+    names:
+      IANA: "TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+      OpenSSL: "DHE-RSA-CHACHA20-POLY1305"
+      GnuTLS: "TLS_DHE_RSA_CHACHA20_POLY1305"
+      NSS: "TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+    strength: MEDIUM
+    tls_versions: ["TLSv1.2"]
+  - id: "0xCC,0xAB"
+    names:
+      IANA: "TLS_PSK_WITH_CHACHA20_POLY1305_SHA256"
+      OpenSSL: "PSK-CHACHA20-POLY1305"
+      GnuTLS: "TLS_PSK_CHACHA20_POLY1305"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xCC,0xAC"
+    names:
+      IANA: "TLS_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256"
+      OpenSSL: "ECDHE-PSK-CHACHA20-POLY1305"
+      GnuTLS: "TLS_ECDHE_PSK_CHACHA20_POLY1305"
+      NSS: "TLS_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xCC,0xAD"
+    names:
+      IANA: "TLS_DHE_PSK_WITH_CHACHA20_POLY1305_SHA256"
+      OpenSSL: "DHE-PSK-CHACHA20-POLY1305"
+      GnuTLS: "TLS_DHE_PSK_CHACHA20_POLY1305"
+      NSS: "TLS_DHE_PSK_WITH_CHACHA20_POLY1305_SHA256"
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0xCC,0xAE"
+    names:
+      IANA: "TLS_RSA_PSK_WITH_CHACHA20_POLY1305_SHA256"
+      OpenSSL: "RSA-PSK-CHACHA20-POLY1305"
+      GnuTLS: "TLS_RSA_PSK_CHACHA20_POLY1305"
+      NSS: ""
+    strength: UNASSIGNED
+    tls_versions: ["TLSv1.2"]
+  - id: "0x01,0x00,0x80"
+    names:
+      IANA: "SSL_CK_RC4_128_WITH_MD5"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["SSLv2"]
+  - id: "0x02,0x00,0x80"
+    names:
+      IANA: "SSL_CK_RC4_128_EXPORT40_WITH_MD5"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["SSLv2"]
+  - id: "0x03,0x00,0x80"
+    names:
+      IANA: "SSL_CK_RC2_128_CBC_WITH_MD5"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["SSLv2"]
+  - id: "0x04,0x00,0x80"
+    names:
+      IANA: "SSL_CK_RC2_128_CBC_EXPORT40_WITH_MD5"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["SSLv2"]
+  - id: "0x05,0x00,0x80"
+    names:
+      IANA: "SSL_CK_IDEA_128_CBC_WITH_MD5"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["SSLv2"]
+  - id: "0x06,0x00,0x40"
+    names:
+      IANA: "SSL_CK_DES_64_CBC_WITH_MD5"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["SSLv2"]
+  - id: "0x07,0x00,0xC0"
+    names:
+      IANA: "SSL_CK_DES_192_EDE3_CBC_WITH_MD5"
+      OpenSSL: ""
+      GnuTLS: ""
+      NSS: ""
+    strength: WEAK
+    tls_versions: ["SSLv2"]

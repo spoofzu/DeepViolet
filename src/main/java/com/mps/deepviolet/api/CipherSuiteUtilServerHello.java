@@ -7,6 +7,11 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
+/**
+ * Parses a TLS ServerHello handshake message from a raw input stream, extracting
+ * protocol version, cipher suite, compression method, server certificate details,
+ * and TLS 1.3 detection via the supported_versions extension.
+ */
 public class CipherSuiteUtilServerHello {
 
 	int recordVersion;
@@ -16,7 +21,8 @@ public class CipherSuiteUtilServerHello {
 	int compression;
 	String serverCertName;
 	String serverCertHash;
-	
+	boolean isTLS13;
+
 	CipherSuiteUtilServerHello(InputStream in)
 		throws IOException
 	{
@@ -77,12 +83,45 @@ public class CipherSuiteUtilServerHello {
 			throw new IOException("invalid ServerHello");
 		}
 		cipherSuite = CipherSuiteUtil.dec16be(buf, ptr);
-		compression = buf[ptr + 2] & 0xFF;
+		ptr += 2;
+		compression = buf[ptr] & 0xFF;
+		ptr += 1;
 
 		/*
-		 * The ServerHello could include some extensions
-		 * here, which we ignore.
+		 * Parse extensions to detect TLS 1.3 via supported_versions.
+		 * In TLS 1.3, the ServerHello version field is 0x0303 (TLS 1.2)
+		 * and the actual version is in the supported_versions extension.
 		 */
+		isTLS13 = false;
+		if (ptr + 2 <= buf.length) {
+			int extTotalLen = CipherSuiteUtil.dec16be(buf, ptr);
+			ptr += 2;
+			int extEnd = ptr + extTotalLen;
+			while (ptr + 4 <= extEnd && ptr + 4 <= buf.length) {
+				int extType = CipherSuiteUtil.dec16be(buf, ptr);
+				ptr += 2;
+				int extLen = CipherSuiteUtil.dec16be(buf, ptr);
+				ptr += 2;
+				if (extType == 0x002b && extLen >= 2) {
+					// supported_versions extension
+					int negotiatedVersion = CipherSuiteUtil.dec16be(buf, ptr);
+					if (negotiatedVersion >= 0x0304) {
+						isTLS13 = true;
+						protoVersion = negotiatedVersion;
+					}
+				}
+				ptr += extLen;
+			}
+		}
+
+		/*
+		 * For TLS 1.3, everything after ServerHello is encrypted.
+		 * We already have the cipher suite, so return without trying
+		 * to read Certificate or other messages.
+		 */
+		if (isTLS13) {
+			return;
+		}
 
 		/*
 		 * We now read a few extra messages, until we
@@ -92,7 +131,7 @@ public class CipherSuiteUtilServerHello {
 		for (;;) {
 			buf = new byte[4];
 			CipherSuiteUtil.readFully(rec, buf);
-			int mt = buf[0] & 0xFF; 
+			int mt = buf[0] & 0xFF;
 			buf = new byte[CipherSuiteUtil.dec24be(buf, 1)];
 			CipherSuiteUtil.readFully(rec, buf);
 			switch (mt) {
@@ -135,9 +174,4 @@ public class CipherSuiteUtilServerHello {
 			return;
 		}
 	}
-	
-	
-
-
-		
 }
