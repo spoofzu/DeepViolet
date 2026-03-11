@@ -231,6 +231,13 @@ class CipherSuiteUtil {
 			if (sh == null) {
 				continue;
 			}
+			// The server may respond with a different version than requested
+			// (e.g. TLS 1.3 ClientHello → TLS 1.2 ServerHello fallback).
+			// If the response version is outside the enabled set, skip it.
+			if (enabledProtocols != null && !enabledProtocols.isEmpty()
+					&& !enabledProtocols.contains(sh.protoVersion)) {
+				continue;
+			}
 			sv.add(sh.protoVersion);
 			dvtask.setStatusBarMessage("Analysing TLS version "+sh.protoVersion);
 			if (sh.compression == 1) {
