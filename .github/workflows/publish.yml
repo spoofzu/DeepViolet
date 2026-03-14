@@ -1,0 +1,111 @@
+name: Publish to Maven Central
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Release version (e.g. 5.1.18). Leave blank to auto-strip -SNAPSHOT from POM.'
+        required: false
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.version.outputs.RELEASE_VERSION }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Determine release version
+        id: version
+        run: |
+          if [ -n "${{ inputs.release_version }}" ]; then
+            VERSION="${{ inputs.release_version }}"
+          else
+            POM_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+            VERSION="${POM_VERSION%-SNAPSHOT}"
+          fi
+          echo "RELEASE_VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Release version: $VERSION"
+
+      - name: Set release version in POM
+        run: mvn -B versions:set -DnewVersion=${{ steps.version.outputs.RELEASE_VERSION }} -DgenerateBackupPoms=false
+
+      - name: Build and test
+        run: mvn -B clean verify
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-build
+          path: |
+            pom.xml
+            target/
+          retention-days: 1
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: maven-central
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          server-id: central
+          server-username: CENTRAL_USERNAME
+          server-password: CENTRAL_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: GPG_PASSPHRASE
+          cache: maven
+
+      - name: Set release version in POM
+        run: mvn -B versions:set -DnewVersion=${{ needs.build.outputs.version }} -DgenerateBackupPoms=false
+
+      - name: Deploy to Maven Central
+        run: mvn -B clean deploy -Prelease
+        env:
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Tag release
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${{ needs.build.outputs.version }}" -m "Release ${{ needs.build.outputs.version }}"
+          git push origin "v${{ needs.build.outputs.version }}"
+
+      - name: Bump to next SNAPSHOT
+        run: |
+          # Increment patch version
+          VERSION="${{ needs.build.outputs.version }}"
+          MAJOR=$(echo "$VERSION" | cut -d. -f1)
+          MINOR=$(echo "$VERSION" | cut -d. -f2)
+          PATCH=$(echo "$VERSION" | cut -d. -f3)
+          NEXT_PATCH=$((PATCH + 1))
+          NEXT_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}-SNAPSHOT"
+          echo "Next development version: $NEXT_VERSION"
+          mvn -B versions:set -DnewVersion=$NEXT_VERSION -DgenerateBackupPoms=false
+          git add pom.xml
+          git commit -m "Bump to $NEXT_VERSION [skip ci]"
+          git push origin HEAD

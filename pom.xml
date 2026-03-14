@@ -4,7 +4,7 @@
     <artifactId>DeepViolet</artifactId>
     <version>5.1.18-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>${project.groupId}:${project.artifactId}</name>
+    <name>DeepViolet</name>
     <description>TLS/SSL security introspection API</description>
     <url>https://github.com/spoofzu/DeepViolet/</url>
     <issueManagement>
@@ -30,6 +30,11 @@
             <timezone>America/Los_Angeles</timezone>
         </developer>
     </developers>
+    <scm>
+        <connection>scm:git:git://github.com/spoofzu/DeepViolet.git</connection>
+        <developerConnection>scm:git:ssh://github.com:spoofzu/DeepViolet.git</developerConnection>
+        <url>https://github.com/spoofzu/DeepViolet/tree/master</url>
+    </scm>
     <properties>
         <dvversion>${project.version}</dvversion>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -95,6 +100,19 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>${maven.javadoc.plugin}</version>
                 <configuration>
@@ -105,6 +123,14 @@
                     <reportOutputDirectory>${project.basedir}/docs</reportOutputDirectory>
                     <destDir>javadocs</destDir>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -163,6 +189,44 @@
                                 </configuration>
                             </execution>
                         </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.2.7</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <gpgArguments>
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+                                    </gpgArguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.7.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>false</autoPublish>
+                            <waitUntil>validated</waitUntil>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
