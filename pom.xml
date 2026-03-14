@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.spoofzu</groupId>
     <artifactId>DeepViolet</artifactId>
-    <version>5.2.0-SNAPSHOT</version>
+    <version>5.2.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>DeepViolet</name>
     <description>TLS/SSL security introspection API</description>
