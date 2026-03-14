@@ -1,10 +1,12 @@
 package com.mps.deepviolet.api;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -15,6 +17,9 @@ import java.util.Properties;
 
 import javax.net.ssl.SSLHandshakeException;
 
+import com.mps.deepviolet.api.ai.AiAnalysisException;
+import com.mps.deepviolet.api.ai.AiConfig;
+import com.mps.deepviolet.api.ai.AiAnalysisService;
 import com.mps.deepviolet.api.tls.TlsMetadata;
 import com.mps.deepviolet.api.tls.TlsSocket;
 import com.mps.deepviolet.api.fingerprint.TlsServerFingerprint;
@@ -530,6 +535,157 @@ class DeepVioletEngine implements IEngine {
 			logger.error(msg, e);
 			throw new DeepVioletException(msg, e);
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see com.mps.deepviolet.api.IEngine#getAiAnalysis(AiConfig)
+	 */
+	public String getAiAnalysis(AiConfig config) throws DeepVioletException {
+		try {
+			String report = buildPlainTextReport();
+			InputStream reportStream = new ByteArrayInputStream(
+					report.getBytes(StandardCharsets.UTF_8));
+			return getAiAnalysis(reportStream, config);
+		} catch (DeepVioletException e) {
+			throw e;
+		} catch (Exception e) {
+			String msg = "Problem building AI analysis report. err=" + e.getMessage();
+			logger.error(msg, e);
+			throw new DeepVioletException(msg, e);
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see com.mps.deepviolet.api.IEngine#getAiAnalysis(InputStream, AiConfig)
+	 */
+	public String getAiAnalysis(InputStream scanReport, AiConfig config) throws DeepVioletException {
+		try {
+			AiAnalysisService aiService = new AiAnalysisService();
+			return aiService.analyze(scanReport, config);
+		} catch (AiAnalysisException e) {
+			throw new DeepVioletException("AI analysis failed: " + e.getMessage(), e);
+		} catch (Exception e) {
+			String msg = "Problem performing AI analysis. err=" + e.getMessage();
+			logger.error(msg, e);
+			throw new DeepVioletException(msg, e);
+		}
+	}
+
+	/**
+	 * Build a plain text summary from the current engine state for AI analysis.
+	 */
+	private String buildPlainTextReport() throws DeepVioletException {
+		StringBuilder sb = new StringBuilder();
+
+		// Session info
+		sb.append("[Session Information]\n");
+		sb.append("URL=").append(url.toString()).append("\n");
+		try {
+			String protocol = session.getSessionPropertyValue(
+					ISession.SESSION_PROPERTIES.NEGOTIATED_PROTOCOL);
+			String cipher = session.getSessionPropertyValue(
+					ISession.SESSION_PROPERTIES.NEGOTIATED_CIPHER_SUITE);
+			if (protocol != null) sb.append("Negotiated Protocol=").append(protocol).append("\n");
+			if (cipher != null) sb.append("Negotiated Cipher Suite=").append(cipher).append("\n");
+		} catch (Exception e) {
+			logger.debug("Could not get session properties for AI report", e);
+		}
+		sb.append("\n");
+
+		// Risk score
+		try {
+			IRiskScore score = getRiskScore();
+			if (score != null) {
+				sb.append("[TLS Risk Assessment]\n");
+				sb.append("Overall Score=").append(score.getTotalScore()).append("/100\n");
+				sb.append("Letter Grade=").append(score.getLetterGrade()).append("\n");
+				sb.append("Risk Level=").append(score.getRiskLevel()).append("\n");
+				for (IRiskScore.ICategoryScore cat : score.getCategoryScores()) {
+					sb.append("\n").append(cat.getDisplayName()).append(":\n");
+					sb.append("   Score=").append(String.format("%.1f", cat.getScore())).append("\n");
+					sb.append("   Risk Level=").append(cat.getRiskLevel()).append("\n");
+					if (cat.getSummary() != null && !cat.getSummary().isEmpty()) {
+						sb.append("   Summary=").append(cat.getSummary()).append("\n");
+					}
+					for (IRiskScore.IDeduction d : cat.getDeductions()) {
+						sb.append("   ").append(d.getRuleId())
+								.append(" [").append(d.getSeverity()).append("] ")
+								.append(d.getDescription())
+								.append(" (").append(String.format("%.0f", d.getScore())).append(" pts)\n");
+					}
+				}
+				sb.append("\n");
+			}
+		} catch (Exception e) {
+			logger.debug("Could not compute risk score for AI report", e);
+		}
+
+		// Cipher suites
+		try {
+			ICipherSuite[] ciphers = getCipherSuites();
+			if (ciphers != null && ciphers.length > 0) {
+				sb.append("[Cipher Suites]\n");
+				for (ICipherSuite cs : ciphers) {
+					sb.append(cs.getSuiteName()).append(" [")
+							.append(cs.getStrengthEvaluation()).append("] ")
+							.append(cs.getHandshakeProtocol()).append("\n");
+				}
+				sb.append("\n");
+			}
+		} catch (Exception e) {
+			logger.debug("Could not get cipher suites for AI report", e);
+		}
+
+		// Certificate info
+		try {
+			IX509Certificate cert = getCertificate();
+			if (cert != null) {
+				sb.append("[Certificate]\n");
+				sb.append("Subject=").append(cert.getSubjectDN()).append("\n");
+				sb.append("Issuer=").append(cert.getIssuerDN()).append("\n");
+				sb.append("Valid From=").append(cert.getNotValidBefore()).append("\n");
+				sb.append("Valid Until=").append(cert.getNotValidAfter()).append("\n");
+				sb.append("Validity=").append(cert.getValidityState()).append("\n");
+				sb.append("Days Until Expiration=").append(cert.getDaysUntilExpiration()).append("\n");
+				sb.append("Trust State=").append(cert.getTrustState()).append("\n");
+				sb.append("Self-Signed=").append(cert.isSelfSignedCertificate()).append("\n");
+				sb.append("Signing Algorithm=").append(cert.getSigningAlgorithm()).append("\n");
+				sb.append("Public Key Algorithm=").append(cert.getPublicKeyAlgorithm()).append("\n");
+				sb.append("Public Key Size=").append(cert.getPublicKeySize()).append("\n");
+				String curve = cert.getPublicKeyCurve();
+				if (curve != null) sb.append("Public Key Curve=").append(curve).append("\n");
+				sb.append("\n");
+			}
+		} catch (Exception e) {
+			logger.debug("Could not get certificate for AI report", e);
+		}
+
+		// DNS status
+		try {
+			IDnsStatus dns = getDnsStatus();
+			if (dns != null) {
+				sb.append("[DNS Security]\n");
+				sb.append("CAA Records Present=").append(dns.hasCaaRecords()).append("\n");
+				sb.append("DANE/TLSA Records Present=").append(dns.hasTlsaRecords()).append("\n");
+				sb.append("\n");
+			}
+		} catch (Exception e) {
+			logger.debug("Could not get DNS status for AI report", e);
+		}
+
+		// TLS fingerprint
+		try {
+			String fingerprint = getTlsFingerprint();
+			if (fingerprint != null) {
+				sb.append("[TLS Fingerprint]\n");
+				sb.append("Fingerprint=").append(fingerprint).append("\n");
+				sb.append("\n");
+			}
+		} catch (Exception e) {
+			logger.debug("Could not get TLS fingerprint for AI report", e);
+		}
+
+		return sb.toString();
 	}
 
 //	public String getPropertyValue( String keyname ) throws DeepVioletException {

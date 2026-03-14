@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mps.deepviolet.api.ISession.CIPHER_NAME_CONVENTION;
+import com.mps.deepviolet.api.ai.AiAnalysisService;
+import com.mps.deepviolet.api.ai.IAiAnalysisService;
 import com.mps.deepviolet.api.tls.ClientHelloConfig;
 import com.mps.deepviolet.api.tls.TlsMetadata;
 import com.mps.deepviolet.api.tls.TlsSocket;
@@ -204,6 +206,15 @@ public class DeepVioletFactory {
 		} catch (Exception e) {
 			throw new DeepVioletException("Failed to load cipher map: " + e.getMessage(), e);
 		}
+	}
+
+	/**
+	 * Get the AI analysis service instance.
+	 *
+	 * @return IAiAnalysisService for direct AI interactions
+	 */
+	public static IAiAnalysisService getAiService() {
+		return new AiAnalysisService();
 	}
 
 	/**

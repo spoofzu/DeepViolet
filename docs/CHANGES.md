@@ -170,3 +170,30 @@ The upstream repository (github.com/spoofzu/DeepViolet) last received meaningful
 | Developer Experience | 2 | 8 sample programs, 378 tests across 24 test classes |
 
 **Total: 17 significant improvements** transforming a dormant 2019-era scanning library into a modern, comprehensive TLS security analysis API.
+
+---
+
+### 18. AI Analysis Service (new — moved from DeepVioletTools)
+- **`com.mps.deepviolet.api.ai`** package with `IAiAnalysisService`, `AiAnalysisService`, `AiConfig`, `AiProvider`, `AiChatMessage`, `AiAnalysisException`
+- Supports Anthropic, OpenAI, and Ollama AI providers for TLS scan analysis and multi-turn chat
+- `InputStream`-based `analyze()` decouples the API from data source (file, URL, in-memory)
+- `AiConfig` builder replaces 7-8 parameter method signatures
+- Integrated with `IEngine.getAiAnalysis(AiConfig)` for one-call analysis from engine state
+- `DeepVioletFactory.getAiService()` factory entry point
+- Two sample programs: `PrintAiAnalysis.java`, `PrintAiChat.java`
+
+### 19. Scan Persistence with Three Save Modes (new — moved from DeepVioletTools)
+
+Scan persistence is now an API-level feature. Any program using the DeepViolet API can save and load `.dvscan` files in the same format used by the DeepVioletTools GUI workbench. This enables workflows like running scans on remote servers or in CI/CD pipelines and transferring `.dvscan` files to a workstation for visual analysis.
+
+- **`com.mps.deepviolet.persist`** package with `ScanFileIO`, `ScanFileMode`, `ScanSnapshot`, `HostSnapshot`, `SourceProvenance`, `ScanJsonCodec`
+- **Three save modes** via `ScanFileMode` enum:
+  - **Plain text** — unencrypted JSON, portable to any machine
+  - **Host locked** — v2 envelope encryption with machine key only (zero-friction, default)
+  - **Password locked** — v2 envelope encryption with password only (always requires password to open, portable across hosts)
+- **v2 envelope encryption:** per-file DEK (AES-256-GCM), dual KEK slots (machine + password), HMAC-SHA256 slot integrity tag
+- **Auto-detecting load:** `ScanFileIO.load()` transparently handles plain JSON, v1 encrypted, and v2 envelope encrypted files
+- **`PasswordCallback`** functional interface for cross-machine password prompts (GUI shows dialog, CLI reads from env/file)
+- **`com.mps.deepviolet.util.CryptoUtils`:** AES-256-GCM, DEK generation/wrapping, PBKDF2-HMAC-SHA256 password KDF, HMAC-SHA256, SHA-256, machine key management
+- Immutable data holders: `ImmutableRiskScore`, `ImmutableCategoryScore`, `ImmutableDeduction`, `ImmutableCipherSuite`
+- Sample program: `PrintScanPersistence.java` — demonstrates all three modes

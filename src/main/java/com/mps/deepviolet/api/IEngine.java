@@ -3,6 +3,7 @@ package com.mps.deepviolet.api;
 import java.io.InputStream;
 import java.util.List;
 
+import com.mps.deepviolet.api.ai.AiConfig;
 import com.mps.deepviolet.api.scoring.rules.RuleContext;
 
 /**
@@ -205,5 +206,27 @@ public interface IEngine {
 	 * @throws DeepVioletException Thrown on problems computing score
 	 */
 	IRiskScore getRiskScore(InputStream userRulesStream) throws DeepVioletException;
+
+	/**
+	 * Analyze the current TLS scan results using an AI provider.
+	 * Builds a plain text report from the engine state and sends it
+	 * as an InputStream to the AI service.
+	 *
+	 * @param config AI configuration
+	 * @return AI analysis text
+	 * @throws DeepVioletException on scan data or AI errors
+	 */
+	String getAiAnalysis(AiConfig config) throws DeepVioletException;
+
+	/**
+	 * Analyze scan data from a caller-provided stream using an AI provider.
+	 * The caller controls the data source — file, URL, in-memory buffer, etc.
+	 *
+	 * @param scanReport InputStream providing the plain text scan report
+	 * @param config     AI configuration
+	 * @return AI analysis text
+	 * @throws DeepVioletException on AI errors
+	 */
+	String getAiAnalysis(InputStream scanReport, AiConfig config) throws DeepVioletException;
 
 }
