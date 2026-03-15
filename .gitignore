@@ -19,6 +19,9 @@
 CLAUDE.md
 .claude/
 
+# Javadoc (generated output lives in docs/javadocs/)
+/javadocs/
+
 # Maven
 target/
 pom.xml.tag
