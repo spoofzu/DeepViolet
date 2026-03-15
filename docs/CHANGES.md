@@ -3,7 +3,7 @@
 The upstream repository (github.com/spoofzu/DeepViolet) last received meaningful updates in **July 2019**. The local repository represents a major modernization effort.
 
 **Upstream:** v5.1.16 / 5.1.17-SNAPSHOT, Java 8, Bouncy Castle dependency, basic TLS introspection, no TLS 1.3.
-**Local:** v5.1.18-SNAPSHOT, Java 21+, Bouncy Castle removed, TLS 1.3 support, comprehensive TLS security analysis.
+**Current:** Java 21+, Bouncy Castle removed, TLS 1.3 support, comprehensive TLS security analysis. See [README](../README.md) for the current version and Maven coordinates.
 
 ---
 

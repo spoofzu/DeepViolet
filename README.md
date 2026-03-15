@@ -25,21 +25,13 @@ mvn clean verify
 
 ## Using in Your Project
 
-Build the JAR:
-
-```bash
-mvn package
-```
-
-The JAR will be in `target/DeepViolet-5.1.18-SNAPSHOT.jar`. Add it to your project as a local dependency in your `pom.xml`:
+DeepViolet is available on [Maven Central](https://central.sonatype.com/). Add it to your `pom.xml`:
 
 ```xml
 <dependency>
-  <groupId>com.github.spoofzu</groupId>
-  <artifactId>DeepViolet</artifactId>
-  <version>5.1.18-SNAPSHOT</version>
-  <scope>system</scope>
-  <systemPath>${project.basedir}/lib/DeepViolet-5.1.18-SNAPSHOT.jar</systemPath>
+    <groupId>com.github.spoofzu</groupId>
+    <artifactId>DeepViolet</artifactId>
+    <version>5.2.0</version>
 </dependency>
 ```
 
@@ -49,9 +41,9 @@ A standalone tool that compares DV API results against openssl for the same serv
 
 ```bash
 mvn package -Pvalidate
-java -jar target/DeepViolet-5.1.18-SNAPSHOT-validate.jar google.com
-java -jar target/DeepViolet-5.1.18-SNAPSHOT-validate.jar expired.badssl.com
-java -jar target/DeepViolet-5.1.18-SNAPSHOT-validate.jar --json github.com
+java -jar target/DeepViolet-5.2.0-validate.jar google.com
+java -jar target/DeepViolet-5.2.0-validate.jar expired.badssl.com
+java -jar target/DeepViolet-5.2.0-validate.jar --json github.com
 ```
 
 Compares 17 fields (subjectDN, issuerDN, serialNumber, version, signingAlgorithm, publicKeyAlgorithm, publicKeySize, publicKeyCurve, notValidBefore, notValidAfter, isSelfSigned, sanCount, fingerprint, negotiatedProtocol, negotiatedCipher, chainLength, ocspStapling) with automatic normalization for cross-tool differences. For bad-cert servers, verifies that DV correctly rejects the connection while openssl shows why. Requires openssl installed locally.
