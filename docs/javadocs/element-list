@@ -1,8 +1,10 @@
 com.mps.deepviolet.api
+com.mps.deepviolet.api.ai
 com.mps.deepviolet.api.fingerprint
 com.mps.deepviolet.api.scoring
 com.mps.deepviolet.api.scoring.rules
 com.mps.deepviolet.api.tls
+com.mps.deepviolet.persist
 com.mps.deepviolet.samples
 com.mps.deepviolet.util
 com.mps.deepviolet.validate
