@@ -24,6 +24,23 @@
   - [Expression Language Reference](#expression-language-reference)
   - [Rules File Reference](#rules-file-reference)
   - [Proposing Changes to Default Scoring](#proposing-changes-to-default-scoring)
+- [AI Analysis](#ai-analysis)
+  - [Supported Providers](#supported-providers)
+  - [AI Configuration](#ai-configuration)
+  - [Using AI Analysis](#using-ai-analysis)
+  - [Multi-Turn Chat](#multi-turn-chat)
+  - [Model Discovery](#model-discovery)
+- [Scanning and Persistence](#scanning-and-persistence)
+  - [Scanning Overview](#scanning-overview)
+  - [Scan Configuration](#scan-configuration-1)
+  - [Scan Sections](#scan-sections)
+  - [Monitoring Scans](#monitoring-scans)
+  - [Scan Results](#scan-results)
+  - [Persistence Overview](#persistence-overview)
+  - [File Modes](#file-modes)
+  - [Saving and Loading Scans](#saving-and-loading-scans)
+  - [Encryption Architecture](#encryption-architecture)
+  - [Delta Comparison](#delta-comparison)
 - [API Reference](#api-reference)
 - [API Usage Examples](#api-usage-examples)
 - [API Validation Tool](#api-validation-tool)
@@ -1237,6 +1254,419 @@ If you believe a default rule, point value, or condition should be changed, [ope
 
 If the proposal is approved, submit a pull request to `risk-scoring-rules.yaml` and include a reference to the approved issue.
 
+## AI Analysis
+
+The AI analysis module sends TLS scan data to a large language model and returns structured security analysis. There are two access paths:
+
+- **Engine one-call** — `IEngine.getAiAnalysis(AiConfig)` generates a report from the current engine state and sends it in a single call.
+- **Service direct** — `DeepVioletFactory.getAiService()` returns an `IAiAnalysisService` that accepts an `InputStream` of scan data, allowing analysis of saved reports, in-memory strings, or any other stream source.
+
+### Supported Providers
+
+| Provider | Endpoint | Default Models | API Key | Notes |
+|----------|----------|---------------|---------|-------|
+| `ANTHROPIC` | `https://api.anthropic.com/v1/messages` | `claude-sonnet-4-5-20250929`, `claude-haiku-4-5-20251001` | Required (`DV_AI_API_KEY`) | Cloud-hosted |
+| `OPENAI` | `https://api.openai.com/v1/chat/completions` | `gpt-4o`, `gpt-4o-mini` | Required (`DV_AI_API_KEY`) | Cloud-hosted |
+| `OLLAMA` | `http://localhost:11434` | `llama3.2:latest`, `mistral:latest`, `gemma2:latest` | Not required | Local — no data leaves the machine |
+
+### AI Configuration
+
+Use `AiConfig.builder()` to construct an immutable configuration:
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `provider` | `AiProvider` | `ANTHROPIC` | AI provider to use |
+| `apiKey` | `String` | `null` | API key (required for Anthropic and OpenAI) |
+| `model` | `String` | Provider default | Model identifier |
+| `maxTokens` | `int` | `4096` | Maximum tokens in the response |
+| `temperature` | `double` | `0.3` | Sampling temperature (0.0–1.0) |
+| `systemPrompt` | `String` | Built-in analysis prompt | Custom system prompt |
+| `endpointUrl` | `String` | Provider default | Override endpoint URL |
+
+```java
+AiConfig config = AiConfig.builder()
+        .provider(AiProvider.ANTHROPIC)
+        .apiKey(System.getenv("DV_AI_API_KEY"))
+        .model("claude-sonnet-4-5-20250929")
+        .maxTokens(4096)
+        .temperature(0.3)
+        .build();
+```
+
+### Using AI Analysis
+
+**Option 1: One-call from engine state** — the engine generates a report internally and sends it to the AI provider:
+
+```java
+URL url = new URL("https://github.com/");
+ISession session = DeepVioletFactory.initializeSession(url);
+IEngine eng = DeepVioletFactory.getEngine(session);
+
+String analysis = eng.getAiAnalysis(config);
+System.out.println(analysis);
+```
+
+**Option 2: Analyze from a file or stream** — use the service directly with any `InputStream`:
+
+```java
+IAiAnalysisService ai = DeepVioletFactory.getAiService();
+
+// From a saved report file
+try (InputStream fileStream = Files.newInputStream(Path.of("saved-report.txt"))) {
+    String analysis = ai.analyze(fileStream, config);
+    System.out.println(analysis);
+}
+```
+
+**Option 3: Analyze from an in-memory string**:
+
+```java
+String reportText = "... scan report text ...";
+try (InputStream memStream = new ByteArrayInputStream(
+        reportText.getBytes(StandardCharsets.UTF_8))) {
+    String analysis = ai.analyze(memStream, config);
+    System.out.println(analysis);
+}
+```
+
+See `PrintAiAnalysis.java` for a complete working example.
+
+### Multi-Turn Chat
+
+The `chat()` method supports multi-turn conversations about scan results. Each call sends the full conversation history and returns the assistant's next response.
+
+`AiChatMessage` is a record with two components: `role` (`"user"`, `"assistant"`, or `"system"`) and `content` (the message text).
+
+```java
+IAiAnalysisService ai = DeepVioletFactory.getAiService();
+
+AiConfig chatConfig = AiConfig.builder()
+        .provider(AiProvider.OLLAMA)
+        .model("llama3.2:latest")
+        .systemPrompt(AiAnalysisService.DEFAULT_CHAT_SYSTEM_PROMPT)
+        .build();
+
+// Seed the conversation with scan context
+List<AiChatMessage> history = new ArrayList<>();
+history.add(new AiChatMessage("user",
+        "Here is a TLS scan report:\n" + scanReport + "\n\nWhat is the biggest risk?"));
+
+String response = ai.chat(history, chatConfig);
+System.out.println("AI: " + response);
+
+// Follow-up question
+history.add(new AiChatMessage("assistant", response));
+history.add(new AiChatMessage("user", "How do I fix it?"));
+
+response = ai.chat(history, chatConfig);
+System.out.println("AI: " + response);
+```
+
+See `PrintAiChat.java` for a complete working example.
+
+### Model Discovery
+
+Use `fetchModels()` to query available models from a provider at runtime:
+
+```java
+IAiAnalysisService ai = DeepVioletFactory.getAiService();
+
+// Query models from Ollama (local)
+String[] ollamaModels = ai.fetchModels(AiProvider.OLLAMA, null, null);
+
+// Query models from Anthropic (requires API key)
+String[] anthropicModels = ai.fetchModels(AiProvider.ANTHROPIC,
+        System.getenv("DV_AI_API_KEY"), null);
+```
+
+For built-in defaults without an API call, use `AiProvider.getDefaultModels()`:
+
+```java
+String[] defaults = AiProvider.ANTHROPIC.getDefaultModels();
+// ["claude-sonnet-4-5-20250929", "claude-haiku-4-5-20251001"]
+```
+
+## Scanning and Persistence
+
+### Scanning Overview
+
+`TlsScanner` provides parallel multi-host TLS scanning using virtual threads. It accepts hostnames, IPs, CIDR ranges, and IP ranges via the `TargetSpec` parser.
+
+Key capabilities:
+
+- **Parallel execution** — configurable thread pool with virtual threads
+- **Flexible targets** — hostnames, IPv4/IPv6, CIDR notation (`10.0.0.0/24`), IP ranges (`192.168.1.1-192.168.1.10`)
+- **Two monitoring modes** — event-driven (`IScanListener`) or polling (`IScanMonitor`)
+- **Cooperative cancel/pause** — via `BackgroundTask` support
+- **Selective sections** — enable only the scan phases you need
+
+```java
+// Simple scan with defaults
+List<IScanResult> results = TlsScanner.scan(List.of("github.com", "google.com"));
+
+// Async variant
+CompletableFuture<List<IScanResult>> future = TlsScanner.scanAsync(targets, config, listener);
+```
+
+### Scan Configuration
+
+Use `ScanConfig.builder()` to customize scan behavior:
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `threadCount` | `int` | `10` | Number of virtual threads |
+| `sectionDelayMs` | `long` | `200` | Milliseconds between scan sections |
+| `perHostTimeoutMs` | `long` | `60000` | Max time per host (ms) |
+| `cipherNameConvention` | `CIPHER_NAME_CONVENTION` | `IANA` | Cipher suite naming convention |
+| `enabledProtocols` | `Set<Integer>` | `null` (all) | TLS protocol versions to test |
+| `enabledSections` | `Set<ScanSection>` | All sections | Scan phases to execute |
+
+```java
+ScanConfig config = ScanConfig.builder()
+        .threadCount(4)
+        .perHostTimeoutMs(30000)
+        .enabledSections(EnumSet.of(
+                ScanSection.SESSION_INIT,
+                ScanSection.CIPHER_ENUMERATION,
+                ScanSection.RISK_SCORING))
+        .build();
+```
+
+### Scan Sections
+
+The `ScanSection` enum defines the phases of a scan. Each can be independently enabled or disabled:
+
+| Section | Description |
+|---------|-------------|
+| `SESSION_INIT` | Session initialization and TLS handshake |
+| `CIPHER_ENUMERATION` | Enumerate supported cipher suites |
+| `CERTIFICATE_RETRIEVAL` | Retrieve X.509 certificate chain |
+| `RISK_SCORING` | Compute TLS risk score |
+| `TLS_FINGERPRINT` | Compute TLS server fingerprint |
+| `DNS_SECURITY` | Check CAA and DANE/TLSA DNS records |
+| `REVOCATION_CHECK` | Check certificate revocation (OCSP, CRL, CT) |
+
+### Monitoring Scans
+
+#### Event-Driven: IScanListener
+
+Implement `IScanListener` to receive callbacks as the scan progresses. All methods have default no-op implementations, so you only need to override what you care about:
+
+```java
+IScanListener listener = new IScanListener() {
+    @Override
+    public void onHostStarted(URL url, int index, int total) {
+        System.out.printf("Starting %s (%d/%d)%n", url.getHost(), index + 1, total);
+    }
+
+    @Override
+    public void onHostCompleted(IScanResult result, int completedCount, int total) {
+        System.out.printf("Completed %s [%s] (%d/%d)%n",
+                result.getURL().getHost(),
+                result.isSuccess() ? "OK" : "ERROR",
+                completedCount, total);
+    }
+
+    @Override
+    public void onScanCompleted(List<IScanResult> results) {
+        System.out.println("Scan finished: " + results.size() + " hosts");
+    }
+};
+
+List<IScanResult> results = TlsScanner.scan(targets, config, listener);
+```
+
+#### Polling: IScanMonitor
+
+Use `IScanMonitor` for timer-based progress polling:
+
+```java
+CompletableFuture<List<IScanResult>> future =
+        TlsScanner.scanAsync(targets, config, null);
+
+IScanMonitor monitor = TlsScanner.getMonitor();
+while (monitor.isRunning()) {
+    System.out.printf("Progress: %d/%d hosts, %d active threads%n",
+            monitor.getCompletedHostCount(),
+            monitor.getTotalHostCount(),
+            monitor.getActiveThreadCount());
+    Thread.sleep(1000);
+}
+```
+
+| IScanMonitor Method | Description |
+|---------------------|-------------|
+| `getActiveThreadCount()` | Threads currently executing a scan section |
+| `getSleepingThreadCount()` | Threads sleeping between sections |
+| `getIdleThreadCount()` | Threads waiting for work |
+| `getCompletedHostCount()` | Hosts completed so far |
+| `getTotalHostCount()` | Total hosts in the scan |
+| `isRunning()` | `true` if the scan is still in progress |
+| `getThreadStatuses()` | Per-thread status snapshot |
+
+### Scan Results
+
+Each `IScanResult` provides access to the scanned host's data:
+
+| Method | Return Type | Description |
+|--------|-------------|-------------|
+| `getURL()` | `URL` | The scanned URL |
+| `isSuccess()` | `boolean` | `true` if completed without fatal error |
+| `getSession()` | `ISession` | Session (or `null` on failure) |
+| `getEngine()` | `IEngine` | Engine (or `null` on failure) |
+| `getError()` | `DeepVioletException` | Error (or `null` on success) |
+| `getStartTime()` | `Instant` | When the scan started |
+| `getEndTime()` | `Instant` | When the scan ended |
+| `getDuration()` | `Duration` | How long the scan took |
+| `getCompletedSections()` | `Set<ScanSection>` | Sections completed successfully |
+
+### Persistence Overview
+
+Scan results can be saved to `.dvscan` files and loaded later. The file format is the same one used by the [DeepVioletTools](https://github.com/spoofzu/DeepVioletTools) GUI workbench, enabling workflows like:
+
+1. Run scans on a remote server (CI/CD, headless CLI)
+2. Save results to `.dvscan` files
+3. Transfer to a workstation
+4. Open in the GUI for visual analysis
+
+The persistence model consists of:
+
+- **`ScanSnapshot`** — top-level container with `totalTargets`, `successCount`, `errorCount`, `scanId`, and a list of `HostSnapshot` entries.
+- **`HostSnapshot`** — per-host data including `riskScore`, `ciphers`, `securityHeaders`, `connProperties`, `httpHeaders`, `tlsFingerprint`, and `reportTree`.
+
+### File Modes
+
+`ScanFileMode` controls how `.dvscan` files are written:
+
+| Mode | Encryption | Portability | Password |
+|------|-----------|-------------|----------|
+| `PLAIN_TEXT` | None | Portable anywhere | Not required |
+| `HOST_LOCKED` | AES-256-GCM with machine key | Same machine only | Not required |
+| `PASSWORD_LOCKED` | AES-256-GCM with machine key + password | Portable across machines | Required on other machines |
+
+### Saving and Loading Scans
+
+**Saving** — use `ScanFileIO.save()` with the desired mode:
+
+```java
+CryptoUtils.ensureEncryptionSeed();
+byte[] machineKey = CryptoUtils.getEncryptionSeed();
+
+// Plain text (no encryption)
+ScanFileIO.save(file, snapshot, ScanFileMode.PLAIN_TEXT, null, null);
+
+// Host locked (machine key only)
+ScanFileIO.save(file, snapshot, ScanFileMode.HOST_LOCKED, machineKey, null);
+
+// Password locked (machine key + password for cross-machine transfer)
+char[] password = "transfer-password".toCharArray();
+ScanFileIO.save(file, snapshot, ScanFileMode.PASSWORD_LOCKED, machineKey, password);
+```
+
+Convenience methods are also available:
+
+```java
+ScanFileIO.savePlainText(file, snapshot);           // Plain text
+ScanFileIO.save(file, snapshot, machineKey);         // Host locked
+ScanFileIO.save(file, snapshot, machineKey, password); // Password locked
+```
+
+**Loading** — `load()` auto-detects the file format (plain JSON, v1 encrypted, or v2 envelope encrypted):
+
+```java
+// Plain text — no key needed
+ScanSnapshot plain = ScanFileIO.load(file, null);
+
+// Host locked — machine key
+ScanSnapshot local = ScanFileIO.load(file, machineKey);
+
+// Password locked on another machine — provide a PasswordCallback
+ScanSnapshot remote = ScanFileIO.load(file, machineKey,
+        () -> "transfer-password".toCharArray());
+```
+
+The `PasswordCallback` functional interface is invoked only when the machine key fails to decrypt (indicating the file was created on a different machine). This allows interactive password prompting in CLI or GUI contexts.
+
+See `PrintScanPersistence.java` for a complete working example, and `PrintSaveScan.java` for an end-to-end scan-and-save workflow.
+
+### Encryption Architecture
+
+The v2 `.dvscan` envelope format uses dual-slot key encryption:
+
+```mermaid
+graph TD
+    A[Scan Data JSON] -->|AES-256-GCM| B[Encrypted Payload]
+    C[Random DEK] --> B
+    C -->|Wrapped by Machine KEK| D[Machine Slot]
+    C -->|Wrapped by Password KEK| E[Password Slot]
+    F[Machine Key] -->|Direct| D
+    G[User Password] -->|PBKDF2-HMAC-SHA256| E
+    D -->|HMAC-SHA256| H[Slot Integrity]
+    E -->|HMAC-SHA256| H
+
+    subgraph "File Header"
+        I[DVSC Magic 4 bytes]
+        J[Version byte]
+    end
+
+    subgraph "KEK Slots"
+        D
+        E
+        H
+    end
+
+    subgraph "Payload"
+        B
+    end
+```
+
+Key properties:
+
+- **Per-file DEK** — each `.dvscan` file gets a unique data encryption key
+- **Dual KEK slots** — the DEK is wrapped independently by the machine key and (optionally) a password-derived key
+- **HMAC-SHA256 slot integrity** — each slot is integrity-checked before unwrapping
+- **PBKDF2-HMAC-SHA256** — password-derived keys use 600,000 iterations
+- **Backward compatibility** — v1 encrypted files are transparently read by `load()`
+
+### Delta Comparison
+
+Two saved `.dvscan` files can be compared to detect TLS configuration changes over time. This is useful for:
+
+- Tracking configuration drift
+- Verifying remediation actions
+- Monitoring changes after server updates
+
+The comparison matches hosts by URL and reports changes in grades, category scores, and cipher suites:
+
+```java
+ScanSnapshot baseline = ScanFileIO.load(new File("baseline.dvscan"), machineKey);
+ScanSnapshot current = ScanFileIO.load(new File("current.dvscan"), machineKey);
+
+for (HostSnapshot curHost : current.getHosts()) {
+    HostSnapshot baseHost = findHostByUrl(baseline, curHost.getTargetUrl());
+    if (baseHost == null) {
+        System.out.println("[NEW] " + curHost.getTargetUrl());
+        continue;
+    }
+
+    // Compare grades
+    IRiskScore baseScore = baseHost.getRiskScore();
+    IRiskScore curScore = curHost.getRiskScore();
+    int diff = curScore.getTotalScore() - baseScore.getTotalScore();
+    System.out.printf("Grade: %s -> %s (%+d)%n",
+            baseScore.getLetterGrade().toDisplayString(),
+            curScore.getLetterGrade().toDisplayString(), diff);
+
+    // Compare cipher suites
+    Set<String> added = new LinkedHashSet<>(curCipherNames);
+    added.removeAll(baseCipherNames);
+    Set<String> removed = new LinkedHashSet<>(baseCipherNames);
+    removed.removeAll(curCipherNames);
+}
+```
+
+See `PrintScanDelta.java` for a complete working example with grade, category score, and cipher suite comparison.
+
 ## API Reference
 
 Browse the [API JavaDoc](javadocs/index.html) for detailed documentation of all public interfaces and classes.
@@ -1253,6 +1683,11 @@ Explore the samples package at `src/main/java/com/mps/deepviolet/samples/` for w
 - `PrintTlsFingerprint.java` -- Compute TLS server fingerprint
 - `PrintBackgroundScan.java` -- Run a scan with progress callbacks
 - `PrintScan.java` -- Parallel multi-host scanning with listeners and monitoring
+- `PrintAiAnalysis.java` -- AI-powered TLS scan analysis (engine state, file, in-memory)
+- `PrintAiChat.java` -- Multi-turn AI chat about scan results
+- `PrintScanPersistence.java` -- Save/load encrypted .dvscan files with envelope encryption
+- `PrintSaveScan.java` -- Scan multiple hosts and save results to .dvscan
+- `PrintScanDelta.java` -- Compare two saved scan files to detect changes
 
 ## API Validation Tool
 
