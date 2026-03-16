@@ -3,7 +3,7 @@
 The upstream repository (github.com/spoofzu/DeepViolet) last received meaningful updates in **July 2019**. The local repository represents a major modernization effort.
 
 **Upstream:** v5.1.16 / 5.1.17-SNAPSHOT, Java 8, Bouncy Castle dependency, basic TLS introspection, no TLS 1.3.
-**Current:** Java 21+, Bouncy Castle removed, TLS 1.3 support, comprehensive TLS security analysis. See [README](../README.md) for the current version and Maven coordinates.
+**Current:** 6.0.0 — Java 21+, Bouncy Castle removed, TLS 1.3 support, comprehensive TLS security analysis, AI-powered scan analysis (Anthropic/OpenAI/Ollama), scan persistence with envelope encryption (.dvscan files). See [README](../README.md) for Maven coordinates.
 
 ---
 
@@ -101,7 +101,7 @@ The upstream repository (github.com/spoofzu/DeepViolet) last received meaningful
 - Thread-safe: flags are `volatile` for cross-thread visibility
 
 ### 12. Sample Programs (new / expanded)
-- 8 sample programs in `com.mps.deepviolet.samples/` (up from 2 in the old `com.mps.deepviolet.api.samples/`):
+- 13 sample programs in `com.mps.deepviolet.samples/` (up from 2 in the old `com.mps.deepviolet.api.samples/`):
 
 | Sample | Demonstrates |
 |--------|-------------|
@@ -113,6 +113,11 @@ The upstream repository (github.com/spoofzu/DeepViolet) last received meaningful
 | `PrintBackgroundScan` | BackgroundTask subclass with protocol filtering (TLS 1.2 + TLS 1.3 only) |
 | `PrintRiskScore` | Risk score with per-category breakdowns, deductions, severity, inconclusive markers |
 | `PrintScan` | Scanning with ScanConfig builder, listener callbacks, monitor polling, IPv6 targets |
+| `PrintAiAnalysis` | AI-powered TLS scan analysis (engine state, file, in-memory) with Anthropic/OpenAI/Ollama |
+| `PrintAiChat` | Multi-turn AI chat about scan results |
+| `PrintScanPersistence` | Save/load encrypted .dvscan files with envelope encryption (plain text, host locked, password locked) |
+| `PrintSaveScan` | Scan hosts and save results to .dvscan files |
+| `PrintScanDelta` | Compare two .dvscan files and display differences |
 
 ---
 
@@ -167,7 +172,7 @@ The upstream repository (github.com/spoofzu/DeepViolet) last received meaningful
 | Customization | 2 | Replaceable cipher map, SYS-/USR- rule namespacing with user rule merging |
 | Infrastructure | 3 | Bouncy Castle removal, dependency modernization, GitHub Actions CI |
 | Validation | 1 | DV vs openssl field-by-field comparison tool with standalone JAR |
-| Developer Experience | 2 | 8 sample programs, 378 tests across 24 test classes |
+| Developer Experience | 2 | 13 sample programs, 378 tests across 24 test classes |
 
 **Total: 17 significant improvements** transforming a dormant 2019-era scanning library into a modern, comprehensive TLS security analysis API.
 

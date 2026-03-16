@@ -31,7 +31,7 @@ DeepViolet is available on [Maven Central](https://central.sonatype.com/). Add i
 <dependency>
     <groupId>com.github.spoofzu</groupId>
     <artifactId>DeepViolet</artifactId>
-    <version>5.2.0</version>
+    <version>6.0.0</version>
 </dependency>
 ```
 
@@ -41,9 +41,9 @@ A standalone tool that compares DV API results against openssl for the same serv
 
 ```bash
 mvn package -Pvalidate
-java -jar target/DeepViolet-5.2.0-validate.jar google.com
-java -jar target/DeepViolet-5.2.0-validate.jar expired.badssl.com
-java -jar target/DeepViolet-5.2.0-validate.jar --json github.com
+java -jar target/DeepViolet-6.0.0-validate.jar google.com
+java -jar target/DeepViolet-6.0.0-validate.jar expired.badssl.com
+java -jar target/DeepViolet-6.0.0-validate.jar --json github.com
 ```
 
 Compares 17 fields (subjectDN, issuerDN, serialNumber, version, signingAlgorithm, publicKeyAlgorithm, publicKeySize, publicKeyCurve, notValidBefore, notValidAfter, isSelfSigned, sanCount, fingerprint, negotiatedProtocol, negotiatedCipher, chainLength, ocspStapling) with automatic normalization for cross-tool differences. For bad-cert servers, verifies that DV correctly rejects the connection while openssl shows why. Requires openssl installed locally.

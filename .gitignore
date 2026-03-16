@@ -19,6 +19,12 @@
 CLAUDE.md
 .claude/
 
+# Serena
+.serena/
+
+# Generated javadocs (root-level duplicate)
+/javadocs/
+
 # Maven
 target/
 pom.xml.tag
