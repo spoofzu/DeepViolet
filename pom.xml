@@ -121,6 +121,7 @@
                     <failOnWarnings>false</failOnWarnings>
                     <failOnError>false</failOnError>
                     <reportOutputDirectory>${project.basedir}/docs</reportOutputDirectory>
+                    <outputDirectory>${project.basedir}/docs/javadocs</outputDirectory>
                     <destDir>javadocs</destDir>
                 </configuration>
                 <executions>

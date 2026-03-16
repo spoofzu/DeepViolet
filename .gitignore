@@ -22,7 +22,7 @@ CLAUDE.md
 # Serena
 .serena/
 
-# Generated javadocs (root-level duplicate)
+# Javadoc (generated output lives in docs/javadocs/)
 /javadocs/
 
 # Maven
