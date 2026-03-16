@@ -121,7 +121,6 @@
                     <failOnWarnings>false</failOnWarnings>
                     <failOnError>false</failOnError>
                     <reportOutputDirectory>${project.basedir}/docs</reportOutputDirectory>
-                    <outputDirectory>${project.basedir}/docs/javadocs</outputDirectory>
                     <destDir>javadocs</destDir>
                 </configuration>
                 <executions>
@@ -130,6 +129,10 @@
                         <goals>
                             <goal>jar</goal>
                         </goals>
+                        <configuration>
+                            <reportOutputDirectory>${project.build.directory}/apidocs</reportOutputDirectory>
+                            <destDir>.</destDir>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
