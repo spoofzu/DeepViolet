@@ -31,7 +31,7 @@ DeepViolet is available on [Maven Central](https://central.sonatype.com/). Add i
 <dependency>
     <groupId>com.github.spoofzu</groupId>
     <artifactId>DeepViolet</artifactId>
-    <version>5.2.0</version>
+    <version>6.0.0</version>
 </dependency>
 ```
 

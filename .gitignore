@@ -19,6 +19,9 @@
 CLAUDE.md
 .claude/
 
+# Serena
+.serena/
+
 # Javadoc (generated output lives in docs/javadocs/)
 /javadocs/
 
