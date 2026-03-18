@@ -49,8 +49,8 @@ public class TlsBehaviorProbesTest {
 
     @Test
     public void testProbeDescriptionsContent() {
-        assertTrue(TlsBehaviorProbes.getProbeDescription(1).contains("TLS 1.2"));
-        assertTrue(TlsBehaviorProbes.getProbeDescription(5).contains("TLS 1.1"));
-        assertTrue(TlsBehaviorProbes.getProbeDescription(6).contains("TLS 1.3"));
+        assertTrue(TlsBehaviorProbes.getProbeDescription(1).contains("TLS 1.1"));
+        assertTrue(TlsBehaviorProbes.getProbeDescription(2).contains("TLS 1.2"));
+        assertTrue(TlsBehaviorProbes.getProbeDescription(7).contains("TLS 1.3"));
     }
 }

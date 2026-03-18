@@ -15,14 +15,27 @@ public interface IX509Certificate {
 
 	// TODO: Properties guaranteed to be present
 
+	/** Sentinel value for unsupported OIDs. */
 	String UNSUPPORTED_OID = "<UNSUPPORTED>";
 
+	/** Trust state of a certificate. */
 	enum TrustState {
-		TRUSTED, UNKNOWN, UNTRUSTED
+		/** Certificate is trusted. */
+		TRUSTED,
+		/** Trust state cannot be determined. */
+		UNKNOWN,
+		/** Certificate is not trusted. */
+		UNTRUSTED
 	}
 
+	/** Validity state of a certificate. */
 	enum ValidState {
-		EXPIRED, VALID, NOT_YET_VALID
+		/** Certificate has expired. */
+		EXPIRED,
+		/** Certificate is currently valid. */
+		VALID,
+		/** Certificate is not yet valid. */
+		NOT_YET_VALID
 	}
 
 	/**

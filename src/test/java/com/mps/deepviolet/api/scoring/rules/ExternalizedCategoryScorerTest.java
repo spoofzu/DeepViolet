@@ -40,7 +40,12 @@ class ExternalizedCategoryScorerTest {
 	void testProtocolsPerfectScore() {
 		ICategoryScore score = scoreCategory("PROTOCOLS");
 		assertEquals(100, score.getScore());
-		assertEquals(0, score.getDeductions().length);
+		// INFO rules SYS-0001300 (pq_kex_available) and SYS-0001400 (pq_kex_preferred) fire — score 0.0
+		assertEquals(2, score.getDeductions().length);
+		assertDeductionPresent(score, "SYS-0001300");
+		assertDeductionPresent(score, "SYS-0001400");
+		assertEquals(0.0, findDeduction(score, "SYS-0001300").getScore(), 0.001);
+		assertEquals(0.0, findDeduction(score, "SYS-0001400").getScore(), 0.001);
 	}
 
 	@Test
@@ -117,6 +122,105 @@ class ExternalizedCategoryScorerTest {
 		getSet("protocols").add("TLSv1.0");
 		ICategoryScore score = scoreCategory("PROTOCOLS");
 		assertDeductionPresent(score, "SYS-0000300");
+	}
+
+	// --- Post-Quantum rules tests ---
+
+	@Test
+	void testPqKexPreferredFalse_RuleFires() {
+		// pq_kex_preferred=false → SYS-0001100 fires (server prefers classical)
+		getSessionMap().put("pq_kex_preferred", false);
+		getSessionMap().put("pq_kex_supported", true);
+		ICategoryScore score = scoreCategory("PROTOCOLS");
+		assertDeductionPresent(score, "SYS-0001100");
+		assertFalse(findDeduction(score, "SYS-0001100").isInconclusive());
+	}
+
+	@Test
+	void testPqKexPreferredTrue_RuleDoesNotFire() {
+		// pq_kex_preferred=true → SYS-0001100 does NOT fire
+		getSessionMap().put("pq_kex_preferred", true);
+		getSessionMap().put("pq_kex_supported", true);
+		ICategoryScore score = scoreCategory("PROTOCOLS");
+		assertDeductionAbsent(score, "SYS-0001100");
+		assertDeductionAbsent(score, "SYS-0001200");
+		assertDeductionPresent(score, "SYS-0001300");
+	}
+
+	@Test
+	void testPqKexPreferredNull_SupportedTrue_Inconclusive() {
+		// pq_kex_supported=true, pq_kex_preferred=null → SYS-0001100 inconclusive
+		getSessionMap().put("pq_kex_supported", true);
+		getSessionMap().put("pq_kex_preferred", null);
+		ICategoryScore score = scoreCategory("PROTOCOLS");
+		assertDeductionPresent(score, "SYS-0001100");
+		assertTrue(findDeduction(score, "SYS-0001100").isInconclusive());
+	}
+
+	@Test
+	void testPqKexPreferredNull_SupportedFalse_NoFire() {
+		// pq_kex_supported=false, pq_kex_preferred=null → SYS-0001100 does NOT fire
+		// (pq_kex_preferred==null alone is ambiguous; without pq_kex_supported==true, skip)
+		getSessionMap().put("pq_kex_supported", false);
+		getSessionMap().put("pq_kex_preferred", null);
+		ICategoryScore score = scoreCategory("PROTOCOLS");
+		assertDeductionAbsent(score, "SYS-0001100");
+		// SYS-0001200 fires instead (no PQ support)
+		assertDeductionPresent(score, "SYS-0001200");
+	}
+
+	@Test
+	void testPqKexNotAvailable_Only1200Fires() {
+		// pq_kex_supported=false, pq_kex_preferred=false → only SYS-0001200 fires
+		// SYS-0001100 requires pq_kex_supported==true, so it does NOT fire here
+		getSessionMap().put("pq_kex_supported", false);
+		getSessionMap().put("pq_kex_preferred", false);
+		ICategoryScore score = scoreCategory("PROTOCOLS");
+		assertDeductionAbsent(score, "SYS-0001100");
+		assertDeductionPresent(score, "SYS-0001200");
+	}
+
+	@Test
+	void testPqKexAvailableInfoRule() {
+		// pq_kex_supported=true → SYS-0001300 fires with severity INFO, score 0.0
+		getSessionMap().put("pq_kex_supported", true);
+		getSessionMap().put("pq_kex_groups", "X25519MLKEM768, SecP256r1MLKEM768");
+		ICategoryScore score = scoreCategory("PROTOCOLS");
+		assertDeductionPresent(score, "SYS-0001300");
+		IDeduction d = findDeduction(score, "SYS-0001300");
+		assertEquals(0.0, d.getScore(), 0.001);
+		assertEquals("INFO", d.getSeverity());
+		assertTrue(d.getDescription().contains("X25519MLKEM768"));
+		assertTrue(d.getDescription().contains("SecP256r1MLKEM768"));
+	}
+
+	@Test
+	void testPqKexSupportedNull() {
+		// pq_kex_supported=null → rule #2 inconclusive
+		getSessionMap().put("pq_kex_supported", null);
+		getSessionMap().put("pq_kex_preferred", null);
+		ICategoryScore score = scoreCategory("PROTOCOLS");
+		assertDeductionPresent(score, "SYS-0001200");
+		assertTrue(findDeduction(score, "SYS-0001200").isInconclusive());
+	}
+
+	@Test
+	void testPqKexProbeFailed() {
+		// TLS 1.3 server but PQ probes failed after retries → SYS-0001500 fires
+		getSessionMap().put("pq_kex_supported", null);
+		getSessionMap().put("pq_kex_preferred", null);
+		getSessionMap().put("pq_kex_probe_failed", true);
+		ICategoryScore score = scoreCategory("PROTOCOLS");
+		assertDeductionPresent(score, "SYS-0001500");
+		assertEquals(0.15, findDeduction(score, "SYS-0001500").getScore(), 0.001);
+	}
+
+	@Test
+	void testPqKexProbeNotFailed() {
+		// PQ probes succeeded → SYS-0001500 does NOT fire
+		getSessionMap().put("pq_kex_probe_failed", false);
+		ICategoryScore score = scoreCategory("PROTOCOLS");
+		assertDeductionAbsent(score, "SYS-0001500");
 	}
 
 	// --- Cipher Suite tests ---
@@ -1035,6 +1139,13 @@ class ExternalizedCategoryScorerTest {
 		session.put("early_data_accepted", false);
 		session.put("alpn_negotiated", "h2");
 		session.put("honors_client_cipher_preference", false);
+		session.put("negotiated_group", "X25519MLKEM768");
+		session.put("negotiated_group_pq", true);
+		session.put("pq_kex_supported", true);
+		session.put("pq_kex_groups", "X25519MLKEM768");
+		session.put("pq_kex_preferred", true);
+		session.put("pq_preferred_group", "X25519MLKEM768");
+		session.put("pq_kex_probe_failed", false);
 		props.put("session", session);
 
 		// Use mutable set for protocols

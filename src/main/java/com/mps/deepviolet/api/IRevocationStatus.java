@@ -8,8 +8,18 @@ package com.mps.deepviolet.api;
  */
 public interface IRevocationStatus {
 
+	/** Result of a certificate revocation check. */
 	enum RevocationResult {
-		GOOD, REVOKED, UNKNOWN, ERROR, NOT_CHECKED
+		/** Certificate is not revoked. */
+		GOOD,
+		/** Certificate has been revoked. */
+		REVOKED,
+		/** Revocation status could not be determined. */
+		UNKNOWN,
+		/** An error occurred during the revocation check. */
+		ERROR,
+		/** Revocation check was not performed. */
+		NOT_CHECKED
 	}
 
 	// --- OCSP ---

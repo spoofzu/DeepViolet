@@ -8,6 +8,9 @@ import java.util.List;
  */
 public class ComparisonResult {
 
+    /** Creates an empty ComparisonResult. */
+    ComparisonResult() {}
+
     String host;
     int port;
     String opensslVersion;
@@ -39,12 +42,14 @@ public class ComparisonResult {
         }
     }
 
-    /** Returns true if all compared fields matched. */
+    /** Check whether all compared fields matched between DV API and openssl.
+     * @return true if all compared fields matched */
     public boolean isAllMatched() {
         return allMatched;
     }
 
-    /** Returns true if the DV API session was successfully established. */
+    /** Check whether the DV API session was successfully established.
+     * @return true if the DV API session was successfully established */
     public boolean isDvSessionSucceeded() {
         return dvSessionSucceeded;
     }

@@ -1,9 +1,5 @@
 package com.mps.deepviolet.api.tls;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,6 +21,21 @@ import java.util.Map;
  */
 public class ServerHello {
 
+    /**
+     * RFC 8446 §4.1.3 sentinel: a ServerHello whose {@code server_random} equals
+     * this value is actually a HelloRetryRequest.
+     */
+    static final byte[] HELLO_RETRY_REQUEST_RANDOM = {
+            (byte)0xCF, (byte)0x21, (byte)0xAD, (byte)0x74,
+            (byte)0xE5, (byte)0x9A, (byte)0x61, (byte)0x11,
+            (byte)0xBE, (byte)0x1D, (byte)0x8C, (byte)0x02,
+            (byte)0x1E, (byte)0x65, (byte)0xB8, (byte)0x91,
+            (byte)0xC2, (byte)0xA2, (byte)0x11, (byte)0x16,
+            (byte)0x7A, (byte)0xBB, (byte)0x8C, (byte)0x5E,
+            (byte)0x07, (byte)0x9E, (byte)0x09, (byte)0xE2,
+            (byte)0xC8, (byte)0xA8, (byte)0x33, (byte)0x9C
+    };
+
     private int recordVersion;
     private int protocolVersion;
     private byte[] serverRandom;
@@ -43,6 +54,7 @@ public class ServerHello {
      * Parse a ServerHello message from raw bytes.
      * @param data The ServerHello message body (without handshake header)
      * @param recordVersion The record layer version
+     * @throws TlsException on parsing errors
      */
     public ServerHello(byte[] data, int recordVersion) throws TlsException {
         this.recordVersion = recordVersion;
@@ -150,38 +162,56 @@ public class ServerHello {
 
     // ==================== Getters ====================
 
+    /** Returns the record layer version.
+     *  @return record version code */
     public int getRecordVersion() {
         return recordVersion;
     }
 
+    /** Returns the protocol version from the ServerHello.
+     *  @return protocol version code */
     public int getProtocolVersion() {
         return protocolVersion;
     }
 
+    /** Returns the effective negotiated TLS version.
+     *  @return negotiated version code */
     public int getNegotiatedVersion() {
         return negotiatedVersion;
     }
 
+    /** Returns the server random bytes.
+     *  @return copy of the server random */
     public byte[] getServerRandom() {
         return serverRandom.clone();
     }
 
+    /** Returns the session ID.
+     *  @return copy of the session ID */
     public byte[] getSessionId() {
         return sessionId.clone();
     }
 
+    /** Returns the selected cipher suite code.
+     *  @return cipher suite code */
     public int getCipherSuite() {
         return cipherSuite;
     }
 
+    /** Returns the compression method.
+     *  @return compression method code */
     public int getCompression() {
         return compression;
     }
 
+    /** Returns the parsed extensions list.
+     *  @return unmodifiable list of extensions */
     public List<TlsExtension> getExtensions() {
         return Collections.unmodifiableList(extensions);
     }
 
+    /** Returns a copy of the extension data map.
+     *  @return map of extension type to data */
     public Map<Integer, byte[]> getExtensionMap() {
         Map<Integer, byte[]> copy = new HashMap<>();
         for (Map.Entry<Integer, byte[]> entry : extensionMap.entrySet()) {
@@ -190,16 +220,22 @@ public class ServerHello {
         return copy;
     }
 
+    /** Returns the raw extension bytes.
+     *  @return copy of raw extension bytes */
     public byte[] getRawExtensions() {
         return rawExtensions != null ? rawExtensions.clone() : new byte[0];
     }
 
+    /** Returns whether this is a TLS 1.3 ServerHello.
+     *  @return true if TLS 1.3 */
     public boolean isTLS13() {
         return isTLS13;
     }
 
     /**
      * Check if a specific extension is present.
+     * @param type extension type code
+     * @return true if the extension is present
      */
     public boolean hasExtension(int type) {
         return extensionMap.containsKey(type);
@@ -207,11 +243,23 @@ public class ServerHello {
 
     /**
      * Get extension data by type.
+     * @param type extension type code
      * @return Extension data, or null if not present
      */
     public byte[] getExtensionData(int type) {
         byte[] data = extensionMap.get(type);
         return data != null ? data.clone() : null;
+    }
+
+    /**
+     * Check whether this message is a HelloRetryRequest (RFC 8446 §4.1.3).
+     * A HelloRetryRequest uses the same message format as ServerHello but
+     * with a special sentinel value in the {@code server_random} field.
+     *
+     * @return true if this message is a HelloRetryRequest
+     */
+    public boolean isHelloRetryRequest() {
+        return Arrays.equals(serverRandom, HELLO_RETRY_REQUEST_RANDOM);
     }
 
     // ==================== Key Share Helpers ====================
@@ -225,7 +273,7 @@ public class ServerHello {
      */
     public int getKeyShareGroup() {
         byte[] data = extensionMap.get(TlsExtension.KEY_SHARE);
-        if (data == null || data.length < 4) {
+        if (data == null || data.length < 2) {
             return -1;
         }
         return TlsRecordLayer.dec16be(data, 0);
@@ -350,25 +398,9 @@ public class ServerHello {
     }
 
     /**
-     * Get the SHA256 hash of the raw extensions (truncated to 16 bytes).
-     * Used for TLS server fingerprint generation.
-     */
-    public byte[] getExtensionsHash() {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            if (rawExtensions != null) {
-                md.update(rawExtensions);
-            }
-            byte[] hash = md.digest();
-            return Arrays.copyOf(hash, 16); // Truncate to 16 bytes
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 not available", e);
-        }
-    }
-
-    /**
      * Get the extension types in order (for TLS server fingerprinting).
      * Excludes GREASE values.
+     * @return list of extension type codes
      */
     public List<Integer> getExtensionTypes() {
         List<Integer> types = new ArrayList<>();
@@ -384,6 +416,7 @@ public class ServerHello {
 
     /**
      * Get human-readable version string.
+     * @return version string such as "TLSv1.3"
      */
     public String getVersionString() {
         int version = negotiatedVersion;
@@ -397,6 +430,7 @@ public class ServerHello {
 
     /**
      * Get cipher suite as hex string.
+     * @return hex representation of the cipher suite code
      */
     public String getCipherSuiteHex() {
         return String.format("0x%04x", cipherSuite);

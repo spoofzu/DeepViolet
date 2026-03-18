@@ -26,6 +26,9 @@ import org.slf4j.LoggerFactory;
  */
 public class CryptoUtils {
 
+	/** Creates a CryptoUtils instance. */
+	public CryptoUtils() {}
+
 	private static final Logger logger = LoggerFactory
 			.getLogger("com.mps.deepviolet.util.CryptoUtils");
 
@@ -188,6 +191,10 @@ public class CryptoUtils {
 
 	/**
 	 * Derive a 32-byte KEK using the default iteration count.
+	 * @param password the user-supplied password
+	 * @param salt random salt bytes
+	 * @return 32-byte KEK
+	 * @throws GeneralSecurityException on KDF failure
 	 */
 	public static byte[] derivePasswordKek(char[] password, byte[] salt)
 			throws GeneralSecurityException {

@@ -16,6 +16,16 @@ public class ImmutableCategoryScore implements IRiskScore.ICategoryScore {
 	private final String summary;
 	private final IRiskScore.IDeduction[] deductions;
 
+	/**
+	 * Creates an immutable category score from deserialized fields.
+	 *
+	 * @param categoryKey the category key string
+	 * @param displayName the human-readable category name
+	 * @param score       the numeric score
+	 * @param riskLevel   the risk level
+	 * @param summary     the summary text
+	 * @param deductions  the deductions applied, or {@code null}
+	 */
 	public ImmutableCategoryScore(String categoryKey, String displayName,
 			int score, IRiskScore.RiskLevel riskLevel, String summary,
 			IRiskScore.IDeduction[] deductions) {

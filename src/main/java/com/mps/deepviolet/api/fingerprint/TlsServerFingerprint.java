@@ -1,9 +1,5 @@
 package com.mps.deepviolet.api.fingerprint;
 
-import java.io.ByteArrayOutputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
 import com.mps.deepviolet.api.tls.ClientHelloConfig;
 import com.mps.deepviolet.api.tls.TlsMetadata;
 import com.mps.deepviolet.api.tls.TlsSocket;
@@ -11,10 +7,10 @@ import com.mps.deepviolet.api.tls.TlsSocket;
 /**
  * TLS Server Fingerprint computation.
  *
- * <p>TLS Server Fingerprinting analyzes how a server responds to specially crafted
+ * <p>TLS Server Probe Fingerprinting analyzes how a server responds to specially crafted
  * TLS ClientHello messages. By sending 10 different probes that vary cipher suites,
- * extensions, and TLS versions, this technique creates a unique 62-character
- * fingerprint based on the server's selection behavior.</p>
+ * extensions, and TLS versions, this technique creates a unique 30-character
+ * probe fingerprint based on the server's selection behavior.</p>
  *
  * <h2>What Fingerprints Identify</h2>
  * <ul>
@@ -40,10 +36,9 @@ import com.mps.deepviolet.api.tls.TlsSocket;
  *   <li><strong>NOT</strong> - "This is definitely nginx" (software identification)</li>
  * </ul>
  *
- * <h2>Fingerprint Structure</h2>
+ * <h2>Probe Fingerprint Structure</h2>
  * <ul>
  *   <li>Characters 1-30: Cipher+version codes from 10 probes (3 chars each)</li>
- *   <li>Characters 31-62: Truncated SHA256 hash of concatenated extensions</li>
  * </ul>
  *
  * <p>Technique inspired by Salesforce's JARM: <a href="https://github.com/salesforce/jarm">https://github.com/salesforce/jarm</a></p>
@@ -52,27 +47,27 @@ import com.mps.deepviolet.api.tls.TlsSocket;
  */
 public class TlsServerFingerprint {
 
+    private TlsServerFingerprint() {}
+
     private static final int PROBE_TIMEOUT_MS = 5000;
     private static final int PROBE_COUNT = 10;
 
     /**
-     * Compute TLS server fingerprint for a host.
+     * Compute TLS probe fingerprint for a host.
      *
      * <p>Sends 10 specially crafted ClientHello messages and analyzes the
-     * ServerHello responses to create a fingerprint that characterizes
+     * ServerHello responses to create a probe fingerprint that characterizes
      * the server's TLS selection behavior.</p>
      *
      * @param host Target hostname
      * @param port Target port (usually 443)
-     * @return 62-character TLS fingerprint, or null on complete failure
+     * @return 30-character TLS probe fingerprint, or null on complete failure
      */
     public static String compute(String host, int port) {
         StringBuilder cipherVersionCodes = new StringBuilder(30);
-        ByteArrayOutputStream allExtensions = new ByteArrayOutputStream();
 
         for (int i = 1; i <= PROBE_COUNT; i++) {
             String code;
-            byte[] extensions;
 
             try {
                 ClientHelloConfig config = TlsBehaviorProbes.getProbe(i);
@@ -86,10 +81,8 @@ public class TlsServerFingerprint {
 
                     if (metadata.isConnectionSucceeded() && metadata.getServerHello() != null) {
                         code = metadata.getFingerprintCode();
-                        extensions = metadata.getFingerprintExtensions();
                     } else {
                         code = "|||"; // Server refused
-                        extensions = new byte[0];
                     }
                 } finally {
                     socket.close();
@@ -97,64 +90,32 @@ public class TlsServerFingerprint {
             } catch (Exception e) {
                 // Connection failed or protocol error
                 code = "|||";
-                extensions = new byte[0];
             }
 
             cipherVersionCodes.append(code);
-            try {
-                allExtensions.write(extensions);
-            } catch (Exception e) {
-                // Ignore
-            }
         }
 
-        // Compute hash of all extensions
-        String extensionHash = computeExtensionHash(allExtensions.toByteArray());
-
-        return cipherVersionCodes.toString() + extensionHash;
+        return cipherVersionCodes.toString();
     }
 
     /**
-     * Compute TLS server fingerprint with default HTTPS port.
+     * Compute TLS probe fingerprint with default HTTPS port.
      *
      * @param host Target hostname
-     * @return 62-character TLS fingerprint
+     * @return 30-character TLS probe fingerprint
      */
     public static String compute(String host) {
         return compute(host, 443);
     }
 
     /**
-     * Compute truncated SHA256 hash of extensions (32 hex characters).
-     */
-    private static String computeExtensionHash(byte[] extensions) {
-        if (extensions == null || extensions.length == 0) {
-            return "00000000000000000000000000000000";
-        }
-
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hash = md.digest(extensions);
-
-            // Convert first 16 bytes to 32 hex characters
-            StringBuilder sb = new StringBuilder(32);
-            for (int i = 0; i < 16; i++) {
-                sb.append(String.format("%02x", hash[i] & 0xFF));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            return "00000000000000000000000000000000";
-        }
-    }
-
-    /**
-     * Parse a TLS fingerprint into its components.
+     * Parse a TLS probe fingerprint into its components.
      *
-     * @param fingerprint The 62-character fingerprint string
+     * @param fingerprint The 30-character probe fingerprint string
      * @return Parsed components, or null if invalid
      */
     public static FingerprintComponents parse(String fingerprint) {
-        if (fingerprint == null || fingerprint.length() != 62) {
+        if (fingerprint == null || fingerprint.length() != 30) {
             return null;
         }
 
@@ -163,9 +124,7 @@ public class TlsServerFingerprint {
             probeCodes[i] = fingerprint.substring(i * 3, (i + 1) * 3);
         }
 
-        String extensionHash = fingerprint.substring(30);
-
-        return new FingerprintComponents(probeCodes, extensionHash);
+        return new FingerprintComponents(probeCodes);
     }
 
     /**
@@ -176,7 +135,7 @@ public class TlsServerFingerprint {
      * @return true if all probes failed, indicating no TLS support
      */
     public static boolean isNoTlsSupport(String fingerprint) {
-        if (fingerprint == null || fingerprint.length() != 62) {
+        if (fingerprint == null || fingerprint.length() != 30) {
             return true;
         }
 
@@ -197,7 +156,7 @@ public class TlsServerFingerprint {
      * @return Human-readable summary string
      */
     public static String summarize(String fingerprint) {
-        if (fingerprint == null || fingerprint.length() != 62) {
+        if (fingerprint == null || fingerprint.length() != 30) {
             return "Invalid fingerprint";
         }
 
@@ -236,18 +195,18 @@ public class TlsServerFingerprint {
     }
 
     /**
-     * Container for parsed TLS fingerprint components.
+     * Container for parsed TLS probe fingerprint components.
      *
-     * <p>Provides access to individual probe codes and the extension hash
-     * that make up a TLS server fingerprint.</p>
+     * <p>Provides access to individual probe codes
+     * that make up a TLS probe fingerprint.</p>
      */
     public static class FingerprintComponents {
         private final String[] probeCodes;
-        private final String extensionHash;
 
-        public FingerprintComponents(String[] probeCodes, String extensionHash) {
+        /** Create fingerprint components from probe codes.
+         *  @param probeCodes array of probe result codes */
+        public FingerprintComponents(String[] probeCodes) {
             this.probeCodes = probeCodes;
-            this.extensionHash = extensionHash;
         }
 
         /**
@@ -269,14 +228,6 @@ public class TlsServerFingerprint {
                 throw new IllegalArgumentException("Probe must be 1-10");
             }
             return probeCodes[probe - 1];
-        }
-
-        /**
-         * Get the extension hash portion of the fingerprint.
-         * @return 32-character hex hash string
-         */
-        public String getExtensionHash() {
-            return extensionHash;
         }
 
         /**
@@ -323,7 +274,6 @@ public class TlsServerFingerprint {
                 sb.append("  Probe ").append(i).append(": ").append(getProbeCode(i));
                 sb.append(" (").append(TlsBehaviorProbes.getProbeDescription(i)).append(")\n");
             }
-            sb.append("  Extension hash: ").append(extensionHash).append("\n");
             sb.append("]");
             return sb.toString();
         }

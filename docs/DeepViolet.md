@@ -93,7 +93,8 @@ Reference implementations are available through the [DeepVioletTools](https://gi
 
 - **Encryption Strength Evaluation** -- Measures minimal and achievable encryption strength
 - **TLS Risk Scoring** -- Quantitative risk assessment across 7 categories with configurable scoring policy, letter grades, and per-category breakdowns
-- **TLS Fingerprinting** -- 62-character behavioral fingerprint based on 10 probe responses, characterizing cipher selection, extension ordering, and version negotiation patterns
+- **TLS Fingerprinting** -- 30-character behavioral fingerprint based on 10 probe responses, characterizing cipher selection, extension ordering, and version negotiation patterns
+- **Post-Quantum Key Exchange Analysis** -- Probes server support for ML-KEM hybrid and pure post-quantum key exchange groups (X25519MLKEM768, SecP256r1MLKEM768, SecP384r1MLKEM1024, MLKEM768, MLKEM1024), detects PQ preference, and reports negotiated PQ group
 - **DNS Security Checks** -- CAA (Certificate Authority Authorization) and DANE/TLSA record lookups
 - **Certificate Revocation Checking** -- OCSP, CRL, OCSP stapling, Must-Staple, OneCRL, and Certificate Transparency (SCT) verification across embedded, TLS extension, and OCSP stapling delivery methods
 - **TLS_FALLBACK_SCSV Detection** -- Tests for RFC 7507 downgrade protection
@@ -327,11 +328,19 @@ The engine interface provides TLS scanning functionality:
 | `getRiskScore()` | Computes risk score using default policy |
 | `getRiskScore(String)` | Computes risk score using custom policy file |
 | `getRiskScore(InputStream)` | Computes risk score merging user rules with defaults |
-| `getTlsFingerprint()` | Computes 62-character TLS server fingerprint |
+| `getTlsFingerprint()` | Computes 30-character TLS server fingerprint |
 | `getSCTs()` | Returns Signed Certificate Timestamps from all sources |
 | `getTlsMetadata()` | Returns detailed TLS metadata from raw protocol parsing |
 | `getFallbackScsvSupported()` | Tests for TLS_FALLBACK_SCSV support (RFC 7507) |
+| `getPqKeyExchangeSupported()` | Tests whether the server supports post-quantum key exchange |
+| `getPqKeyExchangeGroups()` | Returns list of PQ key exchange group names the server supports |
+| `getPqKeyExchangePreferred()` | Tests whether the server prefers PQ over classical key exchange |
+| `getPqPreferredGroup()` | Returns the PQ group name the server prefers |
 | `getDnsStatus()` | Returns DNS security status (CAA, DANE/TLSA records) |
+| `buildRuleContext()` | Build a RuleContext snapshot for persistence or offline re-scoring |
+| `getRiskScore(RuleContext)` | Compute risk score from a pre-built RuleContext (offline) |
+| `getRiskScore(RuleContext, InputStream)` | Offline re-scoring with user rules merged |
+| `getRiskScore(Set<ScanSection>)` | Compute risk score with knowledge of which sections failed |
 | `getDeepVioletMajorVersion()` | Returns API major version |
 
 #### IX509Certificate
@@ -399,6 +408,35 @@ Configuration for scanning, created via `ScanConfig.builder()`:
 | `cipherNameConvention` | IANA | Cipher suite naming convention |
 | `enabledProtocols` | null (all) | TLS protocol versions to probe |
 | `enabledSections` | all | Which scan sections to execute |
+| `maxRetries` | 3 | Max retry attempts per section (0 disables) |
+| `initialRetryDelayMs` | 500 | Initial delay before first retry (ms) |
+| `maxRetryDelayMs` | 4000 | Maximum delay between retries (ms) |
+| `retryBudgetMs` | 15000 | Total wall-clock budget for retries per section (ms) |
+
+#### RetryPolicy
+
+**Location:** `src/main/java/com/mps/deepviolet/api/RetryPolicy.java`
+
+Configurable retry policy with exponential backoff and jitter for transient `IOException` failures. Does not retry `TlsException` or `RuntimeException`.
+
+| Method | Description |
+|--------|-------------|
+| `defaults()` | Create policy with defaults (3 retries, 500ms initial, 4s max, 15s budget) |
+| `disabled()` | Create disabled policy (no retries) |
+| `builder()` | Create a new builder |
+| `execute(Callable<T>, BackgroundTask)` | Execute a task with retry |
+| `executeVoid(RunnableWithException, BackgroundTask)` | Execute a void task with retry |
+
+`ScanConfig` builds a `RetryPolicy` internally via `toRetryPolicy()`. You can also create one directly:
+
+```java
+RetryPolicy policy = RetryPolicy.builder()
+        .maxRetries(5)
+        .initialDelayMs(200)
+        .maxDelayMs(8000)
+        .retryBudgetMs(30000)
+        .build();
+```
 
 #### TargetSpec
 
@@ -453,6 +491,7 @@ Callback interface for scan events. All methods have default no-op implementatio
 | `onSectionCompleted(URL, ScanSection)` | A section completed on a host |
 | `onHostCompleted(IScanResult, int, int)` | A host scan completed (success or failure) |
 | `onScanCompleted(List<IScanResult>)` | All hosts scanned |
+| `onSectionFailed(URL, ScanSection, int, Exception)` | A section failed after all retry attempts |
 | `onHostStatus(URL, String)` | Status text from the scanning engine |
 
 #### IScanMonitor
@@ -470,6 +509,29 @@ Pollable interface for monitoring scan progress, suitable for UI timer integrati
 | `getTotalHostCount()` | Total hosts in the scan |
 | `isRunning()` | Whether the scan is still running |
 | `getThreadStatuses()` | Snapshot of per-thread status |
+
+#### NamedGroup
+
+**Location:** `src/main/java/com/mps/deepviolet/api/tls/NamedGroup.java`
+
+Constants and helpers for IANA TLS Named Groups (RFC 8446 Section 4.2.7), including post-quantum hybrid and pure PQ groups:
+
+| Group | Code | Type |
+|-------|------|------|
+| `SECP256R1` | 0x0017 | Classical EC |
+| `SECP384R1` | 0x0018 | Classical EC |
+| `X25519` | 0x001d | Classical EC |
+| `X25519_MLKEM768` | 0x11EC | PQ Hybrid |
+| `SECP256R1_MLKEM768` | 0x11EB | PQ Hybrid |
+| `SECP384R1_MLKEM1024` | 0x11ED | PQ Hybrid |
+| `MLKEM768` | 0x0201 | Pure PQ |
+| `MLKEM1024` | 0x0202 | Pure PQ |
+
+| Method | Description |
+|--------|-------------|
+| `getName(int)` | Human-readable name for a group code |
+| `isPostQuantum(int)` | Test whether a group code is PQ or hybrid-PQ |
+| `classicalFallback(int)` | Return the classical fallback for a PQ group |
 
 #### DnsSecurityChecker
 
@@ -805,6 +867,11 @@ The system evaluates 7 categories. Each category computes its own sub-average in
 | SYS-0000800 | TLS 1.3 early data (0-RTT) accepted | 0.4 | RFC 8446 Section 8.1 warns 0-RTT has "no guarantee of non-replay between connections." RFC 8470 details HTTP replay risks. | `session.tls_metadata_available == true and session.early_data_accepted == true` |
 | SYS-0000900 | ALPN not negotiated | 0.1 | RFC 7301 defines ALPN; RFC 9113 Section 3.2 requires it for HTTP/2. Absence prevents HTTP/2 negotiation and indicates a less capable TLS stack. | `session.tls_metadata_available == true and session.alpn_negotiated == null` |
 | SYS-0001000 | Server does not support TLS_FALLBACK_SCSV | 0.3 | RFC 7507 defines TLS_FALLBACK_SCSV to prevent protocol downgrade attacks, most notably POODLE (CVE-2014-3566). Servers reject downgraded connections with `inappropriate_fallback` alert. | `session.fallback_scsv_supported == false` |
+| SYS-0001100 | Post-quantum key exchange supported but server prefers classical | 0.2 | Server supports PQ groups but negotiates classical when both are offered. RFC-ietf-tls-ecdhe-mlkem-04. Servers should prefer PQ to gain quantum-resistance benefits. | `session.pq_kex_supported == true and session.pq_kex_preferred == false` |
+| SYS-0001200 | Server does not support post-quantum key exchange | 0.3 | ML-KEM hybrids (X25519MLKEM768, etc.) provide quantum-resistance for TLS 1.3 connections. NIST FIPS 203 standardized ML-KEM in August 2024. Absence means no protection against harvest-now-decrypt-later attacks. | `session.pq_kex_supported == false` |
+| SYS-0001300 | Server supports post-quantum key exchange | 0.0 | Informational — server supports PQ key exchange groups. Score 0.0 (positive finding). | `session.pq_kex_supported == true` |
+| SYS-0001400 | Server negotiated post-quantum key exchange | 0.0 | Informational — server prefers PQ when offered both PQ and classical. Score 0.0 (positive finding). | `session.pq_kex_preferred == true` |
+| SYS-0001500 | Post-quantum probe failed | 0.15 | PQ key exchange could not be evaluated (probe failed after retries). Inconclusive diagnostic. | `session.pq_kex_probe_failed == true` |
 
 #### Cipher Suites
 
@@ -847,6 +914,7 @@ The system evaluates 7 categories. Each category computes its own sub-average in
 | SYS-0021400 | Certificate version < 3 (X.509v3) | 0.3 | RFC 5280 Section 4.1.2.1 — v3 required for extensions. CA/B Forum BR Section 7.1.1 requires X.509v3. Without v3, SANs, Key Usage, and Basic Constraints cannot be expressed. | `cert.version < 3` |
 | SYS-0021500 | MD5 signature algorithm | 0.8 | RFC 6151 documents MD5 collision vulnerabilities. Flame malware (2012) exploited MD5 collision to forge a Microsoft certificate. NIST SP 800-131A Rev. 2 disallows MD5 for signatures. | `contains(lower(cert.signing_algorithm), "md5")` |
 | SYS-0021600 | MD2 signature algorithm | 0.9 | RFC 6149 formally deprecates MD2. CVE-2004-2761. NIST removed MD2 from approved algorithms decades ago; effectively no collision resistance. | `contains(lower(cert.signing_algorithm), "md2")` |
+| SYS-0021700 | Certificate chain could not be evaluated | 0.2 | Certificate retrieval failed after retries. Inconclusive diagnostic — chain validity, trust, key strength, and expiration cannot be assessed. | `scan.certificate_retrieval_failed == true` |
 
 #### Revocation & Transparency
 
@@ -858,6 +926,7 @@ The system evaluates 7 categories. Each category computes its own sub-average in
 | SYS-0030400 | No CT SCTs found | 0.3 | RFC 6962 / RFC 9162 (Certificate Transparency). Chrome requires CT compliance since April 2018; Apple since October 2018. SCTs prove certificate logging for public accountability. | `revocation.available == true and revocation.sct_count == 0` |
 | SYS-0030500 | Only 1 SCT (2+ recommended) | 0.1 | Google CT Policy requires 2+ SCTs from distinct logs (3+ for long-lived certs). Apple CT Policy similar. Single SCT provides insufficient diversity if that log is compromised. | `revocation.available == true and revocation.sct_count > 0 and revocation.sct_count < 2` |
 | SYS-0030600 | Both OCSP and CRL failed | 0.5 | RFC 5280 Section 6.3 — revocation checking is critical to path validation. When both OCSP and CRL fail, revocation status is unknown. NIST SP 800-52r2 Section 3.5. | `revocation.available == true and revocation.ocsp_status == "ERROR" and revocation.crl_status == "ERROR"` |
+| SYS-0030700 | Revocation status could not be evaluated | 0.2 | Revocation check failed after retries. Inconclusive diagnostic — OCSP, CRL, stapling, and CT status cannot be assessed. | `scan.revocation_check_failed == true` |
 
 #### Security Headers
 
@@ -880,6 +949,7 @@ The system evaluates 7 categories. Each category computes its own sub-average in
 |----|------|-------|------------|-----------|
 | SYS-0050100 | No CAA records (any CA can issue certificates) | 0.3 | RFC 8659 (CAA). The CA/Browser Forum -- a consortium of browser vendors and certificate authorities -- publishes Baseline Requirements that influence how browsers and CAs behave but do not mandate what developers must do. BR Section 3.2.2.8 requires CAs to check CAA before issuance (mandatory since September 2017). Without CAA, any CA can issue certificates for the domain. | `dns.available == true and dns.has_caa_records == false` |
 | SYS-0050200 | No DANE/TLSA records | 0.1 | RFC 6698 / RFC 7671 (DANE/TLSA). Binds certificates to domain names via DNSSEC, supplementing the CA trust model. Absence means full reliance on CA/PKI trust without DNS-based pinning. | `dns.available == true and dns.has_tlsa_records == false` |
+| SYS-0050300 | DNS security could not be evaluated | 0.15 | DNS lookup failed after retries. Inconclusive diagnostic — CAA and DANE/TLSA status cannot be assessed. | `scan.dns_security_failed == true` |
 
 #### Other
 
@@ -891,6 +961,7 @@ The system evaluates 7 categories. Each category computes its own sub-average in
 | SYS-0060400 | 21+ SANs (high exposure) | 0.6 | CA/B Forum BR Section 7.1.2.3. NIST SP 800-52r2 Section 3.5 recommends limiting scope. 21+ SANs means key compromise affects many domains; high blast radius. | `cert.san_count >= 21` |
 | SYS-0060500 | 6-20 SANs (medium exposure) | 0.3 | Same basis as SYS-0060400 at medium severity. NIST SP 800-53 AC-6 (least privilege). Common for CDN/multi-service deployments but broader exposure than single-domain. | `cert.san_count >= 6 and cert.san_count < 21` |
 | SYS-0060600 | 2-5 SANs (low exposure) | 0.1 | Same basis at lowest severity. Typical for www + apex domain pairs (RFC 5280 Section 4.2.1.6). Flagged informational for audit awareness. | `cert.san_count >= 2 and cert.san_count < 6` |
+| SYS-0060700 | TLS fingerprint could not be evaluated | 0.1 | TLS fingerprint probing failed after retries. Inconclusive diagnostic — server behavior cannot be characterized via fingerprint probes. | `scan.tls_fingerprint_failed == true` |
 
 ### Using Risk Scoring
 
@@ -923,6 +994,71 @@ for (ICategoryScore cat : score.getCategoryScores()) {
 ```
 
 See `src/main/java/com/mps/deepviolet/samples/PrintRiskScore.java` for a complete working example.
+
+### Scoring Diagnostics
+
+The scoring engine reports issues encountered during rule evaluation via `IScoringDiagnostic`. Diagnostics include optional YAML source location (line, column) so rule authors can locate problems in custom rules files.
+
+```java
+IRiskScore score = eng.getRiskScore();
+
+for (IRiskScore.IScoringDiagnostic diag : score.getDiagnostics()) {
+    System.out.printf("[%s] %s (rule=%s, category=%s, line=%d)%n",
+            diag.getLevel(), diag.getMessage(),
+            diag.getRuleId(), diag.getCategory(), diag.getLine());
+}
+```
+
+| Method | Description |
+|--------|-------------|
+| `getRuleId()` | Rule identifier, or null for non-rule diagnostics |
+| `getCategory()` | Category key, or null for global diagnostics |
+| `getLevel()` | `WARNING` or `ERROR` |
+| `getMessage()` | Human-readable diagnostic message |
+| `getLine()` | 1-based YAML source line (-1 if unknown) |
+| `getColumn()` | 1-based YAML source column (-1 if unknown) |
+
+Per-category diagnostics are also available via `ICategoryScore.getDiagnostics()`.
+
+### Deduction Scope
+
+Each deduction may include structured scope metadata describing the protocol layer, affected TLS versions, and specific mechanism. This is useful for filtering and classifying findings.
+
+```java
+for (IDeduction d : cat.getDeductions()) {
+    IDeduction.IScope scope = d.getScope();
+    if (scope != null) {
+        System.out.printf("    Layer: %s, Protocols: %s, Aspect: %s%n",
+                scope.getLayer(),
+                String.join(", ", scope.getProtocols()),
+                scope.getAspect());
+    }
+}
+```
+
+| IScope Method | Description |
+|---------------|-------------|
+| `getLayer()` | Service/protocol layer (e.g., `"tls"`, `"certificate"`, `"http"`, `"dns"`) |
+| `getProtocols()` | Affected TLS versions (e.g., `["TLSv1.2", "TLSv1.3"]`), empty if not version-specific |
+| `getAspect()` | Specific mechanism (e.g., `"renegotiation"`, `"post_quantum"`, `"hsts"`), or null |
+
+### Offline Re-Scoring
+
+Risk scores can be computed offline from a saved `RuleContext` without re-scanning the server. This is useful for re-scoring persisted scan data when rules are updated.
+
+```java
+// Build and save the context during a live scan
+RuleContext context = eng.buildRuleContext();
+// ... serialize context (e.g., via ScanSnapshot persistence) ...
+
+// Later: re-score offline
+IRiskScore score = eng.getRiskScore(context);
+
+// Or with custom user rules merged in
+try (InputStream userRules = Files.newInputStream(Path.of("my-rules.yaml"))) {
+    IRiskScore customScore = eng.getRiskScore(context, userRules);
+}
+```
 
 ### Configuring the Scoring Rules
 
@@ -1113,6 +1249,12 @@ Rule conditions use a lightweight expression language. Conditions are defined in
 | `session.honors_client_cipher_preference` | Whether the server follows client cipher order instead of enforcing its own (Boolean, or null if inconclusive) |
 | `session.dh_param_size` | DH parameter prime size in bits |
 | `session.kex_type` | Key exchange type (e.g., `"DHE"`, `"ECDHE"`) |
+| `session.pq_kex_supported` | Whether the server supports any post-quantum key exchange group (Boolean, or null) |
+| `session.pq_kex_preferred` | Whether the server prefers PQ over classical when both offered (Boolean, or null) |
+| `session.pq_kex_groups` | Comma-separated list of PQ group names the server supports |
+| `session.pq_preferred_group` | Name of the PQ group the server selected in the preference probe |
+| `session.pq_kex_probe_failed` | True if PQ probe failed after retries |
+| `session.negotiated_group_pq` | Whether the negotiated key exchange group is post-quantum (Boolean) |
 | `protocols` | Set of protocol strings (e.g., `"TLSv1.2"`, `"TLSv1.3"`) |
 | `ciphers` | List of cipher maps, each with `name`, `strength`, `protocol` |
 | `cert.validity_state` | `"VALID"`, `"EXPIRED"`, or `"NOT_YET_VALID"` |
@@ -1136,6 +1278,10 @@ Rule conditions use a lightweight expression language. Conditions are defined in
 | `revocation.ocsp_stapling_present` | Boolean |
 | `revocation.must_staple_present` | Boolean |
 | `revocation.sct_count` | Number of Certificate Transparency SCTs |
+| `scan.certificate_retrieval_failed` | True if certificate retrieval failed after retries |
+| `scan.revocation_check_failed` | True if revocation check failed after retries |
+| `scan.dns_security_failed` | True if DNS security lookup failed after retries |
+| `scan.tls_fingerprint_failed` | True if TLS fingerprint probing failed after retries |
 
 #### Operators
 
@@ -1241,6 +1387,12 @@ Each rule within a category follows this structure:
         inconclusive: false         # Optional, defaults to false
         when: <expression>          # Condition that triggers the rule
         when_inconclusive: <expr>   # Optional inconclusive condition
+        scope:                      # Optional structured scope metadata
+          layer: tls                # Protocol layer (tls, certificate, http, dns, etc.)
+          protocols: [TLSv1.3]      # Affected TLS versions (optional)
+          aspect: post_quantum      # Specific mechanism (optional)
+        meta:                       # Optional template variables for description
+          key: session.some_prop    # Variable expansion via ${key} in description
 ```
 
 The `id` field is optional but strongly recommended. When present, it is used as the deduction's `getRuleId()`. When absent, the YAML key name is used instead. The `score` field determines both the impact on the overall score and the derived severity (via `severity_mapping`).
@@ -1420,6 +1572,10 @@ Use `ScanConfig.builder()` to customize scan behavior:
 | `cipherNameConvention` | `CIPHER_NAME_CONVENTION` | `IANA` | Cipher suite naming convention |
 | `enabledProtocols` | `Set<Integer>` | `null` (all) | TLS protocol versions to test |
 | `enabledSections` | `Set<ScanSection>` | All sections | Scan phases to execute |
+| `maxRetries` | `int` | `3` | Max retry attempts per section (0 disables) |
+| `initialRetryDelayMs` | `long` | `500` | Initial retry delay (ms) |
+| `maxRetryDelayMs` | `long` | `4000` | Max retry delay (ms) |
+| `retryBudgetMs` | `long` | `15000` | Wall-clock retry budget per section (ms) |
 
 ```java
 ScanConfig config = ScanConfig.builder()
@@ -1519,6 +1675,7 @@ Each `IScanResult` provides access to the scanned host's data:
 | `getEndTime()` | `Instant` | When the scan ended |
 | `getDuration()` | `Duration` | How long the scan took |
 | `getCompletedSections()` | `Set<ScanSection>` | Sections completed successfully |
+| `getFailedSections()` | `Set<ScanSection>` | Sections that failed after all retry attempts |
 
 ### Persistence Overview
 

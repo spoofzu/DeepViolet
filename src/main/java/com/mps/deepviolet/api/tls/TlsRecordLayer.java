@@ -15,30 +15,47 @@ import java.io.OutputStream;
  */
 public class TlsRecordLayer {
 
-    // TLS record types
+    /** TLS record type: ChangeCipherSpec. */
     public static final int CHANGE_CIPHER_SPEC = 20;
+    /** TLS record type: Alert. */
     public static final int ALERT = 21;
+    /** TLS record type: Handshake. */
     public static final int HANDSHAKE = 22;
+    /** TLS record type: ApplicationData. */
     public static final int APPLICATION_DATA = 23;
 
-    // Maximum record length per TLS specification
+    /** Maximum TLS record payload length per specification. */
     public static final int MAX_RECORD_LEN = 16384;
 
-    // Handshake message types
+    /** Handshake message type: ClientHello. */
     public static final int HANDSHAKE_CLIENT_HELLO = 1;
+    /** Handshake message type: ServerHello. */
     public static final int HANDSHAKE_SERVER_HELLO = 2;
+    /** Handshake message type: NewSessionTicket. */
     public static final int HANDSHAKE_NEW_SESSION_TICKET = 4;
+    /** Handshake message type: EndOfEarlyData. */
     public static final int HANDSHAKE_END_OF_EARLY_DATA = 5;
+    /** Handshake message type: EncryptedExtensions. */
     public static final int HANDSHAKE_ENCRYPTED_EXTENSIONS = 8;
+    /** Handshake message type: Certificate. */
     public static final int HANDSHAKE_CERTIFICATE = 11;
+    /** Handshake message type: ServerKeyExchange. */
     public static final int HANDSHAKE_SERVER_KEY_EXCHANGE = 12;
+    /** Handshake message type: CertificateRequest. */
     public static final int HANDSHAKE_CERTIFICATE_REQUEST = 13;
+    /** Handshake message type: ServerHelloDone. */
     public static final int HANDSHAKE_SERVER_HELLO_DONE = 14;
+    /** Handshake message type: CertificateVerify. */
     public static final int HANDSHAKE_CERTIFICATE_VERIFY = 15;
+    /** Handshake message type: ClientKeyExchange. */
     public static final int HANDSHAKE_CLIENT_KEY_EXCHANGE = 16;
+    /** Handshake message type: Finished. */
     public static final int HANDSHAKE_FINISHED = 20;
+    /** Handshake message type: CertificateStatus. */
     public static final int HANDSHAKE_CERTIFICATE_STATUS = 22;
+    /** Handshake message type: KeyUpdate. */
     public static final int HANDSHAKE_KEY_UPDATE = 24;
+    /** Handshake message type: MessageHash. */
     public static final int HANDSHAKE_MESSAGE_HASH = 254;
 
     private final InputStream input;
@@ -59,6 +76,9 @@ public class TlsRecordLayer {
     private int expectedType = -1;
     private byte[] lastRecordHeader;
 
+    /** Create a TLS record layer over the given streams.
+     *  @param input the input stream
+     *  @param output the output stream */
     public TlsRecordLayer(InputStream input, OutputStream output) {
         this.input = input;
         this.output = output;
@@ -68,6 +88,7 @@ public class TlsRecordLayer {
 
     /**
      * Set the record type for output.
+     * @param type TLS record type
      */
     public void setOutputType(int type) {
         this.outputType = type;
@@ -75,6 +96,7 @@ public class TlsRecordLayer {
 
     /**
      * Set the protocol version for output records.
+     * @param version TLS version code
      */
     public void setOutputVersion(int version) {
         this.outputVersion = version;
@@ -82,6 +104,8 @@ public class TlsRecordLayer {
 
     /**
      * Write a byte to the output buffer.
+     * @param b byte value to write
+     * @throws IOException on I/O errors
      */
     public void write(int b) throws IOException {
         outputBuffer[outputPtr++] = (byte) b;
@@ -92,6 +116,8 @@ public class TlsRecordLayer {
 
     /**
      * Write bytes to the output buffer.
+     * @param buf byte array to write
+     * @throws IOException on I/O errors
      */
     public void write(byte[] buf) throws IOException {
         write(buf, 0, buf.length);
@@ -99,6 +125,10 @@ public class TlsRecordLayer {
 
     /**
      * Write bytes to the output buffer.
+     * @param buf source byte array
+     * @param off start offset in buf
+     * @param len number of bytes to write
+     * @throws IOException on I/O errors
      */
     public void write(byte[] buf, int off, int len) throws IOException {
         while (len > 0) {
@@ -115,6 +145,7 @@ public class TlsRecordLayer {
 
     /**
      * Flush the output buffer, writing a complete record.
+     * @throws IOException on I/O errors
      */
     public void flushOutput() throws IOException {
         outputBuffer[0] = (byte) outputType;
@@ -129,6 +160,7 @@ public class TlsRecordLayer {
 
     /**
      * Set the expected record type for input. Alert records are still processed.
+     * @param expectedType expected TLS record type, or -1 for any
      */
     public void setExpectedType(int expectedType) {
         this.expectedType = expectedType;
@@ -136,6 +168,7 @@ public class TlsRecordLayer {
 
     /**
      * Get the version from the last read record.
+     * @return input record version
      */
     public int getInputVersion() {
         return inputVersion;
@@ -143,6 +176,7 @@ public class TlsRecordLayer {
 
     /**
      * Get the type of the last read record.
+     * @return input record type
      */
     public int getInputType() {
         return inputType;
@@ -150,6 +184,9 @@ public class TlsRecordLayer {
 
     /**
      * Read a single byte from the input.
+     * @return the byte value (0-255)
+     * @throws IOException on I/O errors
+     * @throws TlsException on TLS protocol errors
      */
     public int read() throws IOException, TlsException {
         while (inputPtr == inputEnd) {
@@ -160,6 +197,12 @@ public class TlsRecordLayer {
 
     /**
      * Read bytes from the input.
+     * @param buf destination buffer
+     * @param off start offset in buf
+     * @param len maximum bytes to read
+     * @return number of bytes read
+     * @throws IOException on I/O errors
+     * @throws TlsException on TLS protocol errors
      */
     public int read(byte[] buf, int off, int len) throws IOException, TlsException {
         while (inputPtr == inputEnd) {
@@ -173,6 +216,9 @@ public class TlsRecordLayer {
 
     /**
      * Read exactly len bytes from the input.
+     * @param buf destination buffer
+     * @throws IOException on I/O errors
+     * @throws TlsException on TLS protocol errors
      */
     public void readFully(byte[] buf) throws IOException, TlsException {
         readFully(buf, 0, buf.length);
@@ -180,6 +226,11 @@ public class TlsRecordLayer {
 
     /**
      * Read exactly len bytes from the input.
+     * @param buf destination buffer
+     * @param off start offset in buf
+     * @param len exact number of bytes to read
+     * @throws IOException on I/O errors
+     * @throws TlsException on TLS protocol errors
      */
     public void readFully(byte[] buf, int off, int len) throws IOException, TlsException {
         while (len > 0) {
@@ -240,6 +291,8 @@ public class TlsRecordLayer {
      * Read a complete TLS record and return the payload.
      * Does NOT consume the record from the input buffer.
      * @return Record payload bytes
+     * @throws IOException on I/O errors
+     * @throws TlsException on TLS protocol errors
      */
     public byte[] readRecord() throws IOException, TlsException {
         // Read 5-byte header
@@ -274,6 +327,8 @@ public class TlsRecordLayer {
     /**
      * Read a handshake message. Returns the message type and full message bytes.
      * @return HandshakeMessage containing type and data
+     * @throws IOException on I/O errors
+     * @throws TlsException on TLS protocol errors
      */
     public HandshakeMessage readHandshakeMessage() throws IOException, TlsException {
         setExpectedType(HANDSHAKE);
@@ -295,6 +350,7 @@ public class TlsRecordLayer {
     /**
      * Get the 5-byte record header from the last {@link #readRecord()} call.
      * Used for TLS 1.3 AEAD additional authenticated data.
+     * @return copy of the record header, or null
      */
     public byte[] getLastRecordHeader() {
         return lastRecordHeader != null ? lastRecordHeader.clone() : null;
@@ -302,22 +358,37 @@ public class TlsRecordLayer {
 
     // ==================== Static Utility Methods ====================
 
+    /** Encode 16-bit value big-endian into buffer.
+     *  @param val value to encode
+     *  @param buf destination buffer
+     *  @param off offset in buffer */
     public static void enc16be(int val, byte[] buf, int off) {
         buf[off] = (byte) (val >>> 8);
         buf[off + 1] = (byte) val;
     }
 
+    /** Encode 16-bit value big-endian to output stream.
+     *  @param val value to encode
+     *  @param out output stream */
     public static void enc16be(int val, ByteArrayOutputStream out) {
         out.write(val >>> 8);
         out.write(val);
     }
 
+    /** Encode 24-bit value big-endian into buffer.
+     *  @param val value to encode
+     *  @param buf destination buffer
+     *  @param off offset in buffer */
     public static void enc24be(int val, byte[] buf, int off) {
         buf[off] = (byte) (val >>> 16);
         buf[off + 1] = (byte) (val >>> 8);
         buf[off + 2] = (byte) val;
     }
 
+    /** Encode 32-bit value big-endian into buffer.
+     *  @param val value to encode
+     *  @param buf destination buffer
+     *  @param off offset in buffer */
     public static void enc32be(int val, byte[] buf, int off) {
         buf[off] = (byte) (val >>> 24);
         buf[off + 1] = (byte) (val >>> 16);
@@ -325,16 +396,28 @@ public class TlsRecordLayer {
         buf[off + 3] = (byte) val;
     }
 
+    /** Decode 16-bit big-endian value from buffer.
+     *  @param buf source buffer
+     *  @param off offset in buffer
+     *  @return decoded value */
     public static int dec16be(byte[] buf, int off) {
         return ((buf[off] & 0xFF) << 8) | (buf[off + 1] & 0xFF);
     }
 
+    /** Decode 24-bit big-endian value from buffer.
+     *  @param buf source buffer
+     *  @param off offset in buffer
+     *  @return decoded value */
     public static int dec24be(byte[] buf, int off) {
         return ((buf[off] & 0xFF) << 16)
                 | ((buf[off + 1] & 0xFF) << 8)
                 | (buf[off + 2] & 0xFF);
     }
 
+    /** Decode 32-bit big-endian value from buffer.
+     *  @param buf source buffer
+     *  @param off offset in buffer
+     *  @return decoded value */
     public static int dec32be(byte[] buf, int off) {
         return ((buf[off] & 0xFF) << 24)
                 | ((buf[off + 1] & 0xFF) << 16)
@@ -342,6 +425,12 @@ public class TlsRecordLayer {
                 | (buf[off + 3] & 0xFF);
     }
 
+    /** Read exactly len bytes from the stream.
+     *  @param in input stream
+     *  @param buf destination buffer
+     *  @param off offset in buffer
+     *  @param len bytes to read
+     *  @throws IOException on I/O errors or EOF */
     public static void readFullyFromStream(InputStream in, byte[] buf, int off, int len)
             throws IOException {
         while (len > 0) {
@@ -356,6 +445,8 @@ public class TlsRecordLayer {
 
     /**
      * Get human-readable name for handshake message type.
+     * @param type handshake message type code
+     * @return human-readable name
      */
     public static String getHandshakeTypeName(int type) {
         switch (type) {
@@ -380,6 +471,8 @@ public class TlsRecordLayer {
 
     /**
      * Get human-readable name for record type.
+     * @param type TLS record type code
+     * @return human-readable name
      */
     public static String getRecordTypeName(int type) {
         switch (type) {
@@ -399,24 +492,36 @@ public class TlsRecordLayer {
         private final byte[] data;
         private final int recordVersion;
 
+        /** Create a handshake message.
+         *  @param type handshake type code
+         *  @param data message body
+         *  @param recordVersion record layer version */
         public HandshakeMessage(int type, byte[] data, int recordVersion) {
             this.type = type;
             this.data = data;
             this.recordVersion = recordVersion;
         }
 
+        /** Returns the handshake type code.
+         *  @return type code */
         public int getType() {
             return type;
         }
 
+        /** Returns the message body.
+         *  @return message data */
         public byte[] getData() {
             return data;
         }
 
+        /** Returns the record layer version.
+         *  @return record version */
         public int getRecordVersion() {
             return recordVersion;
         }
 
+        /** Returns the human-readable type name.
+         *  @return type name */
         public String getTypeName() {
             return getHandshakeTypeName(type);
         }

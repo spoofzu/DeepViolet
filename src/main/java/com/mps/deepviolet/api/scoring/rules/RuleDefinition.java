@@ -36,6 +36,7 @@ public record RuleDefinition(
 	 * Returns the effective rule identifier for deductions.
 	 * Prefers the stable {@code id} (SYS-/USR- format) when present,
 	 * falls back to the YAML key name.
+	 * @return effective rule identifier
 	 */
 	public String effectiveId() {
 		return id != null && !id.isBlank() ? id : ruleId;

@@ -3,6 +3,9 @@ package com.mps.deepviolet.api.scoring;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
+
+import com.mps.deepviolet.api.ScanSection;
 
 import com.mps.deepviolet.api.DeepVioletException;
 import com.mps.deepviolet.api.RiskScore;
@@ -39,10 +42,27 @@ public class RiskScorer {
 
 	private final IEngine engine;
 	private final RulePolicy rulePolicy;
+	private final Set<ScanSection> failedSections;
 
+	/**
+	 * Construct a risk scorer.
+	 * @param engine the engine providing scan data
+	 * @param rulePolicy the rule policy for scoring
+	 */
 	public RiskScorer(IEngine engine, RulePolicy rulePolicy) {
+		this(engine, rulePolicy, Set.of());
+	}
+
+	/**
+	 * Construct a risk scorer with failed section information.
+	 * @param engine the engine providing scan data
+	 * @param rulePolicy the rule policy for scoring
+	 * @param failedSections sections that failed after all retry attempts
+	 */
+	public RiskScorer(IEngine engine, RulePolicy rulePolicy, Set<ScanSection> failedSections) {
 		this.engine = engine;
 		this.rulePolicy = rulePolicy;
+		this.failedSections = failedSections != null ? failedSections : Set.of();
 	}
 
 	/**
@@ -51,7 +71,7 @@ public class RiskScorer {
 	 * @throws DeepVioletException on problems accessing data
 	 */
 	public IRiskScore computeScore() throws DeepVioletException {
-		RuleContext context = RuleContext.from(engine);
+		RuleContext context = RuleContext.from(engine, failedSections);
 		String hostUrl = engine.getSession().getURL().toString();
 		return computeScore(context, hostUrl, rulePolicy);
 	}

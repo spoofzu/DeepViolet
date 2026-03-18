@@ -198,6 +198,38 @@ public class RuleContextSerializationTest {
 	}
 
 	@Test
+	void testPqVariablesRoundTrip() {
+		Map<String, Object> props = new LinkedHashMap<>();
+
+		Map<String, Object> sessionProps = new LinkedHashMap<>();
+		sessionProps.put("negotiated_group", "X25519MLKEM768");
+		sessionProps.put("negotiated_group_pq", true);
+		sessionProps.put("pq_kex_supported", false);
+		sessionProps.put("pq_kex_groups", "X25519MLKEM768, SecP256r1MLKEM768");
+		sessionProps.put("pq_kex_preferred", true);
+		sessionProps.put("pq_preferred_group", "X25519MLKEM768");
+		props.put("session", sessionProps);
+
+		RuleContext original = RuleContext.fromMaps(props, null);
+
+		Map<String, Object> serialized = original.toSerializableMap();
+		RuleContext restored = RuleContext.fromSerializableMap(serialized);
+
+		assertEquals("X25519MLKEM768",
+				restored.resolve(List.of("session", "negotiated_group")));
+		assertEquals(true,
+				restored.resolve(List.of("session", "negotiated_group_pq")));
+		assertEquals(false,
+				restored.resolve(List.of("session", "pq_kex_supported")));
+		assertEquals("X25519MLKEM768, SecP256r1MLKEM768",
+				restored.resolve(List.of("session", "pq_kex_groups")));
+		assertEquals(true,
+				restored.resolve(List.of("session", "pq_kex_preferred")));
+		assertEquals("X25519MLKEM768",
+				restored.resolve(List.of("session", "pq_preferred_group")));
+	}
+
+	@Test
 	void testNullHeadersRoundTrip() {
 		Map<String, Object> props = new LinkedHashMap<>();
 		props.put("session", new LinkedHashMap<>());

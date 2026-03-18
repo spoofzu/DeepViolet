@@ -19,6 +19,7 @@ class ScanResult implements IScanResult {
 	private Instant startTime;
 	private Instant endTime;
 	private final Set<ScanSection> completedSections = EnumSet.noneOf(ScanSection.class);
+	private final Set<ScanSection> failedSections = EnumSet.noneOf(ScanSection.class);
 
 	ScanResult(URL url) {
 		this.url = url;
@@ -56,4 +57,11 @@ class ScanResult implements IScanResult {
 	void setStartTime(Instant startTime) { this.startTime = startTime; }
 	void setEndTime(Instant endTime) { this.endTime = endTime; }
 	void addCompletedSection(ScanSection section) { completedSections.add(section); }
+	void addFailedSection(ScanSection section) { failedSections.add(section); }
+
+	@Override
+	public Set<ScanSection> getFailedSections() {
+		return Collections.unmodifiableSet(EnumSet.copyOf(
+				failedSections.isEmpty() ? EnumSet.noneOf(ScanSection.class) : failedSections));
+	}
 }

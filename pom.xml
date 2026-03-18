@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.spoofzu</groupId>
     <artifactId>DeepViolet</artifactId>
-    <version>6.0.1-SNAPSHOT</version>
+    <version>6.1.0</version>
     <packaging>jar</packaging>
     <name>DeepViolet</name>
     <description>TLS/SSL security introspection API</description>
@@ -46,7 +46,6 @@
         <logback.classic>1.5.6</logback.classic>
         <maven.compiler.plugin>3.13.0</maven.compiler.plugin>
         <maven.jar.plugin>3.4.2</maven.jar.plugin>
-        <maven.javadoc.plugin>3.7.0</maven.javadoc.plugin>
         <maven.surefire.plugin>3.3.0</maven.surefire.plugin>
     </properties>
     <dependencies>
@@ -108,31 +107,6 @@
                         <goals>
                             <goal>jar-no-fork</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>${maven.javadoc.plugin}</version>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                    <show>public</show>
-                    <failOnWarnings>false</failOnWarnings>
-                    <failOnError>false</failOnError>
-                    <reportOutputDirectory>${project.basedir}/docs</reportOutputDirectory>
-                    <destDir>javadocs</destDir>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <reportOutputDirectory>${project.build.directory}/apidocs</reportOutputDirectory>
-                            <destDir>.</destDir>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

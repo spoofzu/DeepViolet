@@ -8,6 +8,9 @@ import java.util.List;
  */
 public class OpensslResult {
 
+    /** Creates an empty result. */
+    OpensslResult() {}
+
     String opensslVersion;
     boolean connectionSucceeded;
     String connectionError;

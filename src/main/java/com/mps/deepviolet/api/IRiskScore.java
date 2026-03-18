@@ -9,21 +9,57 @@ package com.mps.deepviolet.api;
  */
 public interface IRiskScore {
 
-	enum RiskLevel { LOW, MEDIUM, HIGH, CRITICAL }
+	/** Risk level indicating overall threat severity. */
+	enum RiskLevel {
+		/** Low risk. */
+		LOW,
+		/** Medium risk. */
+		MEDIUM,
+		/** High risk. */
+		HIGH,
+		/** Critical risk. */
+		CRITICAL
+	}
 
+	/** Letter grade derived from a numeric risk score. */
 	enum LetterGrade {
-		A_PLUS("A+"), A("A"), B("B"), C("C"), D("D"), F("F");
+		/** A+ grade. */
+		A_PLUS("A+"),
+		/** A grade. */
+		A("A"),
+		/** B grade. */
+		B("B"),
+		/** C grade. */
+		C("C"),
+		/** D grade. */
+		D("D"),
+		/** F grade. */
+		F("F");
 
 		private final String display;
 		LetterGrade(String display) { this.display = display; }
 
-		/** Human-readable grade string (e.g. "A+", "B"). */
+		/** Human-readable grade string (e.g. "A+", "B").
+		 * @return display string */
 		public String toDisplayString() { return display; }
 	}
 
+	/** Categories used to group related scoring rules. */
 	enum ScoreCategory {
-		PROTOCOLS, CIPHER_SUITES, CERTIFICATE,
-		REVOCATION, SECURITY_HEADERS, DNS_SECURITY, OTHER
+		/** Protocol version scoring. */
+		PROTOCOLS,
+		/** Cipher suite scoring. */
+		CIPHER_SUITES,
+		/** Certificate scoring. */
+		CERTIFICATE,
+		/** Revocation checking scoring. */
+		REVOCATION,
+		/** HTTP security headers scoring. */
+		SECURITY_HEADERS,
+		/** DNS security (CAA, DANE) scoring. */
+		DNS_SECURITY,
+		/** Miscellaneous scoring. */
+		OTHER
 	}
 
 	/**
@@ -75,6 +111,7 @@ public interface IRiskScore {
 	/**
 	 * Diagnostics collected during scoring (rule evaluation failures, data-gathering
 	 * warnings, etc.). Returns an empty array when scoring completed without issues.
+	 * @return Array of diagnostics, empty if no issues
 	 */
 	IScoringDiagnostic[] getDiagnostics();
 
@@ -83,17 +120,31 @@ public interface IRiskScore {
 	 * Includes optional YAML source location so rule authors can locate problems.
 	 */
 	interface IScoringDiagnostic {
-		enum Level { WARNING, ERROR }
+		/** Severity level of a scoring diagnostic. */
+		enum Level {
+			/** Non-fatal issue during scoring. */
+			WARNING,
+			/** Fatal issue during scoring. */
+			ERROR
+		}
 
-		/** Rule identifier, or null for non-rule diagnostics. */
+		/** Rule identifier, or null for non-rule diagnostics.
+		 * @return rule ID string, or null */
 		String getRuleId();
-		/** Category key, or null for global diagnostics. */
+		/** Category key, or null for global diagnostics.
+		 * @return category key string, or null */
 		String getCategory();
+		/** Severity level of this diagnostic.
+		 * @return diagnostic level */
 		Level getLevel();
+		/** Human-readable diagnostic message.
+		 * @return message string */
 		String getMessage();
-		/** 1-based YAML source line, -1 if unknown. */
+		/** 1-based YAML source line, -1 if unknown.
+		 * @return line number */
 		int getLine();
-		/** 1-based YAML source column, -1 if unknown. */
+		/** 1-based YAML source column, -1 if unknown.
+		 * @return column number */
 		int getColumn();
 	}
 
@@ -106,7 +157,8 @@ public interface IRiskScore {
 		 * @return Score category enum value, or null
 		 */
 		ScoreCategory getCategory();
-		/** Category sub-score (0-100), computed as average of matched rule scores. */
+		/** Category sub-score (0-100), computed as average of matched rule scores.
+		 * @return category score */
 		int getScore();
 		/**
 		 * Risk level for this category based on its score.
@@ -163,9 +215,11 @@ public interface IRiskScore {
 		 * @return Description string
 		 */
 		String getDescription();
-		/** Normalized rule score (0.0-1.0). */
+		/** Normalized rule score (0.0-1.0).
+		 * @return score value between 0.0 and 1.0 */
 		double getScore();
-		/** Severity derived from the rule score via severity_mapping. */
+		/** Severity derived from the rule score via severity_mapping.
+		 * @return severity string */
 		String getSeverity();
 		/**
 		 * Whether this deduction is inconclusive (data was unavailable to confirm

@@ -104,8 +104,8 @@ class MutableSession implements ISession {
 	}
 
 	/**
-	 * Get the TLS server fingerprint for this session.
-	 * @return 62-character TLS fingerprint, or null if not computed
+	 * Get the TLS probe fingerprint for this session.
+	 * @return 30-character TLS probe fingerprint, or null if not computed
 	 */
 	public String getTlsFingerprint() {
 		return tlsFingerprint;

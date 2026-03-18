@@ -2,7 +2,11 @@ package com.mps.deepviolet.util;
 
 import java.io.File;
 
+/** Utility methods for DeepViolet file and directory operations. */
 public class FileUtils {
+
+	/** Creates a FileUtils instance. */
+	public FileUtils() {}
 
 	/**
 	 * Get the users DeepViolet working directory. For storing completed

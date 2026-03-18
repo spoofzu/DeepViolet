@@ -14,12 +14,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.net.ssl.SSLHandshakeException;
 
 import com.mps.deepviolet.api.ai.AiAnalysisException;
 import com.mps.deepviolet.api.ai.AiConfig;
 import com.mps.deepviolet.api.ai.AiAnalysisService;
+import com.mps.deepviolet.api.tls.NamedGroup;
 import com.mps.deepviolet.api.tls.TlsMetadata;
 import com.mps.deepviolet.api.tls.TlsSocket;
 import com.mps.deepviolet.api.fingerprint.TlsServerFingerprint;
@@ -57,6 +59,9 @@ class DeepVioletEngine implements IEngine {
 	private String tlsFingerprint;
 	private IDnsStatus dnsStatus;
 	private Boolean fallbackScsvSupported;
+	private java.util.List<Integer> pqSupportedGroups;
+	/** Cached PQ preference probe result: null=not probed, -1=inconclusive. */
+	private Integer pqPreferredGroup;
 	
 	/**
 	 * Construct engine with default (no background task).
@@ -417,6 +422,71 @@ class DeepVioletEngine implements IEngine {
 		return fallbackScsvSupported;
 	}
 
+	private java.util.List<Integer> ensurePqProbed() throws DeepVioletException {
+		if (pqSupportedGroups == null) {
+			try {
+				int port = url.getPort() > 0 ? url.getPort() : url.getDefaultPort();
+				pqSupportedGroups = TlsSocket.testPqSupport(url.getHost(), port);
+			} catch (Exception e) {
+				logger.warn("PQ key exchange test failed: " + e.getMessage());
+			}
+		}
+		return pqSupportedGroups;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.mps.deepviolet.api.IEngine#getPqKeyExchangeSupported()
+	 */
+	public Boolean getPqKeyExchangeSupported() throws DeepVioletException {
+		java.util.List<Integer> groups = ensurePqProbed();
+		if (groups == null) return null;
+		return !groups.isEmpty();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.mps.deepviolet.api.IEngine#getPqKeyExchangeGroups()
+	 */
+	public java.util.List<String> getPqKeyExchangeGroups() throws DeepVioletException {
+		java.util.List<Integer> groups = ensurePqProbed();
+		if (groups == null) return null;
+		return groups.stream()
+				.map(NamedGroup::getName)
+				.collect(java.util.stream.Collectors.toList());
+	}
+
+	private static final int PQ_PREF_INCONCLUSIVE = -1;
+
+	private void ensurePqPreferenceProbed() {
+		if (pqPreferredGroup == null) {
+			try {
+				int port = url.getPort() > 0 ? url.getPort() : url.getDefaultPort();
+				Integer result = TlsSocket.testPqPreference(url.getHost(), port);
+				pqPreferredGroup = (result != null) ? result : PQ_PREF_INCONCLUSIVE;
+			} catch (Exception e) {
+				logger.warn("PQ preference probe failed: " + e.getMessage());
+				pqPreferredGroup = PQ_PREF_INCONCLUSIVE;
+			}
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see com.mps.deepviolet.api.IEngine#getPqKeyExchangePreferred()
+	 */
+	public Boolean getPqKeyExchangePreferred() throws DeepVioletException {
+		ensurePqPreferenceProbed();
+		if (pqPreferredGroup == PQ_PREF_INCONCLUSIVE) return null;
+		return NamedGroup.isPostQuantum(pqPreferredGroup);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.mps.deepviolet.api.IEngine#getPqPreferredGroup()
+	 */
+	public String getPqPreferredGroup() throws DeepVioletException {
+		ensurePqPreferenceProbed();
+		if (pqPreferredGroup == PQ_PREF_INCONCLUSIVE) return null;
+		return NamedGroup.getName(pqPreferredGroup);
+	}
+
 	/* (non-Javadoc)
 	 * @see com.mps.deepviolet.api.IEngine#getDnsStatus()
 	 */
@@ -488,12 +558,19 @@ class DeepVioletEngine implements IEngine {
 	 * @see com.mps.deepviolet.api.IEngine#getRiskScore()
 	 */
 	public IRiskScore getRiskScore() throws DeepVioletException {
+		return getRiskScore(Set.of());
+	}
+
+	/* (non-Javadoc)
+	 * @see com.mps.deepviolet.api.IEngine#getRiskScore(Set)
+	 */
+	public IRiskScore getRiskScore(Set<ScanSection> failedSections) throws DeepVioletException {
 		try {
 			RulePolicy rulePolicy = RulePolicyLoader.tryLoad();
 			if (rulePolicy == null) {
 				throw new IllegalStateException("No YAML rules found on classpath or via system property dv.scoring.rules");
 			}
-			RiskScorer scorer = new RiskScorer(this, rulePolicy);
+			RiskScorer scorer = new RiskScorer(this, rulePolicy, failedSections);
 			return scorer.computeScore();
 		} catch (Exception e) {
 			String msg = "Problem computing risk score. err=" + e.getMessage();
@@ -677,7 +754,7 @@ class DeepVioletEngine implements IEngine {
 		try {
 			String fingerprint = getTlsFingerprint();
 			if (fingerprint != null) {
-				sb.append("[TLS Fingerprint]\n");
+				sb.append("[TLS Probe Fingerprint]\n");
 				sb.append("Fingerprint=").append(fingerprint).append("\n");
 				sb.append("\n");
 			}

@@ -37,6 +37,9 @@ public class TlsMetadata {
     // TLS extensions from ServerHello
     private List<TlsExtension> serverExtensions;
 
+    /** Create metadata for a host.
+     *  @param host target hostname
+     *  @param port target port */
     public TlsMetadata(String host, int port) {
         this.host = host;
         this.port = port;
@@ -84,38 +87,56 @@ public class TlsMetadata {
 
     // ==================== Getters ====================
 
+    /** Returns the target hostname.
+     *  @return hostname */
     public String getHost() {
         return host;
     }
 
+    /** Returns the target port.
+     *  @return port number */
     public int getPort() {
         return port;
     }
 
+    /** Returns the parsed ServerHello.
+     *  @return ServerHello, or null */
     public ServerHello getServerHello() {
         return serverHello;
     }
 
+    /** Returns the parsed ServerKeyExchange.
+     *  @return ServerKeyExchange, or null */
     public ServerKeyExchange getServerKeyExchange() {
         return serverKeyExchange;
     }
 
+    /** Returns the parsed Certificate message.
+     *  @return CertificateMessage, or null */
     public CertificateMessage getCertificateMessage() {
         return certificateMessage;
     }
 
+    /** Returns the stapled OCSP response bytes.
+     *  @return copy of OCSP response, or null */
     public byte[] getStapledOcspResponse() {
         return stapledOcspResponse != null ? stapledOcspResponse.clone() : null;
     }
 
+    /** Returns the handshake duration in milliseconds.
+     *  @return handshake time */
     public long getHandshakeTimeMs() {
         return handshakeTimeMs;
     }
 
+    /** Returns whether the connection succeeded.
+     *  @return true if connection succeeded */
     public boolean isConnectionSucceeded() {
         return connectionSucceeded;
     }
 
+    /** Returns the failure reason, or null on success.
+     *  @return failure reason */
     public String getFailureReason() {
         return failureReason;
     }
@@ -124,6 +145,7 @@ public class TlsMetadata {
 
     /**
      * Get negotiated TLS version.
+     * @return negotiated version code, or -1
      */
     public int getNegotiatedVersion() {
         return serverHello != null ? serverHello.getNegotiatedVersion() : -1;
@@ -131,6 +153,7 @@ public class TlsMetadata {
 
     /**
      * Get negotiated TLS version as a string.
+     * @return version string
      */
     public String getVersionString() {
         return serverHello != null ? serverHello.getVersionString() : "Unknown";
@@ -138,6 +161,7 @@ public class TlsMetadata {
 
     /**
      * Get negotiated cipher suite.
+     * @return cipher suite code, or -1
      */
     public int getCipherSuite() {
         return serverHello != null ? serverHello.getCipherSuite() : -1;
@@ -145,6 +169,7 @@ public class TlsMetadata {
 
     /**
      * Check if TLS 1.3 was negotiated.
+     * @return true if TLS 1.3
      */
     public boolean isTLS13() {
         return serverHello != null && serverHello.isTLS13();
@@ -152,6 +177,7 @@ public class TlsMetadata {
 
     /**
      * Get server extensions from ServerHello.
+     * @return unmodifiable list of extensions
      */
     public List<TlsExtension> getServerExtensions() {
         return Collections.unmodifiableList(serverExtensions);
@@ -159,6 +185,7 @@ public class TlsMetadata {
 
     /**
      * Get the certificate chain.
+     * @return certificate chain list
      */
     public List<X509Certificate> getCertificateChain() {
         if (certificateMessage != null) {
@@ -169,6 +196,7 @@ public class TlsMetadata {
 
     /**
      * Get the end-entity (leaf) certificate.
+     * @return leaf certificate, or null
      */
     public X509Certificate getEndEntityCertificate() {
         if (certificateMessage != null) {
@@ -184,6 +212,7 @@ public class TlsMetadata {
      * 1. TLS extension in ServerHello (type 0x0012)
      * 2. X.509 extension in certificates
      * 3. OCSP stapled response
+     * @return list of all SCT byte arrays
      */
     public List<byte[]> getAllSCTs() {
         List<byte[]> allSCTs = new ArrayList<>();
@@ -211,6 +240,7 @@ public class TlsMetadata {
 
     /**
      * Get SCTs from TLS ServerHello extension.
+     * @return SCT bytes, or null
      */
     public byte[] getTlsExtensionSCT() {
         if (serverHello != null) {
@@ -221,6 +251,7 @@ public class TlsMetadata {
 
     /**
      * Get SCTs embedded in X.509 certificates.
+     * @return list of embedded SCT byte arrays
      */
     public List<byte[]> getCertificateSCTs() {
         if (certificateMessage != null) {
@@ -231,6 +262,7 @@ public class TlsMetadata {
 
     /**
      * Get SCTs from OCSP stapled response.
+     * @return list of OCSP SCT byte arrays
      */
     public List<byte[]> getOcspSCTs() {
         List<byte[]> result = new ArrayList<>();
@@ -242,6 +274,7 @@ public class TlsMetadata {
 
     /**
      * Check if any SCTs were found.
+     * @return true if SCTs are present
      */
     public boolean hasSCTs() {
         return !getAllSCTs().isEmpty();
@@ -262,22 +295,11 @@ public class TlsMetadata {
         return serverHello.getFingerprintCode();
     }
 
-    /**
-     * Get the raw extensions bytes for fingerprint hashing.
-     *
-     * @return Raw extension bytes from ServerHello
-     */
-    public byte[] getFingerprintExtensions() {
-        if (serverHello == null) {
-            return new byte[0];
-        }
-        return serverHello.getRawExtensions();
-    }
-
     // ==================== OCSP Stapling ====================
 
     /**
      * Check if OCSP stapling response was received.
+     * @return true if a stapled OCSP response is present
      */
     public boolean hasStapledOcspResponse() {
         return stapledOcspResponse != null && stapledOcspResponse.length > 0;

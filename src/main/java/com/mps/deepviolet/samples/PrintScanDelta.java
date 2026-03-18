@@ -26,6 +26,10 @@ import com.mps.deepviolet.util.CryptoUtils;
  */
 public class PrintScanDelta {
 
+	/** Compares two saved scan files and prints differences.
+	 *  @param baselineFile the baseline .dvscan file
+	 *  @param currentFile the current .dvscan file
+	 *  @throws Exception on I/O or decryption errors */
 	public PrintScanDelta(File baselineFile, File currentFile) throws Exception {
 
 		CryptoUtils.ensureEncryptionSeed();
@@ -166,6 +170,8 @@ public class PrintScanDelta {
 		return null;
 	}
 
+	/** Entry point.
+	 *  @param args optional baseline and current .dvscan file paths */
 	public static final void main(String[] args) {
 		try {
 			File baselineFile;

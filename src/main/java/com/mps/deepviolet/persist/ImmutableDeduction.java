@@ -15,6 +15,15 @@ public class ImmutableDeduction implements IRiskScore.IDeduction {
 	private final String severity;
 	private final boolean inconclusive;
 
+	/**
+	 * Creates an immutable deduction from deserialized fields.
+	 *
+	 * @param ruleId       the rule identifier
+	 * @param description  the human-readable description
+	 * @param score        the points deducted
+	 * @param severity     the severity label
+	 * @param inconclusive {@code true} if the deduction could not be fully evaluated
+	 */
 	public ImmutableDeduction(String ruleId, String description,
 			double score, String severity, boolean inconclusive) {
 		this.ruleId = ruleId;

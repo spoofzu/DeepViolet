@@ -52,6 +52,11 @@ public class TlsSocket implements Closeable {
     private static final int DEFAULT_TIMEOUT_MS = 10000;
     private static final int DEFAULT_CONNECT_TIMEOUT_MS = 5000;
 
+    /** Total time budget for PQ probe retries (milliseconds). */
+    private static final long PQ_RETRY_BUDGET_MS = 10_000;
+    /** Delay between PQ probe retry attempts (milliseconds). */
+    private static final long PQ_RETRY_DELAY_MS = 2_000;
+
     private final String host;
     private final int port;
     private Socket socket;
@@ -65,6 +70,8 @@ public class TlsSocket implements Closeable {
 
     /**
      * Create a TlsSocket for the given host and port.
+     * @param host target hostname
+     * @param port target port
      */
     public TlsSocket(String host, int port) {
         this.host = host;
@@ -74,6 +81,7 @@ public class TlsSocket implements Closeable {
 
     /**
      * Create a TlsSocket from an InetSocketAddress.
+     * @param address socket address
      */
     public TlsSocket(InetSocketAddress address) {
         this(address.getHostName(), address.getPort());
@@ -83,6 +91,7 @@ public class TlsSocket implements Closeable {
 
     /**
      * Set the ClientHello configuration for the handshake.
+     * @param config client hello configuration
      */
     public void setClientHelloConfig(ClientHelloConfig config) {
         this.clientHelloConfig = config != null ? config : ClientHelloConfig.defaultConfig();
@@ -90,6 +99,7 @@ public class TlsSocket implements Closeable {
 
     /**
      * Set connection timeout in milliseconds.
+     * @param timeout timeout in milliseconds
      */
     public void setConnectTimeoutMs(int timeout) {
         this.connectTimeoutMs = timeout;
@@ -97,6 +107,7 @@ public class TlsSocket implements Closeable {
 
     /**
      * Set read timeout in milliseconds.
+     * @param timeout timeout in milliseconds
      */
     public void setReadTimeoutMs(int timeout) {
         this.readTimeoutMs = timeout;
@@ -457,6 +468,7 @@ public class TlsSocket implements Closeable {
 
     /**
      * Get the metadata from the last handshake.
+     * @return TLS metadata, or null
      */
     public TlsMetadata getMetadata() {
         return metadata;
@@ -464,6 +476,7 @@ public class TlsSocket implements Closeable {
 
     /**
      * Get the ServerHello from the last handshake.
+     * @return ServerHello, or null
      */
     public ServerHello getServerHello() {
         return metadata != null ? metadata.getServerHello() : null;
@@ -471,6 +484,7 @@ public class TlsSocket implements Closeable {
 
     /**
      * Get server extensions from the last handshake.
+     * @return list of extensions, or null
      */
     public List<TlsExtension> getServerExtensions() {
         return metadata != null ? metadata.getServerExtensions() : null;
@@ -478,6 +492,7 @@ public class TlsSocket implements Closeable {
 
     /**
      * Get the certificate message from the last handshake.
+     * @return CertificateMessage, or null
      */
     public CertificateMessage getCertificateMessage() {
         return metadata != null ? metadata.getCertificateMessage() : null;
@@ -485,6 +500,7 @@ public class TlsSocket implements Closeable {
 
     /**
      * Get the stapled OCSP response from the last handshake.
+     * @return OCSP response bytes, or null
      */
     public byte[] getStapledOcspResponse() {
         return metadata != null ? metadata.getStapledOcspResponse() : null;
@@ -492,6 +508,7 @@ public class TlsSocket implements Closeable {
 
     /**
      * Get all SCTs from all sources.
+     * @return list of SCT byte arrays, or null
      */
     public List<byte[]> getSCTs() {
         return metadata != null ? metadata.getAllSCTs() : null;
@@ -501,6 +518,8 @@ public class TlsSocket implements Closeable {
 
     /**
      * Get the receive buffer size.
+     * @return buffer size, or -1 if not connected
+     * @throws IOException on socket errors
      */
     public int getReceiveBufferSize() throws IOException {
         return socket != null ? socket.getReceiveBufferSize() : -1;
@@ -508,6 +527,8 @@ public class TlsSocket implements Closeable {
 
     /**
      * Get TCP keep-alive setting.
+     * @return true if keep-alive is enabled
+     * @throws IOException on socket errors
      */
     public boolean getKeepAlive() throws IOException {
         return socket != null && socket.getKeepAlive();
@@ -515,6 +536,7 @@ public class TlsSocket implements Closeable {
 
     /**
      * Check if socket is connected.
+     * @return true if connected
      */
     public boolean isConnected() {
         return socket != null && socket.isConnected();
@@ -522,6 +544,7 @@ public class TlsSocket implements Closeable {
 
     /**
      * Check if socket is closed.
+     * @return true if closed
      */
     public boolean isClosed() {
         return socket == null || socket.isClosed();
@@ -536,7 +559,7 @@ public class TlsSocket implements Closeable {
      *
      * @param host Target hostname
      * @param port Target port
-     * @return 62-character TLS fingerprint
+     * @return 30-character TLS probe fingerprint
      * @see com.mps.deepviolet.api.fingerprint.TlsServerFingerprint
      */
     public static String computeTlsFingerprint(String host, int port) {
@@ -547,7 +570,7 @@ public class TlsSocket implements Closeable {
      * Compute TLS server fingerprint for a host with default HTTPS port.
      *
      * @param host Target hostname
-     * @return 62-character TLS fingerprint
+     * @return 30-character TLS probe fingerprint
      */
     public static String computeTlsFingerprint(String host) {
         return computeTlsFingerprint(host, 443);
@@ -557,6 +580,11 @@ public class TlsSocket implements Closeable {
 
     /**
      * Quick method to connect and get metadata.
+     * @param host target hostname
+     * @param port target port
+     * @return TLS metadata from the handshake
+     * @throws TlsException on TLS errors
+     * @throws IOException on I/O errors
      */
     public static TlsMetadata connect(String host, int port) throws TlsException, IOException {
         try (TlsSocket socket = new TlsSocket(host, port)) {
@@ -566,6 +594,12 @@ public class TlsSocket implements Closeable {
 
     /**
      * Quick method to connect with custom configuration.
+     * @param host target hostname
+     * @param port target port
+     * @param config client hello configuration
+     * @return TLS metadata from the handshake
+     * @throws TlsException on TLS errors
+     * @throws IOException on I/O errors
      */
     public static TlsMetadata connect(String host, int port, ClientHelloConfig config)
             throws TlsException, IOException {
@@ -577,6 +611,11 @@ public class TlsSocket implements Closeable {
 
     /**
      * Quick method to get certificate chain.
+     * @param host target hostname
+     * @param port target port
+     * @return certificate chain list
+     * @throws TlsException on TLS errors
+     * @throws IOException on I/O errors
      */
     public static List<X509Certificate> getCertificateChain(String host, int port)
             throws TlsException, IOException {
@@ -631,6 +670,240 @@ public class TlsSocket implements Closeable {
             return null;
         } catch (Exception e) {
             return null; // Inconclusive
+        }
+    }
+
+    // ==================== Post-Quantum Probe ====================
+
+    /**
+     * Test which post-quantum key exchange groups the server supports.
+     *
+     * <p>Probes each known PQ group individually by sending a TLS 1.3
+     * ClientHello that advertises one PQ group in {@code supported_groups}
+     * with an empty {@code key_share} list.  The empty key_share forces
+     * the server to respond with a HelloRetryRequest naming its preferred
+     * group.  If the HRR names the PQ group, that group is supported.</p>
+     *
+     * <p>On inconclusive results (network error, timeout) the probe is
+     * retried up to the {@link #PQ_RETRY_BUDGET_MS} time budget before
+     * giving up.</p>
+     *
+     * @param host Target hostname
+     * @param port Target port
+     * @return list of supported PQ group codes (may be empty), or null if
+     *         the test was inconclusive (e.g. non-TLS 1.3 server)
+     */
+    public static java.util.List<Integer> testPqSupport(String host, int port) {
+        long deadline = System.currentTimeMillis() + PQ_RETRY_BUDGET_MS;
+        java.util.List<Integer> result = null;
+        int attempt = 0;
+
+        while (true) {
+            attempt++;
+            result = testPqSupportOnce(host, port);
+            if (result != null) return result;
+
+            long remaining = deadline - System.currentTimeMillis();
+            if (remaining <= PQ_RETRY_DELAY_MS) break;
+
+            logger.debug("PQ support probe inconclusive (attempt {}), retrying in {}ms",
+                    attempt, PQ_RETRY_DELAY_MS);
+            try {
+                Thread.sleep(PQ_RETRY_DELAY_MS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+
+        logger.info("PQ support probe inconclusive after {} attempt(s) for {}:{}",
+                attempt, host, port);
+        return null;
+    }
+
+    /**
+     * Single attempt at testing PQ group support (no retries).
+     */
+    private static java.util.List<Integer> testPqSupportOnce(String host, int port) {
+        java.util.List<Integer> supported = new java.util.ArrayList<>();
+        boolean anyProbeRan = false;
+
+        for (int pqGroup : NamedGroup.PQ_GROUPS) {
+            Boolean result = testPqGroupSupport(host, port, pqGroup);
+            if (result == null && !anyProbeRan) {
+                // First probe inconclusive (non-TLS 1.3, network error) — bail out
+                return null;
+            }
+            anyProbeRan = true;
+            if (Boolean.TRUE.equals(result)) {
+                supported.add(pqGroup);
+            }
+        }
+        return supported;
+    }
+
+    /**
+     * Test whether the server supports a single post-quantum key exchange group.
+     *
+     * @param host     Target hostname
+     * @param port     Target port
+     * @param pqGroup  The PQ named-group code to test
+     * @return true if supported, false if not, null if inconclusive
+     */
+    static Boolean testPqGroupSupport(String host, int port, int pqGroup) {
+        try {
+            ClientHelloConfig config = ClientHelloConfig.pqProbe(pqGroup);
+
+            try (TlsSocket socket = new TlsSocket(host, port)) {
+                socket.setClientHelloConfig(config);
+                socket.setConnectTimeoutMs(5000);
+                socket.setReadTimeoutMs(5000);
+
+                // Connect and send ClientHello manually (performHandshake does
+                // too much work; we just need the first ServerHello/HRR)
+                socket.socket = new java.net.Socket();
+                socket.socket.connect(new java.net.InetSocketAddress(host, port), socket.connectTimeoutMs);
+                socket.socket.setSoTimeout(socket.readTimeoutMs);
+
+                socket.recordLayer = new TlsRecordLayer(
+                        socket.socket.getInputStream(),
+                        socket.socket.getOutputStream());
+
+                ClientHello clientHello = new ClientHello(config, host);
+                byte[] clientHelloBytes = clientHello.build();
+
+                socket.recordLayer.setOutputType(TlsRecordLayer.HANDSHAKE);
+                socket.recordLayer.setOutputVersion(clientHello.getRecordVersion());
+                socket.recordLayer.write(clientHelloBytes);
+                socket.recordLayer.flushOutput();
+
+                // Read the response
+                TlsRecordLayer.HandshakeMessage msg = socket.recordLayer.readHandshakeMessage();
+                if (msg.getType() != TlsRecordLayer.HANDSHAKE_SERVER_HELLO) {
+                    return null; // Unexpected response
+                }
+
+                ServerHello serverHello = new ServerHello(msg.getData(), msg.getRecordVersion());
+
+                // Non-TLS 1.3 server — PQ not applicable
+                if (!serverHello.isTLS13()) {
+                    return null;
+                }
+
+                int selectedGroup = serverHello.getKeyShareGroup();
+
+                // Server selected the PQ group (via HRR or directly)
+                if (selectedGroup == pqGroup) {
+                    return true;
+                }
+
+                // Server selected a different group (shouldn't happen with
+                // a single-group offer, but handle defensively)
+                return false;
+            }
+        } catch (TlsException e) {
+            // TLS alert (e.g. handshake_failure) — server is TLS 1.3
+            // but does not support this PQ group
+            return false;
+        } catch (Exception e) {
+            // Network error, timeout, etc. — inconclusive
+            return null;
+        }
+    }
+
+    // ==================== Post-Quantum Preference Probe ====================
+
+    /**
+     * Test which key exchange group the server prefers when offered both
+     * PQ hybrid and classical groups.
+     *
+     * <p>Sends a TLS 1.3 ClientHello with PQ hybrid groups listed before
+     * classical groups and an empty {@code key_share} (forcing HRR).
+     * The server's HelloRetryRequest reveals its preferred group.</p>
+     *
+     * <p>On inconclusive results the probe is retried up to the
+     * {@link #PQ_RETRY_BUDGET_MS} time budget before giving up.</p>
+     *
+     * @param host Target hostname
+     * @param port Target port
+     * @return the selected group code (IANA named-group), or null if
+     *         inconclusive (non-TLS 1.3, network error)
+     */
+    public static Integer testPqPreference(String host, int port) {
+        long deadline = System.currentTimeMillis() + PQ_RETRY_BUDGET_MS;
+        Integer result = null;
+        int attempt = 0;
+
+        while (true) {
+            attempt++;
+            result = testPqPreferenceOnce(host, port);
+            if (result != null) return result;
+
+            long remaining = deadline - System.currentTimeMillis();
+            if (remaining <= PQ_RETRY_DELAY_MS) break;
+
+            logger.debug("PQ preference probe inconclusive (attempt {}), retrying in {}ms",
+                    attempt, PQ_RETRY_DELAY_MS);
+            try {
+                Thread.sleep(PQ_RETRY_DELAY_MS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+
+        logger.info("PQ preference probe inconclusive after {} attempt(s) for {}:{}",
+                attempt, host, port);
+        return null;
+    }
+
+    /**
+     * Single attempt at testing PQ preference (no retries).
+     */
+    private static Integer testPqPreferenceOnce(String host, int port) {
+        try {
+            ClientHelloConfig config = ClientHelloConfig.pqPreferenceProbe();
+
+            try (TlsSocket socket = new TlsSocket(host, port)) {
+                socket.setClientHelloConfig(config);
+                socket.setConnectTimeoutMs(5000);
+                socket.setReadTimeoutMs(5000);
+
+                socket.socket = new java.net.Socket();
+                socket.socket.connect(new java.net.InetSocketAddress(host, port), socket.connectTimeoutMs);
+                socket.socket.setSoTimeout(socket.readTimeoutMs);
+
+                socket.recordLayer = new TlsRecordLayer(
+                        socket.socket.getInputStream(),
+                        socket.socket.getOutputStream());
+
+                ClientHello clientHello = new ClientHello(config, host);
+                byte[] clientHelloBytes = clientHello.build();
+
+                socket.recordLayer.setOutputType(TlsRecordLayer.HANDSHAKE);
+                socket.recordLayer.setOutputVersion(clientHello.getRecordVersion());
+                socket.recordLayer.write(clientHelloBytes);
+                socket.recordLayer.flushOutput();
+
+                TlsRecordLayer.HandshakeMessage msg = socket.recordLayer.readHandshakeMessage();
+                if (msg.getType() != TlsRecordLayer.HANDSHAKE_SERVER_HELLO) {
+                    return null;
+                }
+
+                ServerHello serverHello = new ServerHello(msg.getData(), msg.getRecordVersion());
+
+                if (!serverHello.isTLS13()) {
+                    return null;
+                }
+
+                int selectedGroup = serverHello.getKeyShareGroup();
+                return selectedGroup >= 0 ? selectedGroup : null;
+            }
+        } catch (TlsException e) {
+            // TLS alert — server couldn't negotiate with our offer
+            return null;
+        } catch (Exception e) {
+            return null;
         }
     }
 

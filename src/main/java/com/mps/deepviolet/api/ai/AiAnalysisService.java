@@ -31,6 +31,9 @@ import org.slf4j.LoggerFactory;
  */
 public class AiAnalysisService implements IAiAnalysisService {
 
+	/** Creates a new AI analysis service instance. */
+	public AiAnalysisService() {}
+
 	private static final Logger logger = LoggerFactory
 			.getLogger("com.mps.deepviolet.api.ai.AiAnalysisService");
 
@@ -44,22 +47,28 @@ public class AiAnalysisService implements IAiAnalysisService {
 			.connectTimeout(Duration.ofSeconds(30))
 			.build();
 
+	/** Default Anthropic model identifiers. */
 	public static final String[] ANTHROPIC_MODELS = {
 		"claude-sonnet-4-5-20250929", "claude-haiku-4-5-20251001"
 	};
 
+	/** Default OpenAI model identifiers. */
 	public static final String[] OPENAI_MODELS = {
 		"gpt-4o", "gpt-4o-mini"
 	};
 
+	/** Default Ollama model identifiers. */
 	public static final String[] OLLAMA_MODELS = {
 		"llama3.2:latest", "mistral:latest", "gemma2:latest"
 	};
 
+	/** Default Ollama API endpoint URL. */
 	public static final String DEFAULT_OLLAMA_ENDPOINT = "http://localhost:11434";
 
+	/** Default sampling temperature for AI requests. */
 	public static final double DEFAULT_TEMPERATURE = 0.3;
 
+	/** Default system prompt for single-shot scan analysis. */
 	public static final String DEFAULT_SYSTEM_PROMPT = """
 			You are a TLS/SSL security expert analyzing a DeepViolet scan report. \
 			The risk assessment lists findings identified by stable rule IDs \
@@ -105,6 +114,7 @@ public class AiAnalysisService implements IAiAnalysisService {
 			- Keep the entire response under 1200 words.
 			- Do not add sections beyond those defined above.""";
 
+	/** Default system prompt for multi-turn chat conversations. */
 	public static final String DEFAULT_CHAT_SYSTEM_PROMPT = """
 			You answer TLS/SSL questions about DeepViolet scan results. \
 			HARD LIMIT: 5 sentences maximum. Never exceed 5 sentences. \

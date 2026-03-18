@@ -29,6 +29,9 @@ import com.mps.deepviolet.api.IRiskScore.RiskLevel;
  */
 public class RulePolicyLoader {
 
+	/** Default constructor. */
+	public RulePolicyLoader() {}
+
 	private static final Logger logger = LoggerFactory.getLogger(RulePolicyLoader.class);
 	private static final String DEFAULT_RESOURCE = "risk-scoring-rules.yaml";
 	private static final String SYSTEM_PROPERTY = "dv.scoring.rules";
@@ -40,6 +43,7 @@ public class RulePolicyLoader {
 	 *   <li>Classpath {@code risk-scoring-rules.yaml} → load from bundled resource</li>
 	 *   <li>Neither present → return null (fall back to hardcoded scorers)</li>
 	 * </ol>
+	 * @return loaded rule policy, or null if no YAML rules are available
 	 */
 	public static RulePolicy tryLoad() {
 		String externalPath = System.getProperty(SYSTEM_PROPERTY);
@@ -61,6 +65,8 @@ public class RulePolicyLoader {
 
 	/**
 	 * Load a rule policy from a file path.
+	 * @param path file system path
+	 * @return loaded rule policy
 	 */
 	public static RulePolicy loadFromFile(String path) {
 		try (InputStream is = Files.newInputStream(Path.of(path))) {
@@ -72,6 +78,8 @@ public class RulePolicyLoader {
 
 	/**
 	 * Load a rule policy from an input stream (source file unknown).
+	 * @param is input stream
+	 * @return loaded rule policy
 	 */
 	public static RulePolicy loadFromStream(InputStream is) {
 		return loadFromStream(is, null);
@@ -79,6 +87,9 @@ public class RulePolicyLoader {
 
 	/**
 	 * Load a rule policy from an input stream with a known source filename.
+	 * @param is input stream
+	 * @param sourceFile source file name for diagnostics
+	 * @return loaded rule policy
 	 */
 	@SuppressWarnings("unchecked")
 	public static RulePolicy loadFromStream(InputStream is, String sourceFile) {

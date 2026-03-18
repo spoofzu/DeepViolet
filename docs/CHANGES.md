@@ -3,11 +3,51 @@
 The upstream repository (github.com/spoofzu/DeepViolet) last received meaningful updates in **July 2019**. The local repository represents a major modernization effort.
 
 **Upstream:** v5.1.16 / 5.1.17-SNAPSHOT, Java 8, Bouncy Castle dependency, basic TLS introspection, no TLS 1.3.
-**Current:** 6.0.0 — Java 21+, Bouncy Castle removed, TLS 1.3 support, comprehensive TLS security analysis, AI-powered scan analysis (Anthropic/OpenAI/Ollama), scan persistence with envelope encryption (.dvscan files). See [README](../README.md) for Maven coordinates.
+**Current:** 6.1.0 — Java 21+, Bouncy Castle removed, TLS 1.3 support, comprehensive TLS security analysis, AI-powered scan analysis (Anthropic/OpenAI/Ollama), scan persistence with envelope encryption (.dvscan files), post-quantum key exchange analysis, section-level retry with exponential backoff, failed-section-aware risk scoring, offline re-scoring. See [README](../README.md) for Maven coordinates.
 
 ---
 
-## Features
+## 6.1.0
+
+### 20. Post-Quantum Key Exchange Analysis (new)
+- Detect server support for ML-KEM hybrid and pure post-quantum key exchange groups
+- New `NamedGroup` class with constants for all IANA TLS Named Groups including X25519MLKEM768, SecP256r1MLKEM768, SecP384r1MLKEM1024, MLKEM768, MLKEM1024
+- New `IEngine` methods: `getPqKeyExchangeSupported()`, `getPqKeyExchangeGroups()`, `getPqKeyExchangePreferred()`, `getPqPreferredGroup()`
+- PQ preference detection via empty key_share ClientHello probe triggering HelloRetryRequest to reveal server's preferred group
+- New `ClientHelloConfig.emptyKeyShare` flag for sending key_share with empty client_shares list
+
+### 21. Section-Level Retry with Exponential Backoff (new)
+- New `RetryPolicy` class with configurable exponential backoff and jitter for transient `IOException` failures
+- Builder pattern: max retries, initial/max delays, and wall-clock budget
+- Integrated with `ScanConfig` — new fields: `maxRetries`, `initialRetryDelayMs`, `maxRetryDelayMs`, `retryBudgetMs` (defaults: 3 retries, 500ms initial, 4s max, 15s budget)
+- `ScanConfig.toRetryPolicy()` convenience method
+- Non-critical sections (CERTIFICATE_RETRIEVAL, TLS_FINGERPRINT, DNS_SECURITY, REVOCATION_CHECK) retry and fail gracefully; critical sections (SESSION_INIT, CIPHER_ENUMERATION) retry and abort host scan on failure
+- `BackgroundTask` cancellation respected during retry waits
+
+### 22. Failed-Section-Aware Risk Scoring (new)
+- New `IEngine.getRiskScore(Set<ScanSection>)` — compute risk score with knowledge of which scan sections failed after retries
+- Failed sections produce `inconclusive` deductions instead of false positives
+- 9 new scoring rules for failure-aware analysis: PQ key exchange (SYS-0001100), certificate retrieval failure (SYS-0001200), revocation check failure (SYS-0001300), DNS lookup failure (SYS-0001400), TLS fingerprint probe failure (SYS-0001500), weak PQ cipher (SYS-0021700), PQ not preferred (SYS-0030700), session PQ not supported (SYS-0050300), negotiated group PQ (SYS-0060700)
+- New `IScanResult.getFailedSections()` — returns sections that failed after retries
+- New `IScanListener.onSectionFailed(URL, ScanSection, int, Exception)` callback
+
+### 23. Offline Re-Scoring (new)
+- New `IEngine.buildRuleContext()` — capture all rule context properties for persistence
+- New `IEngine.getRiskScore(RuleContext)` and `getRiskScore(RuleContext, InputStream)` — re-score a saved context without reconnecting to the server
+- Rule context properties now include PQ key exchange fields: `session.pq_kex_supported`, `session.pq_kex_preferred`, `session.pq_kex_groups`, `session.pq_preferred_group`, `session.pq_kex_probe_failed`, `session.negotiated_group_pq`
+- Scan failure properties: `scan.certificate_retrieval_failed`, `scan.revocation_check_failed`, `scan.dns_security_failed`, `scan.tls_fingerprint_failed`
+
+### 24. Build & Infrastructure
+- Version bumped to 6.1.0
+- Removed deprecated `maven-javadoc-plugin` configuration from POM
+- CI simplified to Java 21 only (removed Java 24 matrix build)
+- Comprehensive javadoc added across all public API classes and interfaces
+
+---
+
+## 6.0.0
+
+### Features
 
 ### 1. TLS 1.3 Support (new)
 - Full TLS 1.3 protocol support — the upstream API predates widespread TLS 1.3 adoption and lacks any support for it
@@ -35,8 +75,8 @@ The upstream repository (github.com/spoofzu/DeepViolet) last received meaningful
 - New packages: `com.mps.deepviolet.api.scoring/` (1 class), `com.mps.deepviolet.api.scoring.rules/` (10 classes)
 
 ### 3. TLS Server Fingerprinting (new)
-- JARM-inspired technique: 10 specially crafted ClientHello probes → 62-character fingerprint
-- Characters 1–30: cipher+version response codes; characters 31–62: truncated SHA-256 of extensions
+- JARM-inspired technique: 10 specially crafted ClientHello probes → 30-character fingerprint
+- Characters 1–30: cipher+version response codes derived from server behavior
 - Identifies server configuration patterns for grouping, change detection, and threat hunting
 - New package: `com.mps.deepviolet.api.fingerprint/` (2 classes)
 

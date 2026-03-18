@@ -184,15 +184,6 @@ public class ServerHelloTest {
     }
 
     @Test
-    public void testExtensionsHash() throws TlsException {
-        ServerHello sh = new ServerHello(SERVER_HELLO_WITH_EXT, 0x0303);
-
-        byte[] hash = sh.getExtensionsHash();
-        assertNotNull(hash);
-        assertEquals(16, hash.length); // Truncated to 16 bytes
-    }
-
-    @Test
     public void testNoExtensionData() throws TlsException {
         ServerHello sh = new ServerHello(MINIMAL_SERVER_HELLO, 0x0303);
 
@@ -222,5 +213,84 @@ public class ServerHelloTest {
     public void testRecordVersion() throws TlsException {
         ServerHello sh = new ServerHello(MINIMAL_SERVER_HELLO, 0x0302);
         assertEquals(0x0302, sh.getRecordVersion());
+    }
+
+    // ==================== HRR / PQ tests ====================
+
+    /**
+     * Build a TLS 1.3 ServerHello (or HRR) byte array.
+     * @param random 32-byte server random (use HRR sentinel for HRR)
+     * @param keyShareGroup group code for key_share extension
+     */
+    private static byte[] buildTls13Hello(byte[] random, int keyShareGroup) {
+        // Build extensions: supported_versions (0x002b) + key_share (0x0033)
+        // supported_versions ext: type(2) + len(2) + version(2) = 6 bytes
+        // key_share ext:          type(2) + len(2) + group(2) = 6 bytes  (HRR format)
+        int extLen = 12;
+        byte[] buf = new byte[2 + 32 + 1 + 2 + 1 + 2 + extLen];
+        int ptr = 0;
+
+        // Legacy version 0x0303
+        buf[ptr++] = 0x03; buf[ptr++] = 0x03;
+        // Random
+        System.arraycopy(random, 0, buf, ptr, 32); ptr += 32;
+        // Session ID length 0
+        buf[ptr++] = 0x00;
+        // Cipher suite: TLS_AES_128_GCM_SHA256
+        buf[ptr++] = 0x13; buf[ptr++] = 0x01;
+        // Compression: none
+        buf[ptr++] = 0x00;
+        // Extensions total length
+        buf[ptr++] = (byte)((extLen >> 8) & 0xFF);
+        buf[ptr++] = (byte)(extLen & 0xFF);
+        // supported_versions extension
+        buf[ptr++] = 0x00; buf[ptr++] = 0x2b; // type
+        buf[ptr++] = 0x00; buf[ptr++] = 0x02; // length
+        buf[ptr++] = 0x03; buf[ptr++] = 0x04; // TLS 1.3
+        // key_share extension (HRR format: just 2-byte group)
+        buf[ptr++] = 0x00; buf[ptr++] = 0x33; // type
+        buf[ptr++] = 0x00; buf[ptr++] = 0x02; // length
+        buf[ptr++] = (byte)((keyShareGroup >> 8) & 0xFF);
+        buf[ptr++] = (byte)(keyShareGroup & 0xFF);
+
+        return buf;
+    }
+
+    @Test
+    public void testIsHelloRetryRequestTrue() throws TlsException {
+        byte[] data = buildTls13Hello(ServerHello.HELLO_RETRY_REQUEST_RANDOM, 0x001d);
+        ServerHello sh = new ServerHello(data, 0x0303);
+
+        assertTrue(sh.isHelloRetryRequest());
+        assertTrue(sh.isTLS13());
+    }
+
+    @Test
+    public void testIsHelloRetryRequestFalse() throws TlsException {
+        byte[] normalRandom = new byte[32]; // all zeros — not HRR sentinel
+        byte[] data = buildTls13Hello(normalRandom, 0x001d);
+        ServerHello sh = new ServerHello(data, 0x0303);
+
+        assertFalse(sh.isHelloRetryRequest());
+    }
+
+    @Test
+    public void testHrrWithPqGroup() throws TlsException {
+        byte[] data = buildTls13Hello(ServerHello.HELLO_RETRY_REQUEST_RANDOM, NamedGroup.X25519_MLKEM768);
+        ServerHello sh = new ServerHello(data, 0x0303);
+
+        assertTrue(sh.isHelloRetryRequest());
+        assertEquals(NamedGroup.X25519_MLKEM768, sh.getKeyShareGroup());
+        assertTrue(NamedGroup.isPostQuantum(sh.getKeyShareGroup()));
+    }
+
+    @Test
+    public void testHrrWithClassicalGroup() throws TlsException {
+        byte[] data = buildTls13Hello(ServerHello.HELLO_RETRY_REQUEST_RANDOM, NamedGroup.X25519);
+        ServerHello sh = new ServerHello(data, 0x0303);
+
+        assertTrue(sh.isHelloRetryRequest());
+        assertEquals(NamedGroup.X25519, sh.getKeyShareGroup());
+        assertFalse(NamedGroup.isPostQuantum(sh.getKeyShareGroup()));
     }
 }

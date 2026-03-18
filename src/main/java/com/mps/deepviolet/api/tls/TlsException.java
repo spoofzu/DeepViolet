@@ -14,14 +14,21 @@ public class TlsException extends Exception {
     /** Alert description from TLS alert message, if applicable */
     private int alertDescription = -1;
 
+    /** Create exception with message.
+     *  @param message detail message */
     public TlsException(String message) {
         super(message);
     }
 
+    /** Create exception with message and cause.
+     *  @param message detail message
+     *  @param cause the cause */
     public TlsException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /** Create exception wrapping a cause.
+     *  @param cause the cause */
     public TlsException(Throwable cause) {
         super(cause);
     }
@@ -49,18 +56,26 @@ public class TlsException extends Exception {
         this.alertDescription = alertDescription;
     }
 
+    /** Returns the TLS alert level, or -1 if not an alert.
+     *  @return alert level */
     public int getAlertLevel() {
         return alertLevel;
     }
 
+    /** Returns the TLS alert description code, or -1 if not an alert.
+     *  @return alert description */
     public int getAlertDescription() {
         return alertDescription;
     }
 
+    /** Returns whether this exception is from a TLS alert.
+     *  @return true if from a TLS alert */
     public boolean isAlertException() {
         return alertLevel >= 0 && alertDescription >= 0;
     }
 
+    /** Returns whether this is a fatal alert.
+     *  @return true if fatal */
     public boolean isFatalAlert() {
         return alertLevel == 2;
     }
@@ -73,6 +88,8 @@ public class TlsException extends Exception {
 
     /**
      * Get human-readable name for TLS alert description code.
+     * @param description alert description code
+     * @return human-readable name
      */
     public static String getAlertDescriptionName(int description) {
         switch (description) {

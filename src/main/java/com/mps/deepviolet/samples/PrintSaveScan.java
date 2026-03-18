@@ -19,6 +19,8 @@ import com.mps.deepviolet.util.CryptoUtils;
  */
 public class PrintSaveScan {
 
+	/** Runs the scan-and-save demo.
+	 *  @throws Exception on scan or I/O errors */
 	public PrintSaveScan() throws Exception {
 
 		// Scan two hosts
@@ -79,6 +81,8 @@ public class PrintSaveScan {
 		}
 	}
 
+	/** Entry point.
+	 *  @param args not used */
 	public static final void main(String[] args) {
 		try {
 			new PrintSaveScan();

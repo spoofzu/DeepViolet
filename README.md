@@ -9,7 +9,7 @@
 [Changes from Upstream](docs/CHANGES.md) |
 [Reference Tools](https://github.com/spoofzu/DeepVioletTools)
 
-DeepViolet is a TLS/SSL scanning API written in Java. It provides programmatic introspection of TLS/SSL connections, including certificate chain analysis, cipher suite enumeration, risk scoring, TLS fingerprinting, DNS security checks (CAA, DANE/TLSA), certificate revocation verification (OCSP, CRL, CT), and support for multiple naming conventions (IANA, OpenSSL, GnuTLS, NSS). Protocols SSLv2 through TLS 1.3 are supported. Multi-host scanning with configurable concurrency, cooperative pause/cancel, event-driven monitoring, and flexible target parsing (hostnames, IPs, CIDR, IP ranges) are also available.
+DeepViolet is a TLS/SSL scanning API written in Java. It provides programmatic introspection of TLS/SSL connections, including certificate chain analysis, cipher suite enumeration, risk scoring, TLS fingerprinting, post-quantum key exchange analysis, DNS security checks (CAA, DANE/TLSA), certificate revocation verification (OCSP, CRL, CT), and support for multiple naming conventions (IANA, OpenSSL, GnuTLS, NSS). Protocols SSLv2 through TLS 1.3 are supported. Multi-host scanning with configurable concurrency, section-level retry with exponential backoff, cooperative pause/cancel, event-driven monitoring, and flexible target parsing (hostnames, IPs, CIDR, IP ranges) are also available.
 
 GUI and command-line reference tools that consume this API are available in the [DeepVioletTools](https://github.com/spoofzu/DeepVioletTools) project.
 
@@ -32,7 +32,7 @@ DeepViolet is available on [Maven Central](https://central.sonatype.com/). Add i
 <dependency>
     <groupId>com.github.spoofzu</groupId>
     <artifactId>DeepViolet</artifactId>
-    <version>6.0.0</version>
+    <version>6.1.0</version>
 </dependency>
 ```
 

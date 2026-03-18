@@ -77,10 +77,6 @@ public class PrintTlsFingerprint {
 			}
 		}
 
-		System.out.println();
-		System.out.println("--- Extension Hash ---");
-		System.out.println("Hash: " + components.getExtensionHash());
-
 		System.out.flush();
 	}
 

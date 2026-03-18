@@ -26,19 +26,33 @@ public interface ISession {
 	 * ENABLED_PROTOCOLS, See documentation provided by javax.net.ssl.SSLSocket
 	 */
 	public enum SESSION_PROPERTIES {
+		/** Socket keep-alive enabled. */
 		SO_KEEPALIVE,
+		/** Socket receive buffer size. */
 		SO_RCVBUF,
+		/** Socket linger-on-close timeout. */
 		SO_LINGER,
+		/** Socket read timeout. */
 		SO_TIMEOUT,
+		/** Socket address reuse enabled. */
 		SO_REUSEADDR,
+		/** Socket send buffer size. */
 		SO_SENDBUFF,
+		/** Client authentication required. */
 		CLIENT_AUTH_REQ,
+		/** Client authentication wanted. */
 		CLIENT_AUTH_WANT,
+		/** IP traffic class. */
 		TRAFFIC_CLASS,
+		/** TCP no-delay (Nagle disabled). */
 		TCP_NODELAY,
+		/** Enabled TLS/SSL protocols. */
 		ENABLED_PROTOCOLS,
+		/** DEFLATE compression support. */
 		DEFLATE_COMPRESSION,
+		/** Negotiated TLS protocol version. */
 		NEGOTIATED_PROTOCOL,
+		/** Negotiated cipher suite name. */
 		NEGOTIATED_CIPHER_SUITE
 	}
 	
@@ -48,7 +62,14 @@ public interface ISession {
 	 * CIPHER_NAME_CONVENTION.IANA, CIPHER_NAME_CONVENTION.OpenSSL
 	 */
 	enum CIPHER_NAME_CONVENTION {
-		GnuTLS, NSS, IANA, OpenSSL
+		/** GnuTLS naming convention. */
+		GnuTLS,
+		/** NSS naming convention. */
+		NSS,
+		/** IANA naming convention. */
+		IANA,
+		/** OpenSSL naming convention. */
+		OpenSSL
 	}
 
 	/**

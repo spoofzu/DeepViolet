@@ -7,9 +7,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A background task to do the scanning.
+ * Subclass and override {@link #doInBackground()} to provide scan logic.
  * @author Milton Smith
  */
 public class BackgroundTask extends Thread {
+
+	/** Creates a new background task. */
+	public BackgroundTask() {}
 
 	private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.api.BackgroundTask");
 
