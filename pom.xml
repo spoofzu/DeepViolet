@@ -47,6 +47,7 @@
         <maven.compiler.plugin>3.13.0</maven.compiler.plugin>
         <maven.jar.plugin>3.4.2</maven.jar.plugin>
         <maven.surefire.plugin>3.3.0</maven.surefire.plugin>
+        <maven.javadoc.plugin>3.7.0</maven.javadoc.plugin>
     </properties>
     <dependencies>
         <!-- Gson - JSON processing -->
@@ -106,6 +107,25 @@
                         <id>attach-sources</id>
                         <goals>
                             <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven.javadoc.plugin}</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                    <show>public</show>
+                    <failOnWarnings>false</failOnWarnings>
+                    <failOnError>false</failOnError>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
                         </goals>
                     </execution>
                 </executions>

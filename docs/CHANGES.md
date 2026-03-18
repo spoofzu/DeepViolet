@@ -41,7 +41,7 @@ The upstream repository (github.com/spoofzu/DeepViolet) last received meaningful
 - Version bumped to 6.1.0
 - Removed deprecated `maven-javadoc-plugin` configuration from POM
 - CI simplified to Java 21 only (removed Java 24 matrix build)
-- Comprehensive javadoc added across all public API classes and interfaces
+- Javadoc improvements across public API classes and interfaces
 
 ---
 
