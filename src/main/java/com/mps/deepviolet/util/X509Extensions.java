@@ -22,26 +22,39 @@ public class X509Extensions {
 
     private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.util.X509Extensions");
 
-    // OIDs for common extensions
+    /** OID for Authority Information Access extension. */
     public static final String OID_AUTHORITY_INFO_ACCESS = "1.3.6.1.5.5.7.1.1";
+    /** OID for CRL Distribution Points extension. */
     public static final String OID_CRL_DISTRIBUTION_POINTS = "2.5.29.31";
+    /** OID for Subject Alternative Name extension. */
     public static final String OID_SUBJECT_ALT_NAME = "2.5.29.17";
+    /** OID for SCT List extension (Certificate Transparency). */
     public static final String OID_SCT_LIST = "1.3.6.1.4.1.11129.2.4.2";
+    /** OID for Must-Staple extension. */
     public static final String OID_MUST_STAPLE = "1.3.6.1.5.5.7.1.24";
 
-    // Access method OIDs within AIA
+    /** OID for OCSP access method within AIA. */
     public static final String OID_OCSP = "1.3.6.1.5.5.7.48.1";
+    /** OID for CA Issuers access method within AIA. */
     public static final String OID_CA_ISSUERS = "1.3.6.1.5.5.7.48.2";
 
-    // GeneralName tag numbers
+    /** GeneralName tag: otherName. */
     public static final int GN_OTHER_NAME = 0;
+    /** GeneralName tag: rfc822Name (email). */
     public static final int GN_RFC822_NAME = 1;
+    /** GeneralName tag: dNSName. */
     public static final int GN_DNS_NAME = 2;
+    /** GeneralName tag: x400Address. */
     public static final int GN_X400_ADDRESS = 3;
+    /** GeneralName tag: directoryName. */
     public static final int GN_DIRECTORY_NAME = 4;
+    /** GeneralName tag: ediPartyName. */
     public static final int GN_EDI_PARTY_NAME = 5;
+    /** GeneralName tag: uniformResourceIdentifier. */
     public static final int GN_URI = 6;
+    /** GeneralName tag: iPAddress. */
     public static final int GN_IP_ADDRESS = 7;
+    /** GeneralName tag: registeredID. */
     public static final int GN_REGISTERED_ID = 8;
 
     private X509Extensions() {}
@@ -306,6 +319,8 @@ public class X509Extensions {
 
     /**
      * Parse a TLS-encoded SCT list.
+     * @param data raw SCT list bytes
+     * @return list of parsed SCTs
      */
     public static List<SignedCertificateTimestamp> parseSctList(byte[] data) {
         List<SignedCertificateTimestamp> scts = new ArrayList<>();
@@ -383,16 +398,26 @@ public class X509Extensions {
      * Represents a Signed Certificate Timestamp.
      */
     public static class SignedCertificateTimestamp {
+        /** Creates an empty SCT. */
+        public SignedCertificateTimestamp() {}
+        /** SCT version (0 = v1). */
         public int version;
+        /** Log ID (32 bytes). */
         public byte[] logId;
+        /** Timestamp in milliseconds since epoch. */
         public long timestamp;
+        /** SCT extensions. */
         public byte[] extensions;
+        /** Hash algorithm code. */
         public int hashAlgorithm;
+        /** Signature algorithm code. */
         public int signatureAlgorithm;
+        /** Signature bytes. */
         public byte[] signature;
 
         /**
          * Get the timestamp as an Instant.
+         * @return the timestamp
          */
         public Instant getTimestampInstant() {
             return Instant.ofEpochMilli(timestamp);
@@ -400,6 +425,7 @@ public class X509Extensions {
 
         /**
          * Get the timestamp as an ISO-8601 string.
+         * @return ISO-8601 formatted timestamp
          */
         public String getTimestampString() {
             return DateTimeFormatter.ISO_INSTANT.format(getTimestampInstant());
@@ -407,6 +433,7 @@ public class X509Extensions {
 
         /**
          * Get the first 8 bytes of the log ID as a hex string (for compact display).
+         * @return hex prefix of the log ID
          */
         public String getLogIdPrefix() {
             StringBuilder sb = new StringBuilder();
@@ -418,6 +445,7 @@ public class X509Extensions {
 
         /**
          * Get the full log ID as a hex string (for lookup in CT log lists).
+         * @return full hex log ID
          */
         public String getLogIdHex() {
             StringBuilder sb = new StringBuilder();
@@ -429,6 +457,7 @@ public class X509Extensions {
 
         /**
          * Get the full log ID as a Base64 string (standard CT log format).
+         * @return Base64-encoded log ID
          */
         public String getLogIdBase64() {
             return java.util.Base64.getEncoder().encodeToString(logId);

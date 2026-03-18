@@ -35,6 +35,10 @@ public class RuleExpressionParser {
 
 	private record Token(TokenType type, String value, int position) {}
 
+	/**
+	 * Create a parser for the given input expression.
+	 * @param input the expression string to parse
+	 */
 	public RuleExpressionParser(String input) {
 		this.input = input;
 		this.tokens = tokenize(input);

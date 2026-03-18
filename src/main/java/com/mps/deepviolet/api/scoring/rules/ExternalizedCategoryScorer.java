@@ -30,6 +30,12 @@ public class ExternalizedCategoryScorer {
 	private final RuleContext context;
 	private final RulePolicy rulePolicy;
 
+	/**
+	 * Create a scorer for the given category definition.
+	 * @param category  category definition with rules to evaluate
+	 * @param context   rule context providing TLS scan data
+	 * @param rulePolicy policy for severity mapping and grade boundaries
+	 */
 	public ExternalizedCategoryScorer(CategoryDefinition category, RuleContext context,
 			RulePolicy rulePolicy) {
 		this.category = category;
@@ -48,6 +54,7 @@ public class ExternalizedCategoryScorer {
 	 *   <li>Category score = (int)(100 * (1.0 - avg))</li>
 	 *   <li>Category risk level = severity of highest-scoring matched rule, mapped to RiskLevel</li>
 	 * </ol>
+	 * @return computed category score
 	 */
 	public ICategoryScore score() {
 		List<Deduction> deductions = new ArrayList<>();

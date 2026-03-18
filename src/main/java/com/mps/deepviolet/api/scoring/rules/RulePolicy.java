@@ -22,11 +22,26 @@ public class RulePolicy {
 	private final List<CategoryDefinition> categories;
 	private final String sourceFile;
 
+	/**
+	 * Construct a rule policy.
+	 * @param version policy version
+	 * @param severityMappings severity mappings
+	 * @param gradeMappings grade mappings
+	 * @param categories category definitions
+	 */
 	public RulePolicy(String version, List<SeverityMapping> severityMappings,
 			List<GradeMapping> gradeMappings, List<CategoryDefinition> categories) {
 		this(version, severityMappings, gradeMappings, categories, null);
 	}
 
+	/**
+	 * Construct a rule policy with source file.
+	 * @param version policy version
+	 * @param severityMappings severity mappings
+	 * @param gradeMappings grade mappings
+	 * @param categories category definitions
+	 * @param sourceFile source file name, or null
+	 */
 	public RulePolicy(String version, List<SeverityMapping> severityMappings,
 			List<GradeMapping> gradeMappings, List<CategoryDefinition> categories,
 			String sourceFile) {
@@ -37,24 +52,33 @@ public class RulePolicy {
 		this.sourceFile = sourceFile;
 	}
 
+	/** Returns the policy version.
+	 *  @return version string */
 	public String getVersion() {
 		return version;
 	}
 
+	/** Returns the severity mappings.
+	 *  @return severity mappings list */
 	public List<SeverityMapping> getSeverityMappings() {
 		return severityMappings;
 	}
 
+	/** Returns the grade mappings.
+	 *  @return grade mappings list */
 	public List<GradeMapping> getGradeMappings() {
 		return gradeMappings;
 	}
 
+	/** Returns the category definitions.
+	 *  @return category definitions list */
 	public List<CategoryDefinition> getCategories() {
 		return categories;
 	}
 
 	/**
 	 * Source filename or resource name from which this policy was loaded, or null if unknown.
+	 * @return source file name, or null
 	 */
 	public String getSourceFile() {
 		return sourceFile;
@@ -64,6 +88,8 @@ public class RulePolicy {
 	 * Determine the severity string for a given rule score (0.0-1.0).
 	 * Severity mappings are ordered from highest minScore to lowest;
 	 * the first match is returned.
+	 * @param score rule score (0.0-1.0)
+	 * @return severity label
 	 */
 	public String severityForScore(double score) {
 		for (SeverityMapping sm : severityMappings) {
@@ -77,6 +103,8 @@ public class RulePolicy {
 	/**
 	 * Determine the score floor for a given rule score (0.0-1.0).
 	 * Returns the floor from the highest applicable severity mapping.
+	 * @param score rule score (0.0-1.0)
+	 * @return score floor
 	 */
 	public int floorForScore(double score) {
 		for (SeverityMapping sm : severityMappings) {
@@ -89,6 +117,8 @@ public class RulePolicy {
 
 	/**
 	 * Determine the letter grade for a given score.
+	 * @param score overall score
+	 * @return letter grade
 	 */
 	public LetterGrade gradeForScore(int score) {
 		for (GradeMapping gm : gradeMappings) {
@@ -101,6 +131,8 @@ public class RulePolicy {
 
 	/**
 	 * Determine the risk level for a given letter grade.
+	 * @param grade letter grade
+	 * @return risk level
 	 */
 	public RiskLevel riskLevelForGrade(LetterGrade grade) {
 		for (GradeMapping gm : gradeMappings) {
@@ -162,11 +194,19 @@ public class RulePolicy {
 	/**
 	 * A severity mapping entry from the YAML policy.
 	 * Maps a rule score threshold to a severity label and overall score floor.
+	 *
+	 * @param severity label such as "CRITICAL", "HIGH", "MEDIUM", or "LOW"
+	 * @param minScore minimum rule score (0.0–1.0) for this severity level
+	 * @param floor    overall score floor applied when this severity matches
 	 */
 	public record SeverityMapping(String severity, double minScore, int floor) {}
 
 	/**
 	 * A grade mapping entry from the YAML policy.
+	 *
+	 * @param grade     letter grade assigned when the score meets the threshold
+	 * @param minScore  minimum overall score required for this grade
+	 * @param riskLevel risk level associated with this grade
 	 */
 	public record GradeMapping(LetterGrade grade, int minScore, RiskLevel riskLevel) {}
 }

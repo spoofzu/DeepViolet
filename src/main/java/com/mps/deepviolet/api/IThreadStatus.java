@@ -9,18 +9,33 @@ import java.net.URL;
  */
 public interface IThreadStatus {
 
-	/** Thread identifier (e.g., "dv-scan-1"). */
+	/**
+	 * Thread identifier (e.g., "dv-scan-1").
+	 * @return the thread name
+	 */
 	String getThreadName();
 
-	/** Current state. */
+	/**
+	 * Current state.
+	 * @return the thread state
+	 */
 	ThreadState getState();
 
-	/** Host this thread is scanning, or null if idle. */
+	/**
+	 * Host this thread is scanning, or null if idle.
+	 * @return the current host URL
+	 */
 	URL getCurrentHost();
 
-	/** Section this thread is executing, or null if idle/sleeping. */
+	/**
+	 * Section this thread is executing, or null if idle/sleeping.
+	 * @return the current scan section
+	 */
 	ScanSection getCurrentSection();
 
-	/** Current status message from the engine. */
+	/**
+	 * Current status message from the engine.
+	 * @return the status message
+	 */
 	String getStatusMessage();
 }

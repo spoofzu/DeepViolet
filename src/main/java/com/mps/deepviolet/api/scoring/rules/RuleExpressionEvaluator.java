@@ -13,13 +13,19 @@ public class RuleExpressionEvaluator {
 
 	private final RuleContext context;
 
+	/**
+	 * Create an evaluator for the given context.
+	 * @param context the rule context to evaluate against
+	 */
 	public RuleExpressionEvaluator(RuleContext context) {
 		this.context = context;
 	}
 
 	/**
 	 * Evaluate the expression and return a boolean result.
-	 * Non-boolean results are coerced: null → false, non-null → true.
+	 * Non-boolean results are coerced: null to false, non-null to true.
+	 * @param expr the expression to evaluate
+	 * @return boolean result
 	 */
 	public boolean evaluateBoolean(RuleExpression expr) {
 		Object result = evaluate(expr);
@@ -29,6 +35,8 @@ public class RuleExpressionEvaluator {
 
 	/**
 	 * Evaluate the expression and return the raw result value.
+	 * @param expr the expression to evaluate
+	 * @return the result value
 	 */
 	public Object evaluate(RuleExpression expr) {
 		return switch (expr) {

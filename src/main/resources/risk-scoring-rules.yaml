@@ -49,13 +49,13 @@ metadata:
   version: "3.0"
   description: "DeepViolet TLS Risk Scoring Rules (average-based model)"
   # Next available rule IDs (per category):
-  #   PROTOCOLS:        SYS-0001100
+  #   PROTOCOLS:        SYS-0001500
   #   CIPHER_SUITES:    SYS-0011700
-  #   CERTIFICATE:      SYS-0021700
-  #   REVOCATION:       SYS-0030700
+  #   CERTIFICATE:      SYS-0021800
+  #   REVOCATION:       SYS-0030800
   #   SECURITY_HEADERS: SYS-0041100
-  #   DNS_SECURITY:     SYS-0050300
-  #   OTHER:            SYS-0060700
+  #   DNS_SECURITY:     SYS-0050400
+  #   OTHER:            SYS-0060800
 
 severity_mapping:
   - { severity: CRITICAL, min_score: 0.8, floor: 65 }
@@ -199,6 +199,71 @@ categories:
         scope:
           layer: tls
           aspect: fallback_scsv
+
+      pq_kex_not_negotiated:
+        id: SYS-0001100
+        description: "Post-quantum key exchange supported but server prefers classical"
+        enabled: true
+        score: 0.2
+        when: >
+          session.pq_kex_supported == true
+          and session.pq_kex_preferred == false
+        when_inconclusive: >
+          session.pq_kex_supported == true
+          and session.pq_kex_preferred == null
+        scope:
+          layer: tls
+          protocols: [TLSv1.3]
+          aspect: post_quantum
+
+      pq_kex_not_available:
+        id: SYS-0001200
+        description: "Server does not support post-quantum key exchange"
+        enabled: true
+        score: 0.3
+        when: session.pq_kex_supported == false
+        when_inconclusive: session.pq_kex_supported == null
+        scope:
+          layer: tls
+          protocols: [TLSv1.3]
+          aspect: post_quantum
+
+      pq_kex_available:
+        id: SYS-0001300
+        description: "Server supports post-quantum key exchange (${groups})"
+        enabled: true
+        score: 0.0
+        when: session.pq_kex_supported == true
+        meta:
+          groups: session.pq_kex_groups
+        scope:
+          layer: tls
+          protocols: [TLSv1.3]
+          aspect: post_quantum
+
+      pq_kex_negotiated:
+        id: SYS-0001400
+        description: "Server negotiated post-quantum key exchange (${group})"
+        enabled: true
+        score: 0.0
+        when: session.pq_kex_preferred == true
+        meta:
+          group: session.pq_preferred_group
+        scope:
+          layer: tls
+          protocols: [TLSv1.3]
+          aspect: post_quantum
+
+      pq_kex_probe_failed:
+        id: SYS-0001500
+        description: "Post-quantum key exchange could not be evaluated (probe failed after retries)"
+        enabled: true
+        score: 0.15
+        when: session.pq_kex_probe_failed == true
+        scope:
+          layer: tls
+          protocols: [TLSv1.3]
+          aspect: post_quantum
 
   # ============================================================
   # CIPHER_SUITES
@@ -586,6 +651,17 @@ categories:
           layer: certificate
           aspect: signature_algorithm
 
+      cert_retrieval_failed:
+        id: SYS-0021700
+        description: "Certificate chain could not be evaluated (retrieval failed after retries)"
+        enabled: true
+        score: 0.2
+        inconclusive: true
+        when: scan.certificate_retrieval_failed == true
+        scope:
+          layer: certificate
+          aspect: retrieval
+
   # ============================================================
   # REVOCATION
   # ============================================================
@@ -663,6 +739,17 @@ categories:
         scope:
           layer: revocation
           aspect: ocsp
+
+      revocation_check_connectivity_failed:
+        id: SYS-0030700
+        description: "Revocation status could not be evaluated (check failed after retries)"
+        enabled: true
+        score: 0.2
+        inconclusive: true
+        when: scan.revocation_check_failed == true
+        scope:
+          layer: revocation
+          aspect: check
 
   # ============================================================
   # SECURITY_HEADERS
@@ -812,6 +899,17 @@ categories:
           layer: dns
           aspect: dane
 
+      dns_security_connectivity_failed:
+        id: SYS-0050300
+        description: "DNS security could not be evaluated (lookup failed after retries)"
+        enabled: true
+        score: 0.15
+        inconclusive: true
+        when: scan.dns_security_failed == true
+        scope:
+          layer: dns
+          aspect: lookup
+
   # ============================================================
   # OTHER
   # ============================================================
@@ -878,3 +976,14 @@ categories:
         scope:
           layer: certificate
           aspect: san_exposure
+
+      tls_fingerprint_connectivity_failed:
+        id: SYS-0060700
+        description: "TLS fingerprint could not be evaluated (probing failed after retries)"
+        enabled: true
+        score: 0.1
+        inconclusive: true
+        when: scan.tls_fingerprint_failed == true
+        scope:
+          layer: tls
+          aspect: fingerprint

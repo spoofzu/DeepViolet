@@ -14,6 +14,14 @@ public class ImmutableRiskScore implements IRiskScore {
 	private final RiskLevel riskLevel;
 	private final ICategoryScore[] categories;
 
+	/**
+	 * Creates an immutable risk score from deserialized fields.
+	 *
+	 * @param totalScore  the overall numeric score
+	 * @param letterGrade the letter grade
+	 * @param riskLevel   the risk level
+	 * @param categories  the category scores, or {@code null}
+	 */
 	public ImmutableRiskScore(int totalScore, LetterGrade letterGrade,
 			RiskLevel riskLevel, ICategoryScore[] categories) {
 		this.totalScore = totalScore;

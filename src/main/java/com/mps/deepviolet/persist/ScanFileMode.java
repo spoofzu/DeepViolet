@@ -34,6 +34,8 @@ public enum ScanFileMode {
 		this.displayName = displayName;
 	}
 
+	/** Returns the display name.
+	 *  @return display name */
 	public String getDisplayName() {
 		return displayName;
 	}

@@ -14,6 +14,8 @@ import com.mps.deepviolet.api.IEngine;
 import com.mps.deepviolet.api.IRevocationStatus;
 import com.mps.deepviolet.api.ISession;
 import com.mps.deepviolet.api.IX509Certificate;
+import com.mps.deepviolet.api.ScanSection;
+import com.mps.deepviolet.api.tls.NamedGroup;
 import com.mps.deepviolet.api.tls.ServerHello;
 import com.mps.deepviolet.api.tls.TlsExtension;
 import com.mps.deepviolet.api.tls.TlsMetadata;
@@ -43,6 +45,7 @@ public class RuleContext {
 
 	/**
 	 * Warnings collected during context construction (data-gathering failures).
+	 * @return immutable list of warning messages
 	 */
 	public List<String> getWarnings() {
 		return List.copyOf(warnings);
@@ -50,8 +53,23 @@ public class RuleContext {
 
 	/**
 	 * Build a RuleContext from engine data.
+	 * @param engine the engine providing scan data
+	 * @return populated rule context
+	 * @throws DeepVioletException on data access problems
 	 */
 	public static RuleContext from(IEngine engine) throws DeepVioletException {
+		return from(engine, Set.of());
+	}
+
+	/**
+	 * Build a RuleContext from engine data with failed section information.
+	 * Failed sections are exposed as {@code scan.*_failed} boolean properties.
+	 * @param engine the engine providing scan data
+	 * @param failedSections sections that failed after all retry attempts
+	 * @return populated rule context
+	 * @throws DeepVioletException on data access problems
+	 */
+	public static RuleContext from(IEngine engine, Set<ScanSection> failedSections) throws DeepVioletException {
 		ISession session = engine.getSession();
 		IX509Certificate cert = engine.getCertificate();
 		ICipherSuite[] cipherSuites = engine.getCipherSuites();
@@ -116,6 +134,49 @@ public class RuleContext {
 		}
 		sessionProps.put("fallback_scsv_supported", fallbackScsv);
 
+		// Post-quantum key exchange support
+		Boolean pqKexSupported = null;
+		String pqKexGroups = null;
+		try {
+			pqKexSupported = engine.getPqKeyExchangeSupported();
+			java.util.List<String> groupNames = engine.getPqKeyExchangeGroups();
+			if (groupNames != null && !groupNames.isEmpty()) {
+				pqKexGroups = String.join(", ", groupNames);
+			}
+		} catch (DeepVioletException e) {
+			logger.debug("PQ key exchange check unavailable: {}", e.getMessage());
+			ctx.warnings.add("RuleContext: PQ probe failed: " + e.getMessage());
+		}
+		sessionProps.put("pq_kex_supported", pqKexSupported);
+		sessionProps.put("pq_kex_groups", pqKexGroups);
+
+		// Post-quantum key exchange preference (dedicated preference probe)
+		Boolean pqKexPreferred = null;
+		String pqPreferredGroup = null;
+		try {
+			pqKexPreferred = engine.getPqKeyExchangePreferred();
+			pqPreferredGroup = engine.getPqPreferredGroup();
+		} catch (DeepVioletException e) {
+			logger.debug("PQ preference probe unavailable: {}", e.getMessage());
+			ctx.warnings.add("RuleContext: PQ preference probe failed: " + e.getMessage());
+		}
+		sessionProps.put("pq_kex_preferred", pqKexPreferred);
+		sessionProps.put("pq_preferred_group", pqPreferredGroup);
+
+		// PQ probe failure: true when server supports TLS 1.3 but PQ probes
+		// were inconclusive after retries (network errors, timeouts, etc.)
+		String negotiatedProto = (String) sessionProps.get("negotiated_protocol");
+		boolean tls13Available = "TLSv1.3".equals(negotiatedProto);
+		if (!tls13Available && cipherSuites != null) {
+			for (ICipherSuite cs : cipherSuites) {
+				if ("TLSv1.3".equals(cs.getHandshakeProtocol())) {
+					tls13Available = true;
+					break;
+				}
+			}
+		}
+		sessionProps.put("pq_kex_probe_failed", tls13Available && pqKexSupported == null);
+
 		// TLS metadata from raw handshake (renegotiation_info, ALPN, early_data)
 		TlsMetadata tlsMeta = null;
 		try {
@@ -138,6 +199,16 @@ public class RuleContext {
 			byte[] alpnData = serverHello.getExtensionData(TlsExtension.ALPN);
 			String alpnNegotiated = parseAlpn(alpnData);
 			sessionProps.put("alpn_negotiated", alpnNegotiated);
+
+			// Negotiated key share group
+			int keyShareGroup = serverHello.getKeyShareGroup();
+			if (keyShareGroup >= 0) {
+				sessionProps.put("negotiated_group", NamedGroup.getName(keyShareGroup));
+				sessionProps.put("negotiated_group_pq", NamedGroup.isPostQuantum(keyShareGroup));
+			} else {
+				sessionProps.put("negotiated_group", null);
+				sessionProps.put("negotiated_group_pq", null);
+			}
 
 			// ServerKeyExchange parameters
 			com.mps.deepviolet.api.tls.ServerKeyExchange ske = tlsMeta.getServerKeyExchange();
@@ -244,12 +315,25 @@ public class RuleContext {
 		}
 		ctx.rootProperties.put("dns", dnsProps);
 
+		// Build scan failure properties
+		Map<String, Object> scanProps = new LinkedHashMap<>();
+		scanProps.put("certificate_retrieval_failed",
+				failedSections.contains(ScanSection.CERTIFICATE_RETRIEVAL));
+		scanProps.put("revocation_check_failed",
+				failedSections.contains(ScanSection.REVOCATION_CHECK));
+		scanProps.put("tls_fingerprint_failed",
+				failedSections.contains(ScanSection.TLS_FINGERPRINT));
+		scanProps.put("dns_security_failed",
+				failedSections.contains(ScanSection.DNS_SECURITY));
+		ctx.rootProperties.put("scan", scanProps);
+
 		return ctx;
 	}
 
 	/**
 	 * Export this context as a serializable map (for JSON persistence).
 	 * Converts Set values to List for clean JSON round-tripping.
+	 * @return serializable map representation
 	 */
 	public Map<String, Object> toSerializableMap() {
 		Map<String, Object> map = new LinkedHashMap<>();
@@ -262,6 +346,8 @@ public class RuleContext {
 
 	/**
 	 * Reconstruct a RuleContext from a serialized map.
+	 * @param map the serialized map
+	 * @return reconstructed rule context
 	 */
 	@SuppressWarnings("unchecked")
 	public static RuleContext fromSerializableMap(Map<String, Object> map) {
@@ -291,6 +377,9 @@ public class RuleContext {
 
 	/**
 	 * Build a RuleContext from raw property maps (for testing).
+	 * @param rootProps root property map
+	 * @param headers HTTP response headers
+	 * @return populated rule context
 	 */
 	public static RuleContext fromMaps(Map<String, Object> rootProps, Map<String, List<String>> headers) {
 		RuleContext ctx = new RuleContext(headers);
@@ -300,6 +389,8 @@ public class RuleContext {
 
 	/**
 	 * Resolve a dotted property path.
+	 * @param path the property path segments
+	 * @return resolved value, or null if not found
 	 */
 	@SuppressWarnings("unchecked")
 	public Object resolve(List<String> path) {
@@ -319,6 +410,8 @@ public class RuleContext {
 
 	/**
 	 * Get an HTTP header value (case-insensitive).
+	 * @param name the header name
+	 * @return the first header value, or null if not found
 	 */
 	public String getHeader(String name) {
 		if (headers == null || name == null) return null;

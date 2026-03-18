@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
- * Integration tests for TLS server fingerprinting.
+ * Integration tests for TLS probe fingerprinting.
  * These tests connect to real servers and require network access.
  */
 @Disabled("Requires network access - run manually")
@@ -17,9 +17,9 @@ public class TlsServerFingerprintIntegrationTest {
         String fingerprint = TlsServerFingerprint.compute("www.google.com", 443);
 
         assertNotNull(fingerprint);
-        assertEquals(62, fingerprint.length(), "TLS fingerprint should be 62 characters");
+        assertEquals(30, fingerprint.length(), "TLS probe fingerprint should be 30 characters");
 
-        System.out.println("TLS fingerprint for www.google.com: " + fingerprint);
+        System.out.println("TLS probe fingerprint for www.google.com: " + fingerprint);
 
         // Parse and display components
         TlsServerFingerprint.FingerprintComponents components = TlsServerFingerprint.parse(fingerprint);
@@ -32,7 +32,6 @@ public class TlsServerFingerprintIntegrationTest {
             String desc = TlsBehaviorProbes.getProbeDescription(i);
             System.out.printf("  Probe %2d: %s (%s) - %s%n", i, code, success ? "OK" : "FAIL", desc);
         }
-        System.out.println("Extension hash: " + components.getExtensionHash());
     }
 
     @Test
@@ -40,7 +39,7 @@ public class TlsServerFingerprintIntegrationTest {
         String fingerprint = TlsServerFingerprint.compute("www.google.com");
 
         assertNotNull(fingerprint);
-        assertEquals(62, fingerprint.length());
+        assertEquals(30, fingerprint.length());
 
         // Should not be all failed
         assertFalse(TlsServerFingerprint.isNoTlsSupport(fingerprint),
@@ -63,9 +62,9 @@ public class TlsServerFingerprintIntegrationTest {
         String fingerprint = TlsServerFingerprint.compute("cloudflare.com", 443);
 
         assertNotNull(fingerprint);
-        assertEquals(62, fingerprint.length());
+        assertEquals(30, fingerprint.length());
 
-        System.out.println("TLS fingerprint for cloudflare.com: " + fingerprint);
+        System.out.println("TLS probe fingerprint for cloudflare.com: " + fingerprint);
         System.out.println("Summary: " + TlsServerFingerprint.summarize(fingerprint));
     }
 
@@ -74,9 +73,9 @@ public class TlsServerFingerprintIntegrationTest {
         String fingerprint = TlsServerFingerprint.compute("www.badssl.com", 443);
 
         assertNotNull(fingerprint);
-        assertEquals(62, fingerprint.length());
+        assertEquals(30, fingerprint.length());
 
-        System.out.println("TLS fingerprint for www.badssl.com: " + fingerprint);
+        System.out.println("TLS probe fingerprint for www.badssl.com: " + fingerprint);
         System.out.println("Summary: " + TlsServerFingerprint.summarize(fingerprint));
     }
 
@@ -86,22 +85,21 @@ public class TlsServerFingerprintIntegrationTest {
         String fingerprint = TlsServerFingerprint.compute("nonexistent.invalid.test", 443);
 
         assertNotNull(fingerprint);
-        assertEquals(62, fingerprint.length());
+        assertEquals(30, fingerprint.length());
 
         // All probes should have failed
         assertTrue(TlsServerFingerprint.isNoTlsSupport(fingerprint),
                 "Non-existent host should show no TLS support");
 
-        System.out.println("TLS fingerprint for non-existent host: " + fingerprint);
+        System.out.println("TLS probe fingerprint for non-existent host: " + fingerprint);
     }
 
     @Test
     public void testTlsFingerprintConsistency() {
-        // Run fingerprinting twice and compare - should be similar (server config may vary slightly)
+        // Run fingerprinting twice and compare - probe codes should be consistent
         String fingerprint1 = TlsServerFingerprint.compute("www.google.com", 443);
         String fingerprint2 = TlsServerFingerprint.compute("www.google.com", 443);
 
-        // Extension hash may vary due to timestamps, but probe codes should be similar
         TlsServerFingerprint.FingerprintComponents c1 = TlsServerFingerprint.parse(fingerprint1);
         TlsServerFingerprint.FingerprintComponents c2 = TlsServerFingerprint.parse(fingerprint2);
 

@@ -36,6 +36,11 @@ public class ClientHello {
     private KeyPair keyShareKeyPair;   // secp256r1
     private KeyPair x25519KeyPair;     // X25519
 
+    /**
+     * Create a ClientHello builder for the given config and target hostname.
+     * @param config the ClientHello configuration
+     * @param hostname the SNI hostname
+     */
     public ClientHello(ClientHelloConfig config, String hostname) {
         this.config = config;
         this.hostname = hostname;
@@ -48,6 +53,7 @@ public class ClientHello {
 
     /**
      * Get the client random bytes (32 bytes).
+     * @return defensive copy of the 32-byte client random
      */
     public byte[] getClientRandom() {
         return clientRandom.clone();
@@ -55,6 +61,7 @@ public class ClientHello {
 
     /**
      * Set custom client random bytes.
+     * @param random the 32-byte client random value
      */
     public void setClientRandom(byte[] random) {
         if (random.length != 32) {
@@ -65,6 +72,7 @@ public class ClientHello {
 
     /**
      * Get the session ID.
+     * @return defensive copy of the session ID bytes
      */
     public byte[] getSessionId() {
         return sessionId.clone();
@@ -72,6 +80,7 @@ public class ClientHello {
 
     /**
      * Set session ID (for session resumption testing).
+     * @param id the session ID bytes, or null for empty
      */
     public void setSessionId(byte[] id) {
         this.sessionId = id != null ? id.clone() : new byte[0];
@@ -79,7 +88,7 @@ public class ClientHello {
 
     /**
      * Get the EC key pair used for key_share extension (TLS 1.3, secp256r1).
-     * Returns null if key_share was not included.
+     * @return the secp256r1 key pair, or null if key_share was not included
      */
     public KeyPair getKeyShareKeyPair() {
         return keyShareKeyPair;
@@ -87,7 +96,7 @@ public class ClientHello {
 
     /**
      * Get the X25519 key pair used for key_share extension (TLS 1.3).
-     * Returns null if X25519 key share was not included.
+     * @return the X25519 key pair, or null if not included
      */
     public KeyPair getX25519KeyPair() {
         return x25519KeyPair;
@@ -201,7 +210,11 @@ public class ClientHello {
 
         // key_share extension (TLS 1.3)
         if (config.isIncludeKeyShare()) {
-            writeKeyShareExtension(ext);
+            if (config.isEmptyKeyShare()) {
+                writeEmptyKeyShareExtension(ext);
+            } else {
+                writeKeyShareExtension(ext);
+            }
         }
 
         // ec_point_formats extension
@@ -343,6 +356,17 @@ public class ClientHello {
     }
 
     /**
+     * Write a key_share extension with an empty client_shares list.
+     * Forces the server to respond with a HelloRetryRequest, revealing its
+     * preferred named group without the client needing to generate key material.
+     */
+    private void writeEmptyKeyShareExtension(ByteArrayOutputStream ext) throws IOException {
+        ext.write(0x00); ext.write(0x33); // extension type = key_share (51)
+        TlsRecordLayer.enc16be(2, ext);   // extension data length: 2 bytes
+        TlsRecordLayer.enc16be(0, ext);   // client_shares length: 0
+    }
+
+    /**
      * Extract raw 32-byte public key from X25519 public key.
      * The XECPublicKey.getU() returns the u-coordinate as BigInteger;
      * we need it as 32 bytes in little-endian (RFC 7748).
@@ -400,6 +424,7 @@ public class ClientHello {
     /**
      * Get the record layer version to use when sending this ClientHello.
      * For TLS 1.3 compatibility, use TLS 1.0 or 1.2 as the record version.
+     * @return the TLS record layer version code
      */
     public int getRecordVersion() {
         int version = config.getTlsVersion();

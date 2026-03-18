@@ -12,30 +12,63 @@ import java.util.Set;
  */
 public interface IScanResult {
 
-	/** The URL that was scanned. */
+	/**
+	 * The URL that was scanned.
+	 * @return the scanned URL
+	 */
 	URL getURL();
 
-	/** True if the scan completed without fatal error. */
+	/**
+	 * True if the scan completed without fatal error.
+	 * @return true on success
+	 */
 	boolean isSuccess();
 
-	/** The session, or null on failure. */
+	/**
+	 * The session, or null on failure.
+	 * @return the session
+	 */
 	ISession getSession();
 
-	/** The engine, or null on failure. */
+	/**
+	 * The engine, or null on failure.
+	 * @return the engine
+	 */
 	IEngine getEngine();
 
-	/** The error, or null on success. */
+	/**
+	 * The error, or null on success.
+	 * @return the error
+	 */
 	DeepVioletException getError();
 
-	/** When the scan started. */
+	/**
+	 * When the scan started.
+	 * @return the start time
+	 */
 	Instant getStartTime();
 
-	/** When the scan ended. */
+	/**
+	 * When the scan ended.
+	 * @return the end time
+	 */
 	Instant getEndTime();
 
-	/** How long the scan took. */
+	/**
+	 * How long the scan took.
+	 * @return the scan duration
+	 */
 	Duration getDuration();
 
-	/** Which sections completed successfully for this host. */
+	/**
+	 * Which sections completed successfully for this host.
+	 * @return set of completed sections
+	 */
 	Set<ScanSection> getCompletedSections();
+
+	/**
+	 * Which sections failed after all retry attempts for this host.
+	 * @return set of failed sections
+	 */
+	Set<ScanSection> getFailedSections();
 }

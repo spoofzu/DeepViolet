@@ -12,6 +12,7 @@ import java.util.List;
  */
 public record RuleScope(String layer, List<String> protocols, String aspect) {
 
+	/** Compact constructor normalizing null protocols to empty list. */
 	public RuleScope {
 		if (protocols == null) {
 			protocols = List.of();

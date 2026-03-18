@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ScanFileIO {
 
+	private ScanFileIO() {}
+
 	private static final Logger logger = LoggerFactory
 			.getLogger("com.mps.deepviolet.persist.ScanFileIO");
 
@@ -59,6 +61,11 @@ public class ScanFileIO {
 	 */
 	@FunctionalInterface
 	public interface PasswordCallback {
+		/**
+		 * Prompt for and return the password.
+		 * @return the password characters
+		 * @throws IOException on I/O errors
+		 */
 		char[] getPassword() throws IOException;
 	}
 
@@ -106,6 +113,11 @@ public class ScanFileIO {
 
 	/**
 	 * Save with machine-key only (host locked, zero-friction on same machine).
+	 * @param file target file
+	 * @param snapshot scan snapshot to save
+	 * @param machineKey machine encryption key
+	 * @return SHA-256 hash of the written file
+	 * @throws IOException on I/O errors
 	 */
 	public static String save(File file, ScanSnapshot snapshot,
 			byte[] machineKey) throws IOException {
@@ -115,6 +127,12 @@ public class ScanFileIO {
 	/**
 	 * Save with password only (password locked, always requires password to open).
 	 * If password is null or empty, falls back to host locked (machine key only).
+	 * @param file target file
+	 * @param snapshot scan snapshot to save
+	 * @param machineKey machine encryption key
+	 * @param password user password, or null for host locked
+	 * @return SHA-256 hash of the written file
+	 * @throws IOException on I/O errors
 	 */
 	public static String save(File file, ScanSnapshot snapshot,
 			byte[] machineKey, char[] password) throws IOException {
@@ -196,6 +214,10 @@ public class ScanFileIO {
 
 	/**
 	 * Load with machine key only. Throws if password is required.
+	 * @param file source file
+	 * @param machineKey machine encryption key
+	 * @return loaded scan snapshot
+	 * @throws IOException on I/O or decryption errors
 	 */
 	public static ScanSnapshot load(File file, byte[] machineKey)
 			throws IOException {
@@ -205,6 +227,11 @@ public class ScanFileIO {
 	/**
 	 * Load a scan file with machine key + optional password callback.
 	 * Auto-detects the file format: encrypted binary (v1/v2) or plain JSON.
+	 * @param file source file
+	 * @param machineKey machine encryption key
+	 * @param passwordCallback callback for password prompts, or null
+	 * @return loaded scan snapshot
+	 * @throws IOException on I/O or decryption errors
 	 */
 	public static ScanSnapshot load(File file, byte[] machineKey,
 			PasswordCallback passwordCallback) throws IOException {
@@ -385,6 +412,8 @@ public class ScanFileIO {
 
 	/**
 	 * Serialize a snapshot to plain JSON (no encryption).
+	 * @param snapshot scan snapshot to serialize
+	 * @return JSON string
 	 */
 	public static String toJson(ScanSnapshot snapshot) {
 		return codec.encode(snapshot);
@@ -392,6 +421,8 @@ public class ScanFileIO {
 
 	/**
 	 * Deserialize a snapshot from a plain JSON string.
+	 * @param json JSON string
+	 * @return deserialized scan snapshot
 	 */
 	public static ScanSnapshot fromJson(String json) {
 		Gson gson = new Gson();
@@ -402,6 +433,9 @@ public class ScanFileIO {
 
 	/**
 	 * Deserialize a snapshot from a plain JSON input stream.
+	 * @param in input stream containing JSON
+	 * @return deserialized scan snapshot
+	 * @throws IOException on I/O errors
 	 */
 	public static ScanSnapshot fromJson(InputStream in) throws IOException {
 		String json = new String(in.readAllBytes(), StandardCharsets.UTF_8);

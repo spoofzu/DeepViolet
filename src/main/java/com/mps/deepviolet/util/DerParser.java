@@ -16,27 +16,44 @@ import java.util.List;
  */
 public class DerParser {
 
-    // ASN.1 Tag classes
+    /** ASN.1 Universal tag class. */
     public static final int TAG_CLASS_UNIVERSAL = 0x00;
+    /** ASN.1 Application tag class. */
     public static final int TAG_CLASS_APPLICATION = 0x40;
+    /** ASN.1 Context-specific tag class. */
     public static final int TAG_CLASS_CONTEXT = 0x80;
+    /** ASN.1 Private tag class. */
     public static final int TAG_CLASS_PRIVATE = 0xC0;
 
-    // Common ASN.1 Universal tags
+    /** ASN.1 BOOLEAN tag. */
     public static final int TAG_BOOLEAN = 0x01;
+    /** ASN.1 INTEGER tag. */
     public static final int TAG_INTEGER = 0x02;
+    /** ASN.1 BIT STRING tag. */
     public static final int TAG_BIT_STRING = 0x03;
+    /** ASN.1 OCTET STRING tag. */
     public static final int TAG_OCTET_STRING = 0x04;
+    /** ASN.1 NULL tag. */
     public static final int TAG_NULL = 0x05;
+    /** ASN.1 OBJECT IDENTIFIER tag. */
     public static final int TAG_OBJECT_IDENTIFIER = 0x06;
+    /** ASN.1 ENUMERATED tag. */
     public static final int TAG_ENUMERATED = 0x0A;
+    /** ASN.1 UTF8String tag. */
     public static final int TAG_UTF8_STRING = 0x0C;
+    /** ASN.1 PrintableString tag. */
     public static final int TAG_PRINTABLE_STRING = 0x13;
+    /** ASN.1 IA5String tag. */
     public static final int TAG_IA5_STRING = 0x16;
+    /** ASN.1 UTCTime tag. */
     public static final int TAG_UTC_TIME = 0x17;
+    /** ASN.1 GeneralizedTime tag. */
     public static final int TAG_GENERALIZED_TIME = 0x18;
+    /** ASN.1 VisibleString tag. */
     public static final int TAG_VISIBLE_STRING = 0x1A;
+    /** ASN.1 SEQUENCE tag. */
     public static final int TAG_SEQUENCE = 0x30;
+    /** ASN.1 SET tag. */
     public static final int TAG_SET = 0x31;
 
     private DerParser() {}
@@ -134,6 +151,11 @@ public class DerParser {
         private final int tag;
         private final byte[] value;
 
+        /**
+         * Construct a DerValue with the given tag and content bytes.
+         * @param tag the ASN.1 tag byte
+         * @param value the raw content bytes
+         */
         public DerValue(int tag, byte[] value) {
             this.tag = tag;
             this.value = value;
@@ -141,6 +163,7 @@ public class DerParser {
 
         /**
          * Get the ASN.1 tag.
+         * @return the raw tag byte
          */
         public int getTag() {
             return tag;
@@ -148,6 +171,7 @@ public class DerParser {
 
         /**
          * Get the tag number (stripped of class and constructed bits).
+         * @return tag number (0-31)
          */
         public int getTagNumber() {
             return tag & 0x1F;
@@ -155,6 +179,7 @@ public class DerParser {
 
         /**
          * Check if this is a constructed type (SEQUENCE, SET, etc).
+         * @return true if the constructed bit is set
          */
         public boolean isConstructed() {
             return (tag & 0x20) != 0;
@@ -162,6 +187,7 @@ public class DerParser {
 
         /**
          * Check if this is a context-specific tagged value.
+         * @return true if the tag class is context-specific
          */
         public boolean isContextSpecific() {
             return (tag & 0xC0) == TAG_CLASS_CONTEXT;
@@ -169,6 +195,7 @@ public class DerParser {
 
         /**
          * Get the context-specific tag number (0-31).
+         * @return the context tag number
          */
         public int getContextTag() {
             if (!isContextSpecific()) {
@@ -179,6 +206,7 @@ public class DerParser {
 
         /**
          * Get the raw value bytes.
+         * @return the DER value content
          */
         public byte[] getValue() {
             return value;
@@ -186,6 +214,7 @@ public class DerParser {
 
         /**
          * Get the length of the value.
+         * @return byte count of the value
          */
         public int getLength() {
             return value.length;
@@ -193,6 +222,8 @@ public class DerParser {
 
         /**
          * Parse this value as a SEQUENCE and return its elements.
+         * @return list of child DerValues
+         * @throws IOException if parsing fails
          */
         public List<DerValue> getSequence() throws IOException {
             if (tag != TAG_SEQUENCE && !isConstructed()) {
@@ -203,6 +234,8 @@ public class DerParser {
 
         /**
          * Parse this value as a SET and return its elements.
+         * @return list of child DerValues
+         * @throws IOException if parsing fails
          */
         public List<DerValue> getSet() throws IOException {
             if (tag != TAG_SET && !isConstructed()) {
@@ -213,6 +246,8 @@ public class DerParser {
 
         /**
          * Get this value as an OCTET STRING.
+         * @return the octet string bytes
+         * @throws IOException if parsing fails
          */
         public byte[] getOctetString() throws IOException {
             if (tag != TAG_OCTET_STRING) {
@@ -224,6 +259,8 @@ public class DerParser {
         /**
          * Get this value as a BIT STRING.
          * Returns the bit string content (excluding the unused bits indicator).
+         * @return the bit string bytes
+         * @throws IOException if parsing fails
          */
         public byte[] getBitString() throws IOException {
             if (tag != TAG_BIT_STRING) {
@@ -241,6 +278,8 @@ public class DerParser {
 
         /**
          * Get the BIT STRING as an integer value.
+         * @return integer representation of the bit string
+         * @throws IOException if parsing fails
          */
         public int getBitStringAsInt() throws IOException {
             byte[] bits = getBitString();
@@ -253,6 +292,8 @@ public class DerParser {
 
         /**
          * Get this value as an IA5String.
+         * @return the IA5 string
+         * @throws IOException if parsing fails
          */
         public String getIA5String() throws IOException {
             if (tag != TAG_IA5_STRING) {
@@ -263,6 +304,8 @@ public class DerParser {
 
         /**
          * Get this value as a UTF8String.
+         * @return the UTF-8 string
+         * @throws IOException if parsing fails
          */
         public String getUTF8String() throws IOException {
             if (tag != TAG_UTF8_STRING) {
@@ -273,6 +316,8 @@ public class DerParser {
 
         /**
          * Get this value as a PrintableString.
+         * @return the printable string
+         * @throws IOException if parsing fails
          */
         public String getPrintableString() throws IOException {
             if (tag != TAG_PRINTABLE_STRING) {
@@ -283,6 +328,8 @@ public class DerParser {
 
         /**
          * Get this value as a VisibleString.
+         * @return the visible string
+         * @throws IOException if parsing fails
          */
         public String getVisibleString() throws IOException {
             if (tag != TAG_VISIBLE_STRING) {
@@ -293,6 +340,8 @@ public class DerParser {
 
         /**
          * Get this value as any string type.
+         * @return the decoded string
+         * @throws IOException if parsing fails
          */
         public String getString() throws IOException {
             switch (tag) {
@@ -312,6 +361,8 @@ public class DerParser {
 
         /**
          * Get this value as an OBJECT IDENTIFIER string (dotted notation).
+         * @return OID in dotted notation (e.g. "1.2.840.113549")
+         * @throws IOException if parsing fails
          */
         public String getObjectIdentifier() throws IOException {
             if (tag != TAG_OBJECT_IDENTIFIER) {
@@ -322,6 +373,8 @@ public class DerParser {
 
         /**
          * Get this value as an INTEGER.
+         * @return the integer value
+         * @throws IOException if parsing fails
          */
         public BigInteger getInteger() throws IOException {
             if (tag != TAG_INTEGER) {
@@ -332,6 +385,8 @@ public class DerParser {
 
         /**
          * Get this value as an ENUMERATED.
+         * @return the enumerated value
+         * @throws IOException if parsing fails
          */
         public BigInteger getEnumerated() throws IOException {
             if (tag != TAG_ENUMERATED) {
@@ -342,6 +397,8 @@ public class DerParser {
 
         /**
          * Get this value as a small integer (handles both INTEGER and ENUMERATED).
+         * @return the int value
+         * @throws IOException if parsing fails
          */
         public int getIntValue() throws IOException {
             if (tag == TAG_INTEGER || tag == TAG_ENUMERATED) {
@@ -352,6 +409,8 @@ public class DerParser {
 
         /**
          * Get this value as a long integer (handles both INTEGER and ENUMERATED).
+         * @return the long value
+         * @throws IOException if parsing fails
          */
         public long getLongValue() throws IOException {
             if (tag == TAG_INTEGER || tag == TAG_ENUMERATED) {
@@ -362,6 +421,8 @@ public class DerParser {
 
         /**
          * Get this value as an ENUMERATED int value.
+         * @return the enum int value
+         * @throws IOException if parsing fails
          */
         public int getEnumValue() throws IOException {
             return getEnumerated().intValue();
@@ -369,6 +430,8 @@ public class DerParser {
 
         /**
          * Get this value as a BOOLEAN.
+         * @return the boolean value
+         * @throws IOException if parsing fails
          */
         public boolean getBoolean() throws IOException {
             if (tag != TAG_BOOLEAN) {
@@ -382,6 +445,8 @@ public class DerParser {
 
         /**
          * Get the inner content of a context-specific tagged value.
+         * @return the inner DerValue
+         * @throws IOException if parsing fails
          */
         public DerValue getTaggedObject() throws IOException {
             if (!isContextSpecific()) {
@@ -398,6 +463,8 @@ public class DerParser {
 
         /**
          * Get the inner content of a context-specific tagged value as a sequence.
+         * @return list of child DerValues
+         * @throws IOException if parsing fails
          */
         public List<DerValue> getTaggedSequence() throws IOException {
             if (!isContextSpecific()) {
@@ -409,6 +476,7 @@ public class DerParser {
         /**
          * Try to get string content from this value, handling various tags.
          * Useful for Subject Alternative Names and other string-like values.
+         * @return the decoded string value
          */
         public String getStringValue() {
             // Handle common string types and context-specific tags
@@ -469,6 +537,8 @@ public class DerParser {
 
     /**
      * Encode an OID string to DER bytes.
+     * @param oid OID in dotted notation (e.g. "1.2.840.113549")
+     * @return DER-encoded OID bytes
      */
     public static byte[] encodeOid(String oid) {
         String[] parts = oid.split("\\.");
@@ -520,6 +590,8 @@ public class DerParser {
 
     /**
      * Convert a byte array to a hex string.
+     * @param data the bytes to convert
+     * @return colon-separated hex string
      */
     public static String toHex(byte[] data) {
         StringBuilder sb = new StringBuilder();

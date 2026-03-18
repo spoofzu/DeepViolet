@@ -26,8 +26,14 @@ import com.mps.deepviolet.api.IX509Certificate;
  * java -jar dvvalidate.jar google.com
  * java -jar dvvalidate.jar --json expired.badssl.com
  * </pre>
+ *
+ * @see OpensslRunner
+ * @see FieldNormalizer
  */
 public class ApiValidator {
+
+    /** Creates a new validator instance. */
+    public ApiValidator() {}
 
     private static final Logger logger = LoggerFactory.getLogger("com.mps.deepviolet.validate.ApiValidator");
 
@@ -58,6 +64,8 @@ public class ApiValidator {
 
     /**
      * Standalone JAR entry point.
+     *
+     * @param args command-line arguments: {@code <host> [--port <port>] [--json] [--help]}
      */
     public static void main(String[] args) {
         redirectLogbackToStderr();
@@ -139,6 +147,9 @@ public class ApiValidator {
 
     /**
      * Validate one server on port 443.
+     *
+     * @param host hostname to validate
+     * @return comparison result with field-by-field match details
      */
     public ComparisonResult validate(String host) {
         return validate(host, 443);
@@ -146,6 +157,10 @@ public class ApiValidator {
 
     /**
      * Validate one server on a custom port.
+     *
+     * @param host hostname to validate
+     * @param port TCP port to connect to
+     * @return comparison result with field-by-field match details
      */
     public ComparisonResult validate(String host, int port) {
         redirectLogbackToStderr();
@@ -362,6 +377,9 @@ public class ApiValidator {
 
     /**
      * Prints the formatted comparison table to a PrintStream.
+     *
+     * @param result comparison result to display
+     * @param out    stream to write the table to
      */
     public void printResult(ComparisonResult result, PrintStream out) {
         out.println();
@@ -406,6 +424,9 @@ public class ApiValidator {
 
     /**
      * Prints the result as JSON.
+     *
+     * @param result comparison result to serialize
+     * @param out    stream to write the JSON to
      */
     public void printJson(ComparisonResult result, PrintStream out) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();

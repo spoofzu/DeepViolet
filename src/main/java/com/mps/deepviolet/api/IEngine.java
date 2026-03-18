@@ -2,6 +2,7 @@ package com.mps.deepviolet.api;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
 
 import com.mps.deepviolet.api.ai.AiConfig;
 import com.mps.deepviolet.api.scoring.rules.RuleContext;
@@ -85,13 +86,13 @@ public interface IEngine {
 	boolean isDeepVioletSnapShot();
 
 	/**
-	 * Compute TLS server fingerprint for the target host.
+	 * Compute TLS probe fingerprint for the target host.
 	 *
-	 * <p>TLS server fingerprinting analyzes how a server responds to 10 different
-	 * ClientHello probes to create a 62-character fingerprint that characterizes
+	 * <p>TLS probe fingerprinting analyzes how a server responds to 10 different
+	 * ClientHello probes to create a 30-character probe fingerprint that characterizes
 	 * the server's TLS selection behavior.</p>
 	 *
-	 * <p><b>What Fingerprints Identify</b></p>
+	 * <p><b>What Probe Fingerprints Identify</b></p>
 	 * <ul>
 	 *   <li>Server's cipher selection behavior</li>
 	 *   <li>Extension ordering in responses</li>
@@ -99,7 +100,7 @@ public interface IEngine {
 	 *   <li>Deployment-specific configuration</li>
 	 * </ul>
 	 *
-	 * <p><b>What Fingerprints Do NOT Identify</b></p>
+	 * <p><b>What Probe Fingerprints Do NOT Identify</b></p>
 	 * <ul>
 	 *   <li>Specific software (nginx, Apache, etc.)</li>
 	 *   <li>Software version</li>
@@ -108,7 +109,7 @@ public interface IEngine {
 	 *
 	 * <p>Technique inspired by Salesforce's JARM.</p>
 	 *
-	 * @return 62-character TLS fingerprint, or null if unavailable
+	 * @return 30-character TLS probe fingerprint, or null if unavailable
 	 * @throws DeepVioletException Thrown on problems computing fingerprint
 	 * @see com.mps.deepviolet.api.fingerprint.TlsServerFingerprint
 	 */
@@ -139,6 +140,52 @@ public interface IEngine {
 	 * @throws DeepVioletException Thrown on problems performing the test
 	 */
 	Boolean getFallbackScsvSupported() throws DeepVioletException;
+
+	/**
+	 * Test whether the server supports post-quantum key exchange.
+	 *
+	 * <p>Probes each known PQ group individually and returns true if the
+	 * server supports at least one.</p>
+	 *
+	 * @return true if PQ key exchange is supported, false if not,
+	 *         null if the test was inconclusive (e.g. non-TLS 1.3 server)
+	 * @throws DeepVioletException Thrown on problems performing the test
+	 */
+	Boolean getPqKeyExchangeSupported() throws DeepVioletException;
+
+	/**
+	 * Get the list of post-quantum key exchange group names supported by the server.
+	 *
+	 * <p>Probes each known PQ group individually and returns the names of
+	 * those the server accepted (e.g. "X25519MLKEM768").</p>
+	 *
+	 * @return list of supported PQ group names (may be empty), or null if
+	 *         the test was inconclusive (e.g. non-TLS 1.3 server)
+	 * @throws DeepVioletException Thrown on problems performing the test
+	 */
+	java.util.List<String> getPqKeyExchangeGroups() throws DeepVioletException;
+
+	/**
+	 * Test whether the server prefers post-quantum key exchange when offered
+	 * both PQ hybrid and classical groups.
+	 *
+	 * <p>Sends a preference probe with PQ groups listed first and classical
+	 * groups as fallback, then checks whether the server selects a PQ group.</p>
+	 *
+	 * @return true if the server prefers PQ, false if it prefers classical,
+	 *         null if inconclusive (e.g. non-TLS 1.3 server, network error)
+	 * @throws DeepVioletException Thrown on problems performing the test
+	 */
+	Boolean getPqKeyExchangePreferred() throws DeepVioletException;
+
+	/**
+	 * Get the name of the key exchange group the server prefers when offered
+	 * both PQ hybrid and classical groups.
+	 *
+	 * @return group name (e.g. "X25519MLKEM768"), or null if inconclusive
+	 * @throws DeepVioletException Thrown on problems performing the test
+	 */
+	String getPqPreferredGroup() throws DeepVioletException;
 
 	/**
 	 * Get DNS security status for the target host.
@@ -187,6 +234,16 @@ public interface IEngine {
 	 * @throws DeepVioletException Thrown on problems computing score
 	 */
 	IRiskScore getRiskScore() throws DeepVioletException;
+
+	/**
+	 * Compute risk score with knowledge of which scan sections failed.
+	 * Failed sections produce inconclusive deductions in the score.
+	 *
+	 * @param failedSections sections that failed after all retry attempts
+	 * @return Risk score with per-category breakdowns and letter grade
+	 * @throws DeepVioletException Thrown on problems computing score
+	 */
+	IRiskScore getRiskScore(Set<ScanSection> failedSections) throws DeepVioletException;
 
 	/**
 	 * Compute a TLS risk score using a custom YAML rules file.

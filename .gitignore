@@ -22,8 +22,10 @@ CLAUDE.md
 # Serena
 .serena/
 
-# Javadoc (generated output lives in docs/javadocs/)
+# Javadoc generated output (keep docs/javadocs/ folder for local generation)
 /javadocs/
+docs/javadocs/*
+!docs/javadocs/.gitkeep
 
 # Maven
 target/

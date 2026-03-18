@@ -205,6 +205,8 @@ public final class TlsScanner {
 
 	/**
 	 * Scan a single host through all enabled sections.
+	 * Sections are retried per the config's retry policy. RISK_SCORING
+	 * runs last so it has full knowledge of which sections failed.
 	 */
 	private static ScanResult scanSingleHost(URL url, ScanConfig config,
 												IScanListener listener,
@@ -214,6 +216,7 @@ public final class TlsScanner {
 
 		ISession session = null;
 		IEngine eng = null;
+		RetryPolicy retryPolicy = config.toRetryPolicy();
 
 		// Create a BackgroundTask that bridges to the listener
 		BackgroundTask bridgeTask = new BackgroundTask() {
@@ -226,22 +229,24 @@ public final class TlsScanner {
 		};
 
 		try {
-			// 1. SESSION_INIT
+			// 1. SESSION_INIT (critical — re-throws on failure)
 			if (config.getEnabledSections().contains(ScanSection.SESSION_INIT)) {
 				executeSection(threadStatus, ScanSection.SESSION_INIT, listener, url);
-				session = DeepVioletFactory.initializeSession(url);
+				session = retryCriticalSection(retryPolicy, bridgeTask, () ->
+						DeepVioletFactory.initializeSession(url));
 				result.setSession(session);
 				result.addCompletedSection(ScanSection.SESSION_INIT);
 				sectionDelay(config, threadStatus);
 			}
 
-			// 2. CIPHER_ENUMERATION
+			// 2. CIPHER_ENUMERATION (critical — re-throws on failure)
 			if (session != null && config.getEnabledSections().contains(ScanSection.CIPHER_ENUMERATION)) {
 				executeSection(threadStatus, ScanSection.CIPHER_ENUMERATION, listener, url);
-				eng = DeepVioletFactory.getEngine(session, config.getCipherNameConvention(),
-						bridgeTask, config.getEnabledProtocols());
+				final ISession sessionRef = session;
+				eng = retryCriticalSection(retryPolicy, bridgeTask, () ->
+						DeepVioletFactory.getEngine(sessionRef, config.getCipherNameConvention(),
+								bridgeTask, config.getEnabledProtocols()));
 				result.setEngine(eng);
-				// getCipherSuites is performed during DeepVioletEngine construction via getServerMetadataInstance
 				result.addCompletedSection(ScanSection.CIPHER_ENUMERATION);
 				sectionDelay(config, threadStatus);
 			}
@@ -249,62 +254,56 @@ public final class TlsScanner {
 			// 3. CERTIFICATE_RETRIEVAL
 			if (eng != null && config.getEnabledSections().contains(ScanSection.CERTIFICATE_RETRIEVAL)) {
 				executeSection(threadStatus, ScanSection.CERTIFICATE_RETRIEVAL, listener, url);
-				try {
-					eng.getCertificate();
+				if (retrySection(retryPolicy, bridgeTask, ScanSection.CERTIFICATE_RETRIEVAL,
+						url, result, listener, eng::getCertificate)) {
 					result.addCompletedSection(ScanSection.CERTIFICATE_RETRIEVAL);
-				} catch (DeepVioletException e) {
-					logger.warn("Certificate retrieval failed for {}: {}", url, e.getMessage());
 				}
 				sectionDelay(config, threadStatus);
 			}
 
-			// 4. RISK_SCORING
+			// 4. TLS_FINGERPRINT
+			if (eng != null && config.getEnabledSections().contains(ScanSection.TLS_FINGERPRINT)) {
+				executeSection(threadStatus, ScanSection.TLS_FINGERPRINT, listener, url);
+				if (retrySection(retryPolicy, bridgeTask, ScanSection.TLS_FINGERPRINT,
+						url, result, listener, eng::getTlsFingerprint)) {
+					result.addCompletedSection(ScanSection.TLS_FINGERPRINT);
+				}
+				sectionDelay(config, threadStatus);
+			}
+
+			// 5. DNS_SECURITY
+			if (eng != null && config.getEnabledSections().contains(ScanSection.DNS_SECURITY)) {
+				executeSection(threadStatus, ScanSection.DNS_SECURITY, listener, url);
+				if (retrySection(retryPolicy, bridgeTask, ScanSection.DNS_SECURITY,
+						url, result, listener, eng::getDnsStatus)) {
+					result.addCompletedSection(ScanSection.DNS_SECURITY);
+				}
+				sectionDelay(config, threadStatus);
+			}
+
+			// 6. REVOCATION_CHECK
+			if (eng != null && config.getEnabledSections().contains(ScanSection.REVOCATION_CHECK)) {
+				executeSection(threadStatus, ScanSection.REVOCATION_CHECK, listener, url);
+				if (retrySection(retryPolicy, bridgeTask, ScanSection.REVOCATION_CHECK,
+						url, result, listener, () -> {
+							X509Certificate cert = CipherSuiteUtil.getServerCertificate(url);
+							X509Certificate[] chain = CipherSuiteUtil.getServerCertificateChain(url);
+							X509Certificate issuer = (chain.length > 1) ? chain[1] : cert;
+							RevocationChecker.check(cert, issuer);
+						})) {
+					result.addCompletedSection(ScanSection.REVOCATION_CHECK);
+				}
+				sectionDelay(config, threadStatus);
+			}
+
+			// 7. RISK_SCORING (last — uses failedSections for unevaluable deductions)
 			if (eng != null && config.getEnabledSections().contains(ScanSection.RISK_SCORING)) {
 				executeSection(threadStatus, ScanSection.RISK_SCORING, listener, url);
 				try {
-					eng.getRiskScore();
+					eng.getRiskScore(result.getFailedSections());
 					result.addCompletedSection(ScanSection.RISK_SCORING);
 				} catch (DeepVioletException e) {
 					logger.warn("Risk scoring failed for {}: {}", url, e.getMessage());
-				}
-				sectionDelay(config, threadStatus);
-			}
-
-			// 5. TLS_FINGERPRINT
-			if (eng != null && config.getEnabledSections().contains(ScanSection.TLS_FINGERPRINT)) {
-				executeSection(threadStatus, ScanSection.TLS_FINGERPRINT, listener, url);
-				try {
-					eng.getTlsFingerprint();
-					result.addCompletedSection(ScanSection.TLS_FINGERPRINT);
-				} catch (DeepVioletException e) {
-					logger.warn("TLS fingerprint failed for {}: {}", url, e.getMessage());
-				}
-				sectionDelay(config, threadStatus);
-			}
-
-			// 6. DNS_SECURITY
-			if (eng != null && config.getEnabledSections().contains(ScanSection.DNS_SECURITY)) {
-				executeSection(threadStatus, ScanSection.DNS_SECURITY, listener, url);
-				try {
-					eng.getDnsStatus();
-					result.addCompletedSection(ScanSection.DNS_SECURITY);
-				} catch (DeepVioletException e) {
-					logger.warn("DNS security check failed for {}: {}", url, e.getMessage());
-				}
-				sectionDelay(config, threadStatus);
-			}
-
-			// 7. REVOCATION_CHECK
-			if (eng != null && config.getEnabledSections().contains(ScanSection.REVOCATION_CHECK)) {
-				executeSection(threadStatus, ScanSection.REVOCATION_CHECK, listener, url);
-				try {
-					X509Certificate cert = CipherSuiteUtil.getServerCertificate(url);
-					X509Certificate[] chain = CipherSuiteUtil.getServerCertificateChain(url);
-					X509Certificate issuer = (chain.length > 1) ? chain[1] : cert;
-					RevocationChecker.check(cert, issuer);
-					result.addCompletedSection(ScanSection.REVOCATION_CHECK);
-				} catch (Exception e) {
-					logger.warn("Revocation check failed for {}: {}", url, e.getMessage());
 				}
 			}
 
@@ -318,6 +317,33 @@ public final class TlsScanner {
 
 		result.setEndTime(Instant.now());
 		return result;
+	}
+
+	/**
+	 * Retry a non-critical section. Returns true on success, false on failure.
+	 * On failure, records the section as failed and fires the listener.
+	 */
+	private static boolean retrySection(RetryPolicy policy, BackgroundTask bg,
+										ScanSection section, URL url,
+										ScanResult result, IScanListener listener,
+										RetryPolicy.RunnableWithException task) {
+		try {
+			policy.executeVoid(task, bg);
+			return true;
+		} catch (Exception e) {
+			logger.warn("{} failed for {} after retries: {}", section.getDisplayName(), url, e.getMessage());
+			result.addFailedSection(section);
+			listener.onSectionFailed(url, section, policy.getMaxRetries() + 1, e);
+			return false;
+		}
+	}
+
+	/**
+	 * Retry a critical section. Re-throws on failure (aborts host scan).
+	 */
+	private static <T> T retryCriticalSection(RetryPolicy policy, BackgroundTask bg,
+											  java.util.concurrent.Callable<T> task) throws Exception {
+		return policy.execute(task, bg);
 	}
 
 	private static void executeSection(ThreadStatus threadStatus, ScanSection section,

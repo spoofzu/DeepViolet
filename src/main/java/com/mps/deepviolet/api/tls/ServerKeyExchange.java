@@ -35,7 +35,15 @@ public class ServerKeyExchange {
         NAMED_CURVES[0x0016] = "secp224r1";
     }
 
-    public enum KexType { DHE, ECDHE, UNKNOWN }
+    /** Key exchange type. */
+    public enum KexType {
+        /** Diffie-Hellman Ephemeral. */
+        DHE,
+        /** Elliptic Curve Diffie-Hellman Ephemeral. */
+        ECDHE,
+        /** Unknown key exchange type. */
+        UNKNOWN
+    }
 
     private final KexType kexType;
     private final int dhPrimeSizeBits;
@@ -135,8 +143,16 @@ public class ServerKeyExchange {
                 || cs == 0x009C || cs == 0x009D;
     }
 
+    /** Returns the key exchange type.
+     *  @return key exchange type */
     public KexType getKexType() { return kexType; }
+    /** Returns the DH prime size in bits (0 for ECDHE).
+     *  @return DH prime size in bits */
     public int getDhPrimeSizeBits() { return dhPrimeSizeBits; }
+    /** Returns the EC curve identifier (0 for DHE).
+     *  @return EC named curve ID */
     public int getEcCurveId() { return ecCurveId; }
+    /** Returns the EC curve name, or null.
+     *  @return EC curve name */
     public String getEcCurveName() { return ecCurveName; }
 }

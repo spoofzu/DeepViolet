@@ -35,17 +35,24 @@ public class OcspClient {
     // Default timeout for network operations
     private static final int DEFAULT_TIMEOUT_MS = 8000;
 
-    // OCSP response status codes
+    /** OCSP response status: successful. */
     public static final int OCSP_SUCCESSFUL = 0;
+    /** OCSP response status: malformed request. */
     public static final int OCSP_MALFORMED_REQUEST = 1;
+    /** OCSP response status: internal error. */
     public static final int OCSP_INTERNAL_ERROR = 2;
+    /** OCSP response status: try later. */
     public static final int OCSP_TRY_LATER = 3;
+    /** OCSP response status: signature required. */
     public static final int OCSP_SIG_REQUIRED = 5;
+    /** OCSP response status: unauthorized. */
     public static final int OCSP_UNAUTHORIZED = 6;
 
-    // Certificate status values
+    /** Certificate status: good (not revoked). */
     public static final int CERT_STATUS_GOOD = 0;
+    /** Certificate status: revoked. */
     public static final int CERT_STATUS_REVOKED = 1;
+    /** Certificate status: unknown. */
     public static final int CERT_STATUS_UNKNOWN = 2;
 
     // OIDs
@@ -62,6 +69,7 @@ public class OcspClient {
 
     /**
      * Set the network timeout in milliseconds.
+     * @param timeoutMs timeout in milliseconds
      */
     public void setTimeoutMs(int timeoutMs) {
         this.timeoutMs = timeoutMs;
@@ -712,10 +720,15 @@ public class OcspClient {
      * Certificate status from OCSP check.
      */
     public enum Status {
+        /** Certificate is not revoked. */
         GOOD,
+        /** Certificate has been revoked. */
         REVOKED,
+        /** Revocation status is unknown. */
         UNKNOWN,
+        /** An error occurred during the check. */
         ERROR,
+        /** Revocation has not been checked. */
         NOT_CHECKED
     }
 
@@ -723,18 +736,30 @@ public class OcspClient {
      * OCSP response details.
      */
     public static class OcspResponse {
+        /** Creates an OcspResponse with default NOT_CHECKED status. */
+        public OcspResponse() {}
+        /** OCSP certificate status. */
         public Status status = Status.NOT_CHECKED;
+        /** URL of the OCSP responder. */
         public String responderUrl;
+        /** Response time in milliseconds. */
         public long responseTimeMs;
+        /** When the status was last confirmed. */
         public Date thisUpdate;
+        /** When the status should next be checked. */
         public Date nextUpdate;
+        /** When the certificate was revoked, if applicable. */
         public Date revocationTime;
+        /** Revocation reason, if applicable. */
         public String revocationReason;
+        /** Whether the OCSP response signature is valid. */
         public Boolean signatureValid;
+        /** Error message, if an error occurred. */
         public String errorMessage;
 
         /**
          * Format thisUpdate as ISO-8601 string.
+         * @return ISO-8601 formatted date string, or null
          */
         public String getThisUpdateString() {
             if (thisUpdate == null) return null;
@@ -743,6 +768,7 @@ public class OcspClient {
 
         /**
          * Format nextUpdate as ISO-8601 string.
+         * @return ISO-8601 formatted date string, or null
          */
         public String getNextUpdateString() {
             if (nextUpdate == null) return null;
@@ -751,6 +777,7 @@ public class OcspClient {
 
         /**
          * Format revocationTime as ISO-8601 string.
+         * @return ISO-8601 formatted date string, or null
          */
         public String getRevocationTimeString() {
             if (revocationTime == null) return null;

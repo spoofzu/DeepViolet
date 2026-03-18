@@ -6,8 +6,11 @@ package com.mps.deepviolet.api.ai;
  * @author Milton Smith
  */
 public enum AiProvider {
+	/** Anthropic Claude API provider. */
 	ANTHROPIC("Anthropic"),
+	/** OpenAI ChatGPT API provider. */
 	OPENAI("OpenAI"),
+	/** Local Ollama API provider. */
 	OLLAMA("Ollama");
 
 	private final String displayName;
@@ -16,6 +19,11 @@ public enum AiProvider {
 		this.displayName = displayName;
 	}
 
+	/**
+	 * Returns the human-readable provider name.
+	 *
+	 * @return the display name
+	 */
 	public String getDisplayName() {
 		return displayName;
 	}

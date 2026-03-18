@@ -254,6 +254,10 @@ public class RiskScorerTest {
 		// TLS metadata (null = unavailable, rules become inconclusive)
 		when(engine.getTlsMetadata()).thenReturn(null);
 		when(engine.getFallbackScsvSupported()).thenReturn(true);
+		when(engine.getPqKeyExchangeSupported()).thenReturn(true);
+		when(engine.getPqKeyExchangeGroups()).thenReturn(java.util.List.of("X25519MLKEM768"));
+		when(engine.getPqKeyExchangePreferred()).thenReturn(true);
+		when(engine.getPqPreferredGroup()).thenReturn("X25519MLKEM768");
 
 		// DNS security: mock with CAA and TLSA present
 		IDnsStatus dnsStatus = mock(IDnsStatus.class);

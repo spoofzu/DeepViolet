@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class CertificateMessage {
 
-    // OID for SCT extension in X.509 certificates
+    /** OID for SCT extension in X.509 certificates. */
     public static final String SCT_X509_OID = "1.3.6.1.4.1.11129.2.4.2";
 
     private final List<X509Certificate> certificateChain;
@@ -42,6 +42,7 @@ public class CertificateMessage {
      * Parse a Certificate message from raw bytes.
      * @param data The Certificate message body (without handshake header)
      * @param isTLS13 Whether this is a TLS 1.3 Certificate message
+     * @throws TlsException if the message is malformed or cannot be parsed
      */
     public CertificateMessage(byte[] data, boolean isTLS13) throws TlsException {
         this.isTLS13 = isTLS13;
@@ -230,6 +231,7 @@ public class CertificateMessage {
 
     /**
      * Get the certificate chain (leaf certificate first).
+     * @return unmodifiable list of certificates
      */
     public List<X509Certificate> getCertificateChain() {
         return Collections.unmodifiableList(certificateChain);
@@ -237,6 +239,7 @@ public class CertificateMessage {
 
     /**
      * Get the end-entity (leaf) certificate.
+     * @return the leaf certificate, or null if the chain is empty
      */
     public X509Certificate getEndEntityCertificate() {
         return certificateChain.isEmpty() ? null : certificateChain.get(0);
@@ -245,6 +248,7 @@ public class CertificateMessage {
     /**
      * Get SCTs embedded in X.509 certificate extensions.
      * Each entry is the raw SCT list bytes.
+     * @return defensive copy of embedded SCT byte arrays
      */
     public List<byte[]> getEmbeddedSCTs() {
         List<byte[]> result = new ArrayList<>();
@@ -257,6 +261,7 @@ public class CertificateMessage {
     /**
      * Get SCTs from TLS extensions (TLS 1.3 only).
      * Each entry is the raw SCT list bytes.
+     * @return defensive copy of TLS extension SCT byte arrays
      */
     public List<byte[]> getTlsExtensionSCTs() {
         List<byte[]> result = new ArrayList<>();
@@ -268,6 +273,7 @@ public class CertificateMessage {
 
     /**
      * Get all SCTs from all sources (X.509 extension and TLS extension).
+     * @return combined list of SCT byte arrays from all sources
      */
     public List<byte[]> getAllSCTs() {
         List<byte[]> all = new ArrayList<>();
@@ -278,17 +284,21 @@ public class CertificateMessage {
 
     /**
      * Check if any SCTs were found.
+     * @return true if embedded or TLS extension SCTs are present
      */
     public boolean hasSCTs() {
         return !embeddedSCTs.isEmpty() || !tlsExtensionSCTs.isEmpty();
     }
 
+    /** Returns whether this is a TLS 1.3 Certificate message.
+     *  @return true if this is a TLS 1.3 Certificate message */
     public boolean isTLS13() {
         return isTLS13;
     }
 
     /**
      * Get the number of certificates in the chain.
+     * @return certificate count
      */
     public int getCertificateCount() {
         return certificateChain.size();

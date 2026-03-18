@@ -113,7 +113,7 @@ public class TlsScannerTest {
 		assertEquals("Cipher suite enumeration", ScanSection.CIPHER_ENUMERATION.getDisplayName());
 		assertEquals("Certificate retrieval", ScanSection.CERTIFICATE_RETRIEVAL.getDisplayName());
 		assertEquals("Risk scoring", ScanSection.RISK_SCORING.getDisplayName());
-		assertEquals("TLS fingerprinting", ScanSection.TLS_FINGERPRINT.getDisplayName());
+		assertEquals("TLS probe fingerprinting", ScanSection.TLS_FINGERPRINT.getDisplayName());
 		assertEquals("DNS security check", ScanSection.DNS_SECURITY.getDisplayName());
 		assertEquals("Revocation check", ScanSection.REVOCATION_CHECK.getDisplayName());
 	}

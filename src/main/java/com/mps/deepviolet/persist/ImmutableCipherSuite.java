@@ -13,6 +13,13 @@ public class ImmutableCipherSuite implements ICipherSuite {
 	private final String strength;
 	private final String protocol;
 
+	/**
+	 * Creates an immutable cipher suite from deserialized fields.
+	 *
+	 * @param name     the IANA cipher suite name
+	 * @param strength the strength evaluation
+	 * @param protocol the handshake protocol version
+	 */
 	public ImmutableCipherSuite(String name, String strength, String protocol) {
 		this.name = name;
 		this.strength = strength;

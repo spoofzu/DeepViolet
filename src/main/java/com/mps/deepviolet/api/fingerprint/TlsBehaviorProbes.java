@@ -23,6 +23,8 @@ import com.mps.deepviolet.api.tls.ClientHelloConfig;
  */
 public class TlsBehaviorProbes {
 
+    private TlsBehaviorProbes() {}
+
     /**
      * Total number of behavior probes.
      */
@@ -48,25 +50,25 @@ public class TlsBehaviorProbes {
     public static String getProbeDescription(int probeNumber) {
         switch (probeNumber) {
             case 1:
-                return "TLS 1.2 standard cipher order";
-            case 2:
-                return "TLS 1.2 reverse cipher order";
-            case 3:
-                return "TLS 1.2 with ALPN h2";
-            case 4:
-                return "TLS 1.2 no ECC support";
-            case 5:
                 return "TLS 1.1 only";
+            case 2:
+                return "TLS 1.2 standard cipher order";
+            case 3:
+                return "TLS 1.2 reverse cipher order";
+            case 4:
+                return "TLS 1.2 with ALPN h2";
+            case 5:
+                return "TLS 1.2 no ECC support";
             case 6:
-                return "TLS 1.3 only (TLS 1.3 ciphers)";
-            case 7:
-                return "TLS 1.3 with TLS 1.2 fallback";
-            case 8:
-                return "TLS 1.3 with ALPN h2";
-            case 9:
-                return "TLS 1.3 reverse cipher order";
-            case 10:
                 return "TLS 1.2 forward secrecy only";
+            case 7:
+                return "TLS 1.3 only (TLS 1.3 ciphers)";
+            case 8:
+                return "TLS 1.3 with TLS 1.2 fallback";
+            case 9:
+                return "TLS 1.3 with ALPN h2";
+            case 10:
+                return "TLS 1.3 reverse cipher order";
             default:
                 return "Unknown probe";
         }

@@ -110,7 +110,7 @@ class RulePolicyLoaderTest {
 		RulePolicy policy = loadBundled();
 		CategoryDefinition protocols = findCategory(policy, "PROTOCOLS");
 		assertEquals("Protocols & Connections", protocols.displayName());
-		assertEquals(10, protocols.rules().size());
+		assertEquals(15, protocols.rules().size());
 
 		RuleDefinition sslv2 = findRule(protocols, "sslv2_supported");
 		assertEquals("SYS-0000100", sslv2.id());
@@ -145,14 +145,14 @@ class RulePolicyLoaderTest {
 	void testCertificateCategoryDetails() {
 		RulePolicy policy = loadBundled();
 		CategoryDefinition cert = findCategory(policy, "CERTIFICATE");
-		assertEquals(16, cert.rules().size());
+		assertEquals(17, cert.rules().size());
 	}
 
 	@Test
 	void testRevocationCategoryDetails() {
 		RulePolicy policy = loadBundled();
 		CategoryDefinition rev = findCategory(policy, "REVOCATION");
-		assertEquals(6, rev.rules().size());
+		assertEquals(7, rev.rules().size());
 
 		// Check inconclusive rule
 		RuleDefinition errors = findRule(rev, "revocation_check_errors");
@@ -175,7 +175,7 @@ class RulePolicyLoaderTest {
 	void testOtherCategoryDetails() {
 		RulePolicy policy = loadBundled();
 		CategoryDefinition other = findCategory(policy, "OTHER");
-		assertEquals(6, other.rules().size());
+		assertEquals(7, other.rules().size());
 
 		RuleDefinition fingerprint = findRule(other, "fingerprint_unavailable");
 		assertTrue(fingerprint.inconclusive());
@@ -488,6 +488,13 @@ class RulePolicyLoaderTest {
 			for (RuleDefinition rule : cat.rules()) {
 				assertNotNull(rule.meta(),
 						"Rule " + rule.ruleId() + " should have non-null meta");
+				// pq_kex_available and pq_kex_negotiated have meta for group interpolation
+				if ("pq_kex_available".equals(rule.ruleId())
+						|| "pq_kex_negotiated".equals(rule.ruleId())) {
+					assertFalse(rule.meta().isEmpty(),
+							"Rule " + rule.ruleId() + " should have non-empty meta");
+					continue;
+				}
 				assertTrue(rule.meta().isEmpty(),
 						"Rule " + rule.ruleId() + " should have empty meta but had: " + rule.meta());
 			}

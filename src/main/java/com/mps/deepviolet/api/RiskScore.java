@@ -19,6 +19,11 @@ public class RiskScore implements IRiskScore {
 
 	/**
 	 * Construct from enum-keyed map (backward compatible).
+	 * @param totalScore overall score 0-100
+	 * @param letterGrade letter grade
+	 * @param riskLevel risk level
+	 * @param hostUrl scanned host URL
+	 * @param categoryScores per-category scores keyed by enum
 	 */
 	public RiskScore(int totalScore, LetterGrade letterGrade, RiskLevel riskLevel,
 				String hostUrl, Map<ScoreCategory, ICategoryScore> categoryScores) {
@@ -35,6 +40,11 @@ public class RiskScore implements IRiskScore {
 
 	/**
 	 * Construct from string-keyed map (supports custom categories).
+	 * @param totalScore overall score 0-100
+	 * @param letterGrade letter grade
+	 * @param riskLevel risk level
+	 * @param hostUrl scanned host URL
+	 * @param categoryScoresByKey per-category scores keyed by string
 	 */
 	public RiskScore(int totalScore, LetterGrade letterGrade, RiskLevel riskLevel,
 				String hostUrl, LinkedHashMap<String, ICategoryScore> categoryScoresByKey) {
@@ -43,6 +53,12 @@ public class RiskScore implements IRiskScore {
 
 	/**
 	 * Construct from string-keyed map with diagnostics.
+	 * @param totalScore overall score 0-100
+	 * @param letterGrade letter grade
+	 * @param riskLevel risk level
+	 * @param hostUrl scanned host URL
+	 * @param categoryScoresByKey per-category scores keyed by string
+	 * @param diagnostics scoring diagnostics
 	 */
 	public RiskScore(int totalScore, LetterGrade letterGrade, RiskLevel riskLevel,
 				String hostUrl, LinkedHashMap<String, ICategoryScore> categoryScoresByKey,
@@ -107,6 +123,15 @@ public class RiskScore implements IRiskScore {
 		private final int line;
 		private final int column;
 
+		/**
+		 * Construct a scoring diagnostic.
+		 * @param ruleId rule identifier
+		 * @param category category name
+		 * @param level diagnostic level
+		 * @param message diagnostic message
+		 * @param line line number (0 if N/A)
+		 * @param column column number (0 if N/A)
+		 */
 		public ScoringDiagnostic(String ruleId, String category, Level level,
 				String message, int line, int column) {
 			this.ruleId = ruleId;
@@ -155,6 +180,12 @@ public class RiskScore implements IRiskScore {
 
 		/**
 		 * Construct for a built-in category.
+		 * @param category score category enum
+		 * @param score category score 0-100
+		 * @param riskLevel risk level
+		 * @param displayName display name
+		 * @param summary summary text
+		 * @param deductions score deductions
 		 */
 		public CategoryScore(ScoreCategory category, int score,
 						RiskLevel riskLevel, String displayName, String summary,
@@ -165,6 +196,12 @@ public class RiskScore implements IRiskScore {
 
 		/**
 		 * Construct for a custom (user-defined) category.
+		 * @param categoryKey category key string
+		 * @param score category score 0-100
+		 * @param riskLevel risk level
+		 * @param displayName display name
+		 * @param summary summary text
+		 * @param deductions score deductions
 		 */
 		public CategoryScore(String categoryKey, int score,
 						RiskLevel riskLevel, String displayName, String summary,
@@ -175,6 +212,13 @@ public class RiskScore implements IRiskScore {
 
 		/**
 		 * Construct for a custom category with diagnostics.
+		 * @param categoryKey category key string
+		 * @param score category score 0-100
+		 * @param riskLevel risk level
+		 * @param displayName display name
+		 * @param summary summary text
+		 * @param deductions score deductions
+		 * @param diagnostics scoring diagnostics
 		 */
 		public CategoryScore(String categoryKey, int score,
 						RiskLevel riskLevel, String displayName, String summary,
@@ -240,6 +284,12 @@ public class RiskScore implements IRiskScore {
 		private final String[] protocols;
 		private final String aspect;
 
+		/**
+		 * Construct a scope.
+		 * @param layer scope layer (e.g., "transport")
+		 * @param protocols applicable protocols
+		 * @param aspect scope aspect
+		 */
 		public Scope(String layer, String[] protocols, String aspect) {
 			this.layer = layer;
 			this.protocols = protocols != null ? protocols : new String[0];
@@ -263,15 +313,39 @@ public class RiskScore implements IRiskScore {
 		private final boolean inconclusive;
 		private final IScope scope;
 
+		/**
+		 * Construct a deduction.
+		 * @param ruleId rule identifier
+		 * @param description description text
+		 * @param score score value
+		 * @param severity severity level
+		 */
 		public Deduction(String ruleId, String description, double score, String severity) {
 			this(ruleId, description, score, severity, false, null);
 		}
 
+		/**
+		 * Construct a deduction with inconclusive flag.
+		 * @param ruleId rule identifier
+		 * @param description description text
+		 * @param score score value
+		 * @param severity severity level
+		 * @param inconclusive true if result is inconclusive
+		 */
 		public Deduction(String ruleId, String description, double score,
 				String severity, boolean inconclusive) {
 			this(ruleId, description, score, severity, inconclusive, null);
 		}
 
+		/**
+		 * Construct a deduction with inconclusive flag and scope.
+		 * @param ruleId rule identifier
+		 * @param description description text
+		 * @param score score value
+		 * @param severity severity level
+		 * @param inconclusive true if result is inconclusive
+		 * @param scope deduction scope
+		 */
 		public Deduction(String ruleId, String description, double score,
 				String severity, boolean inconclusive, IScope scope) {
 			this.ruleId = ruleId;
