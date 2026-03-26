@@ -15,7 +15,7 @@ GUI and command-line reference tools that consume this API are available in the 
 
 ## Requirements
 
-- Java 21 or higher
+- Java 17 or higher
 - Apache Maven 3.6.3 or higher
 
 ## Quick Start

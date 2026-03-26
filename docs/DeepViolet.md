@@ -101,7 +101,7 @@ Reference implementations are available through the [DeepVioletTools](https://gi
 
 ### Scanning
 
-- **Multi-Host Parallel Scanning** -- Scan multiple targets concurrently using Java 21 virtual threads with configurable concurrency, per-host timeouts, and section-level delays
+- **Multi-Host Parallel Scanning** -- Scan multiple targets concurrently using a cached thread pool with configurable concurrency, per-host timeouts, and section-level delays
 - **Flexible Target Parsing** -- Accepts hostnames, IPs, IPv6, host:port, CIDR notation (e.g., `10.0.0.0/24`), and IP ranges (e.g., `192.168.1.1-192.168.1.10`)
 - **Section-Based Execution** -- Scans broken into 7 discrete phases (session init, cipher enumeration, certificate retrieval, risk scoring, TLS fingerprinting, DNS security, revocation check) that can be individually enabled or disabled
 - **Event-Driven Monitoring** -- Callback listener (`IScanListener`) for host-started, section-started, section-completed, host-completed, and scan-completed events
@@ -114,7 +114,7 @@ Reference implementations are available through the [DeepVioletTools](https://gi
 
 ## Requirements
 
-- Java 21 or higher
+- Java 17 or higher
 - Apache Maven 3.6.3 or higher
 
 ## Building from Source
@@ -371,7 +371,7 @@ Internal utility class handling:
 
 **Location:** `src/main/java/com/mps/deepviolet/api/TlsScanner.java`
 
-TLS scanner that scans multiple hosts in parallel using Java 21 virtual threads with a semaphore to cap concurrency.
+TLS scanner that scans multiple hosts in parallel using a cached thread pool with a semaphore to cap concurrency.
 
 | Method | Description |
 |--------|-------------|

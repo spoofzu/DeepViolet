@@ -3,7 +3,7 @@
 The upstream repository (github.com/spoofzu/DeepViolet) last received meaningful updates in **July 2019**. The local repository represents a major modernization effort.
 
 **Upstream:** v5.1.16 / 5.1.17-SNAPSHOT, Java 8, Bouncy Castle dependency, basic TLS introspection, no TLS 1.3.
-**Current:** 6.1.0 — Java 21+, Bouncy Castle removed, TLS 1.3 support, comprehensive TLS security analysis, AI-powered scan analysis (Anthropic/OpenAI/Ollama), scan persistence with envelope encryption (.dvscan files), post-quantum key exchange analysis, section-level retry with exponential backoff, failed-section-aware risk scoring, offline re-scoring. See [README](../README.md) for Maven coordinates.
+**Current:** 6.1.0 — Java 17+, Bouncy Castle removed, TLS 1.3 support, comprehensive TLS security analysis, AI-powered scan analysis (Anthropic/OpenAI/Ollama), scan persistence with envelope encryption (.dvscan files), post-quantum key exchange analysis, section-level retry with exponential backoff, failed-section-aware risk scoring, offline re-scoring. See [README](../README.md) for Maven coordinates.
 
 ---
 
@@ -42,6 +42,13 @@ The upstream repository (github.com/spoofzu/DeepViolet) last received meaningful
 - Removed deprecated `maven-javadoc-plugin` configuration from POM
 - CI simplified to Java 21 only (removed Java 24 matrix build)
 - Javadoc improvements across public API classes and interfaces
+
+### 25. Java 17 Backport
+- Minimum Java version lowered from 21 to 17 — zero public API changes
+- Replaced virtual thread executor (`Executors.newVirtualThreadPerTaskExecutor()`) with cached thread pool in `TlsScanner`; semaphore still caps concurrency
+- Replaced record pattern matching in switch with `instanceof` chain in `RuleExpressionEvaluator`
+- Replaced `Thread.startVirtualThread()` with daemon thread in `PrintScan` sample
+- CI and publish workflows updated to JDK 17
 
 ---
 
