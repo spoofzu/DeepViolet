@@ -129,7 +129,7 @@ The upstream repository (github.com/spoofzu/DeepViolet) last received meaningful
 - `ECCurveNames.java` — EC named curve OID-to-name mapping
 
 ### 10. TLS Scanning API (new)
-- Scan multiple hosts concurrently with `TlsScanner` using Java 21 virtual threads
+- Scan multiple hosts concurrently with `TlsScanner` using a cached thread pool
 - Rich target specification via `TargetSpec` — supports hostname, hostname:port, URL, IPv4, IPv4:port, **IPv6**, IPv6:port, IP ranges, CIDR, CIDR:port
 - Builder-pattern `ScanConfig` for thread count, per-host section delay, timeout, protocol filtering, and section selection
 - 7 scan sections (`ScanSection`): session init, cipher enumeration, certificate retrieval, risk scoring, TLS fingerprinting, DNS security, revocation check
