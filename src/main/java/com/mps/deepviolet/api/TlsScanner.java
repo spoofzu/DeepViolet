@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * TLS scanner with configurable threading, per-host rate limiting,
  * per-host results, and a global monitor for UI integration.
  *
- * <p>Uses Java 21 virtual threads with a semaphore to cap concurrency.</p>
+ * <p>Uses a cached thread pool with a semaphore to cap concurrency.</p>
  *
  * @author Milton Smith
  */
@@ -109,7 +109,8 @@ public final class TlsScanner {
 		@SuppressWarnings("unchecked")
 		Future<ScanResult>[] futures = new Future[total];
 
-		try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+		ExecutorService executor = Executors.newCachedThreadPool();
+		try {
 			for (int i = 0; i < total; i++) {
 				final int index = i;
 				final URL url = urls.get(i);
@@ -162,6 +163,7 @@ public final class TlsScanner {
 			return results;
 
 		} finally {
+			executor.shutdownNow();
 			monitor.setRunning(false);
 		}
 	}
