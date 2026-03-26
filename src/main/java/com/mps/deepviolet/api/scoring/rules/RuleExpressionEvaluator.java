@@ -39,17 +39,26 @@ public class RuleExpressionEvaluator {
 	 * @return the result value
 	 */
 	public Object evaluate(RuleExpression expr) {
-		return switch (expr) {
-			case RuleExpression.Literal lit -> lit.value();
-			case RuleExpression.PropertyRef ref -> context.resolve(ref.path());
-			case RuleExpression.And and -> evaluateBoolean(and.left()) && evaluateBoolean(and.right());
-			case RuleExpression.Or or -> evaluateBoolean(or.left()) || evaluateBoolean(or.right());
-			case RuleExpression.Not not -> !evaluateBoolean(not.operand());
-			case RuleExpression.Comparison cmp -> evaluateComparison(cmp);
-			case RuleExpression.Contains cnt -> evaluateContains(cnt);
-			case RuleExpression.FunctionCall fn -> evaluateFunction(fn);
-			case RuleExpression.CountFiltered cf -> evaluateCountFiltered(cf);
-		};
+		if (expr instanceof RuleExpression.Literal lit) {
+			return lit.value();
+		} else if (expr instanceof RuleExpression.PropertyRef ref) {
+			return context.resolve(ref.path());
+		} else if (expr instanceof RuleExpression.And and) {
+			return evaluateBoolean(and.left()) && evaluateBoolean(and.right());
+		} else if (expr instanceof RuleExpression.Or or) {
+			return evaluateBoolean(or.left()) || evaluateBoolean(or.right());
+		} else if (expr instanceof RuleExpression.Not not) {
+			return !evaluateBoolean(not.operand());
+		} else if (expr instanceof RuleExpression.Comparison cmp) {
+			return evaluateComparison(cmp);
+		} else if (expr instanceof RuleExpression.Contains cnt) {
+			return evaluateContains(cnt);
+		} else if (expr instanceof RuleExpression.FunctionCall fn) {
+			return evaluateFunction(fn);
+		} else if (expr instanceof RuleExpression.CountFiltered cf) {
+			return evaluateCountFiltered(cf);
+		}
+		throw new IllegalArgumentException("Unknown expression type: " + expr.getClass().getName());
 	}
 
 	private boolean evaluateComparison(RuleExpression.Comparison cmp) {
