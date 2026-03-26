@@ -85,7 +85,7 @@ public class PrintScan {
 
 			// Monitor polling in a background thread (same pattern as GUI Timer)
 			IScanMonitor monitor = TlsScanner.getMonitor();
-			Thread monitorThread = Thread.startVirtualThread(() -> {
+			Thread monitorThread = new Thread(() -> {
 				while (monitor.isRunning() || monitor.getCompletedHostCount() == 0) {
 					System.out.printf("  [monitor] active=%d sleeping=%d idle=%d completed=%d/%d%n",
 						monitor.getActiveThreadCount(),
@@ -96,6 +96,8 @@ public class PrintScan {
 					try { Thread.sleep(500); } catch (InterruptedException e) { break; }
 				}
 			});
+			monitorThread.setDaemon(true);
+			monitorThread.start();
 
 			// Run the scan
 			List<IScanResult> results = TlsScanner.scan(targets, config, listener);
