@@ -4,6 +4,10 @@
 
 # DeepViolet TLS/SSL API
 
+<div align="left">
+  <img src="./media/deepviolet-logo.png?raw=true" alt="DeepViolet Logo" width="150">
+</div>
+
 [Documentation](docs/DeepViolet.md) |
 [API JavaDoc](docs/javadocs/index.html) |
 [Changes from Upstream](docs/CHANGES.md) |
