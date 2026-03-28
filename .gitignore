@@ -22,6 +22,9 @@ CLAUDE.md
 # Serena
 .serena/
 
+# Planning docs (local only)
+docs/planning/
+
 # Javadoc generated output (keep docs/javadocs/ folder for local generation)
 /javadocs/
 docs/javadocs/*
