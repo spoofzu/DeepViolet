@@ -8,10 +8,10 @@
   <img src="./media/deepviolet-logo.png?raw=true" alt="DeepViolet Logo" width="150">
 </div>
 
-[Documentation](docs/DeepViolet.md) |
-[Changes from Upstream](docs/CHANGES.md) |
-[Reference Tools](https://github.com/spoofzu/DeepVioletTools) |
-[Project Blog](https://www.sipsjava.com/blog/)
+<a href="docs/DeepViolet.md" target="_blank">Documentation</a> |
+<a href="docs/CHANGES.md" target="_blank">Changes from Upstream</a> |
+<a href="https://github.com/spoofzu/DeepVioletTools" target="_blank">Reference Tools</a> |
+<a href="https://www.sipsjava.com/blog/" target="_blank">Project Blog</a>
 
 DeepViolet is a TLS/SSL scanning API written in Java. It provides programmatic introspection of TLS/SSL connections, including certificate chain analysis, cipher suite enumeration, risk scoring, TLS fingerprinting, post-quantum key exchange analysis, DNS security checks (CAA, DANE/TLSA), certificate revocation verification (OCSP, CRL, CT), and support for multiple naming conventions (IANA, OpenSSL, GnuTLS, NSS). Protocols SSLv2 through TLS 1.3 are supported. Multi-host scanning with configurable concurrency, section-level retry with exponential backoff, cooperative pause/cancel, event-driven monitoring, and flexible target parsing (hostnames, IPs, CIDR, IP ranges) are also available.
 
