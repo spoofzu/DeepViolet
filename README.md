@@ -2,16 +2,16 @@
 [![Black Hat Arsenal](https://github.com/toolswatch/badges/blob/master/arsenal/europe/2016.svg)](http://www.blackhat.com/eu-16/arsenal.html#milton-smith)
 [![Black Hat Arsenal](https://github.com/toolswatch/badges/blob/master/arsenal/usa/2018.svg)](https://www.blackhat.com/us-18/arsenal/schedule/index.html#deepviolet-ssltls-scanning-api-38-tools-10724)
 
-# DeepViolet TLS/SSL API
+# DeepViolet SSL/TLS API
 
 <div align="left">
   <img src="./media/deepviolet-logo.png?raw=true" alt="DeepViolet Logo" width="150">
 </div>
 
 [Documentation](docs/DeepViolet.md) |
-[API JavaDoc](docs/javadocs/index.html) |
 [Changes from Upstream](docs/CHANGES.md) |
-[Reference Tools](https://github.com/spoofzu/DeepVioletTools)
+[Reference Tools](https://github.com/spoofzu/DeepVioletTools) |
+[Project Blog](https://www.sipsjava.com/blog/)
 
 DeepViolet is a TLS/SSL scanning API written in Java. It provides programmatic introspection of TLS/SSL connections, including certificate chain analysis, cipher suite enumeration, risk scoring, TLS fingerprinting, post-quantum key exchange analysis, DNS security checks (CAA, DANE/TLSA), certificate revocation verification (OCSP, CRL, CT), and support for multiple naming conventions (IANA, OpenSSL, GnuTLS, NSS). Protocols SSLv2 through TLS 1.3 are supported. Multi-host scanning with configurable concurrency, section-level retry with exponential backoff, cooperative pause/cancel, event-driven monitoring, and flexible target parsing (hostnames, IPs, CIDR, IP ranges) are also available.
 
