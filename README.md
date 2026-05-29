@@ -1,6 +1,6 @@
 [![Build and Test](https://github.com/spoofzu/DeepViolet/actions/workflows/build.yml/badge.svg)](https://github.com/spoofzu/DeepViolet/actions/workflows/build.yml)
-[![Black Hat Arsenal](https://github.com/toolswatch/badges/blob/master/arsenal/europe/2016.svg)](http://www.blackhat.com/eu-16/arsenal.html#milton-smith)
-[![Black Hat Arsenal](https://github.com/toolswatch/badges/blob/master/arsenal/usa/2018.svg)](https://www.blackhat.com/us-18/arsenal/schedule/index.html#deepviolet-ssltls-scanning-api-38-tools-10724)
+[![Black Hat Arsenal Europe 2016](https://img.shields.io/badge/Black_Hat_Arsenal-EU_2016-black)](http://www.blackhat.com/eu-16/arsenal.html#milton-smith)
+[![Black Hat Arsenal USA 2018](https://img.shields.io/badge/Black_Hat_Arsenal-USA_2018-black)](https://www.blackhat.com/us-18/arsenal/schedule/index.html#deepviolet-ssltls-scanning-api-38-tools-10724)
 
 # DeepViolet SSL/TLS API
 
